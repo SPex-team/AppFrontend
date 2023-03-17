@@ -1,0 +1,14 @@
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+npx --no-install lint-staged
+
+if [ -f "${HOME}/.huskyrc" ]; then
+  echo 'huskyrc exist'
+else
+  echo export NVM_DIR=\"\$HOME/.nvm\" >>"${HOME}/.huskyrc"
+  echo "[ -s \"\$NVM_DIR/nvm.sh\" ] && \. \"\$NVM_DIR/nvm.sh\"" >>"${HOME}/.huskyrc"
+  echo "[ -s \"\$NVM_DIR/bash_completion\" ] && \. \"\$NVM_DIR/bash_completion\"" >>"${HOME}/.huskyrc"
+fi
+
+yarn run lint-staged
