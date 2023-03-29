@@ -2,10 +2,15 @@
   "name": "AppFrontend",
   "version": "0.1.1",
   "private": true,
+  "engines": {
+    "node": ">=10.24.1 <16.19.1"
+  },
   "dependencies": {
     "@babel/core": "^7.16.0",
     "@craco/craco": "^6.4.3",
+    "@headlessui/react": "^1.7.13",
     "@pmmmwh/react-refresh-webpack-plugin": "^0.5.3",
+    "@reduxjs/toolkit": "^1.9.3",
     "@svgr/webpack": "^5.5.0",
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^13.3.0",
@@ -29,11 +34,14 @@
     "case-sensitive-paths-webpack-plugin": "^2.4.0",
     "chalk": "^5.0.1",
     "classnames": "^2.3.1",
+    "clsx": "^1.2.1",
     "css-loader": "^6.5.1",
     "cssnano": "^5.1.15",
+    "dayjs": "^1.11.7",
     "dotenv": "^10.0.0",
     "dotenv-expand": "^5.1.0",
     "env-cmd": "^10.1.0",
+    "ethers": "^6.2.0",
     "file-loader": "^6.2.0",
     "fs-extra": "^10.0.0",
     "html-webpack-plugin": "^5.5.0",
@@ -47,11 +55,13 @@
     "postcss-loader": "^6.2.1",
     "postcss-normalize": "^10.0.1",
     "postcss-preset-env": "^7.0.1",
+    "prettier-plugin-tailwindcss": "^0.2.5",
     "prompts": "2.4.0",
     "react": "^17.0.2",
     "react-app-polyfill": "^2.0.0",
     "react-dev-utils": "^12.0.1",
     "react-dom": "^17.0.2",
+    "react-redux": "^8.0.5",
     "react-refresh": "^0.11.0",
     "react-router-dom": "^6.9.0",
     "resolve": "1.18.1",
@@ -191,5 +201,6 @@
     "src/**/*.+(less|css|sass|scss)": [
       "prettier --config ./prettier.config.js --write"
     ]
-  }
+  },
+  "proxy": "http://192.168.19.22:8000/"
 }
