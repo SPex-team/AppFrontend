@@ -14,6 +14,9 @@ import { Contract } from 'ethers'
 import { abi, config } from '@/config'
 import { postUpdataMiners } from '@/api/modules'
 import { setRootData } from '@/store/modules/root'
+import { message } from '@/components/Tip'
+import clsx from 'clsx'
+import { formatTime } from '@/plugins/dayjs'
 
 const Me = (props) => {
   const dispatch = useDispatch()
@@ -36,10 +39,12 @@ const Me = (props) => {
       const contract = new Contract(config.contractAddress, abi, signer)
 
       const tx = await contract.changePrice(minerId, data.price, { gasLimit: 10000000 })
-      // this.$message.info(`Waiting transaction: ${tx.hash}`)
-      console.log('tx: ', tx)
+      message({
+        title: 'TIP',
+        type: 'success',
+        content: tx.hash
+      })
       ;(await tx)?.wait()
-      console.log('meList: ', tx)
 
       let row = meList.find((item) => item.miner_id === minerId)
       row = { ...row }
@@ -48,10 +53,13 @@ const Me = (props) => {
       row.price = data.price
 
       await postUpdataMiners(row.miner_id)
+
       meClass.removeDataOfList(minerId)
+      setOpenDialog('')
       // TODO: 替换参数
     } catch (error) {
       console.log('error', error)
+      setOpenDialog('')
     }
   }
 
@@ -66,104 +74,192 @@ const Me = (props) => {
       const contract = new Contract(config.contractAddress, abi, signer)
 
       const tx = await contract.cancelList(minerId, { gasLimit: 10000000 })
-      // this.$message.info(`Waiting transaction: ${tx.hash}`)
+      message({
+        title: 'TIP',
+        type: 'success',
+        content: tx.hash
+      })
       console.log('tx: ', tx)
       ;(await tx)?.wait()
 
       await postUpdataMiners(data.miner_id)
       dispatch(setRootData({ loading: false }))
       meClass.removeDataOfList(minerId)
+      setOpenDialog('')
     } catch (error) {
       console.error('error', error)
 
       dispatch(setRootData({ loading: false }))
+      setOpenDialog('')
+    }
+  }
+
+  const onList = async (data) => {
+    try {
+      // TODO: add error message
+      const signer = await provider?.getSigner()
+      const contract = new Contract(config.contractAddress, abi, signer)
+
+      const tx = await contract.listMiner(minerId, data.price, { gasLimit: 10000000 })
+      message({
+        title: 'TIP',
+        type: 'success',
+        content: tx.hash
+      })
+      ;(await tx)?.wait()
+
+      let row = meList.find((item) => item.miner_id === minerId)
+
+      await postUpdataMiners(row.miner_id)
+
+      meClass.removeDataOfList(minerId)
+      setOpenDialog('')
+      // TODO: 替换参数
+    } catch (error) {
+      console.log('error', error)
+      setOpenDialog('')
     }
   }
 
   useEffect(() => {
-    meClass.init()
+    if (metaMaskAccount) {
+      meClass.init()
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [metaMaskAccount])
 
   return (
     <Layout>
-      <section className='container mx-auto pt-[190px] pb-[60px]'>
-        <div className='flex justify-between'>
-          <div className='mb-20'>
-            <h2 className='mb-[13px] text-[56px] font-bold leading-[61px]'>Sold</h2>
-            <p className='w-[462px] text-lg text-[#57596C]'>
-              Allowing Storage Providers to trade their account belongings such as ID address, Beneficiary, etc.
-            </p>
-          </div>
-          <button
-            onClick={() => setOpenDialog('add')}
-            className='ml-8 flex h-11 w-[119px] items-center justify-center rounded-full bg-gradient-to-r from-[#0077FE] to-[#3BF4BB] text-white'
-          >
-            Add
-            <svg
-              xmlns='http://www.w3.org/2000/svg'
-              fill='none'
-              viewBox='0 0 24 24'
-              strokeWidth={1.5}
-              stroke='currentColor'
-              className='ml-2 h-[20px] w-[20px]'
+      {metaMaskAccount ? (
+        <section className='container mx-auto pt-[190px] pb-[60px]'>
+          <div className='flex justify-between'>
+            <div className='mb-20'>
+              <h2 className='mb-[13px] text-[56px] font-bold leading-[61px]'>Sold</h2>
+              <p className='w-[462px] text-lg text-[#57596C]'>
+                Allowing Storage Providers to trade their account belongings such as ID address, Beneficiary, etc.
+              </p>
+            </div>
+            <button
+              onClick={() => setOpenDialog('add')}
+              className='ml-8 flex h-11 w-[119px] items-center justify-center rounded-full bg-gradient-to-r from-[#0077FE] to-[#3BF4BB] text-white'
             >
-              <path strokeLinecap='round' strokeLinejoin='round' d='M12 4.5v15m7.5-7.5h-15' />
-            </svg>
+              Add
+              <svg
+                xmlns='http://www.w3.org/2000/svg'
+                fill='none'
+                viewBox='0 0 24 24'
+                strokeWidth={1.5}
+                stroke='currentColor'
+                className='ml-2 h-[20px] w-[20px]'
+              >
+                <path strokeLinecap='round' strokeLinejoin='round' d='M12 4.5v15m7.5-7.5h-15' />
+              </svg>
+            </button>
+          </div>
+          <div>
+            <div className='mb-[11px] flex px-12 text-2xl font-semibold'>
+              <span className='inline-block w-[13%] min-w-[100px]'>Miner ID</span>
+              <span className='inline-block w-[16%] min-w-[90px]'>Order Status</span>
+              <span className='inline-block w-[14%] min-w-[75px]'>Price(Fil)</span>
+              <span className='inline-block w-[14%] min-w-[105px]'>List Time</span>
+            </div>
+            <div className='space-y-[18px]'>
+              {meList.map((item) => (
+                <div
+                  key={item.miner_id}
+                  className='box-border flex h-[74px] rounded-[10px] border border-[#eaeaef] bg-white px-12 text-lg leading-[74px] text-[#57596c] hover:border-0 hover:shadow-[0_0_10px_0_rgba(17,16,41,0.15)]'
+                >
+                  <span className='inline-block w-[13%] min-w-[100px] truncate'>{item.miner_id ?? '-'}</span>
+                  <span className='inline-block w-[16%] min-w-[90px] truncate'>
+                    <span
+                      className={clsx([
+                        'inline-block h-[26px] w-[85px] rounded-full bg-[rgba(0,119,254,0.1)] text-center text-sm leading-[26px]',
+                        item.is_list ? 'text-[#0077fe]' : 'text-[#909399]'
+                      ])}
+                    >
+                      {item.is_list ? 'Listing' : 'Unlisted'}
+                    </span>
+                  </span>
+                  <span className='inline-block w-[14%] min-w-[75px] truncate'>{item.price ?? '-'}</span>
+                  <span className='inline-block w-[14%] min-w-[105px] truncate'>
+                    {item.list_time ? formatTime(item.list_time * 1000) : '-'}
+                  </span>
+                  <div className='inline-block text-black' onClick={() => setMinerId(item.miner_id)}>
+                    <button className='hover:text-[#0077FE]' onClick={() => setOpenDialog('price')}>
+                      Change Price
+                      <PriceIcon className='ml-2 inline-block w-[14px]' />
+                    </button>
+                    <button className='ml-7 hover:text-[#0077FE]' onClick={() => setOpenDialog('owner')}>
+                      Transfer Out
+                      <OutIcon className='ml-2 inline-block w-[14px]' />
+                    </button>
+                    <button
+                      className='ml-7 hover:text-[#0077FE]'
+                      onClick={() => {
+                        if (item.is_list) {
+                          onCancal(item)
+                        } else {
+                          setOpenDialog('list')
+                        }
+                      }}
+                    >
+                      {item.is_list ? (
+                        <>
+                          Cancel
+                          <CanelIcon className='ml-2 inline-block w-[14px]' />
+                        </>
+                      ) : (
+                        <>
+                          List
+                          <svg
+                            xmlns='http://www.w3.org/2000/svg'
+                            viewBox='0 0 20 20'
+                            fill='currentColor'
+                            className='ml-2 inline-block w-[16px]'
+                          >
+                            <path
+                              fillRule='evenodd'
+                              d='M2 3.75A.75.75 0 012.75 3h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 3.75zm0 4.167a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75a.75.75 0 01-.75-.75zm0 4.166a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75a.75.75 0 01-.75-.75zm0 4.167a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75a.75.75 0 01-.75-.75z'
+                              clipRule='evenodd'
+                            />
+                          </svg>
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <Pagination
+              pageNum={Math.ceil(meCount / meClass.page_size)}
+              currentPage={mePage}
+              onChange={(page) => meClass.selectPage(page)}
+            />
+          </div>
+        </section>
+      ) : (
+        <div className='container flex items-center justify-center [min-height:calc(100vh-279px)]'>
+          <button className='hidden h-11 cursor-default rounded-full bg-gradient-to-r from-[#0077FE] to-[#3BF4BB] px-6 text-white md:block'>
+            Please Connect Wallet
           </button>
         </div>
-        <div>
-          <div className='mb-[11px] flex px-12 text-2xl font-semibold'>
-            <span className='inline-block w-[13%] min-w-[100px]'>Miner ID</span>
-            <span className='inline-block w-[16%] min-w-[90px]'>Order Status</span>
-            <span className='inline-block w-[14%] min-w-[75px]'>Price(Fil)</span>
-            <span className='inline-block w-[14%] min-w-[105px]'>List Time</span>
-          </div>
-          <div className='space-y-[18px]'>
-            {meList.map((item) => (
-              <div
-                key={item.miner_id}
-                className='box-border flex h-[74px] rounded-[10px] border border-[#eaeaef] bg-white px-12 text-lg leading-[74px] text-[#57596c] hover:border-0 hover:shadow-[0_0_10px_0_rgba(17,16,41,0.15)]'
-              >
-                <span className='inline-block w-[13%] min-w-[100px] truncate'>{item.miner_id ?? '-'}</span>
-                <span className='inline-block w-[16%] min-w-[90px] truncate'>
-                  <span className='inline-block h-[26px] w-[85px] rounded-full bg-[rgba(0,119,254,0.1)] text-center text-sm leading-[26px] text-[#0077fe]'>
-                    {item.status ?? '-'}
-                  </span>
-                </span>
-                <span className='inline-block w-[14%] min-w-[75px] truncate'>{item.power ?? '-'}</span>
-                <span className='inline-block w-[14%] min-w-[105px] truncate'>{item.price ?? '-'}</span>
-                <div className='inline-block text-black' onClick={() => setMinerId(item.miner_id)}>
-                  <button className='hover:text-[#0077FE]' onClick={() => setOpenDialog('price')}>
-                    Change Price
-                    <PriceIcon className='ml-2 inline-block w-[14px]' />
-                  </button>
-                  <button className='ml-7 hover:text-[#0077FE]' onClick={() => setOpenDialog('owner')}>
-                    Transfer Out
-                    <OutIcon className='ml-2 inline-block w-[14px]' />
-                  </button>
-                  <button className='ml-7 hover:text-[#0077FE]' onClick={() => onCancal(item)}>
-                    Canel
-                    <CanelIcon className='ml-2 inline-block w-[14px]' />
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-          <Pagination
-            pageNum={Math.ceil(meCount / meClass.page_size)}
-            currentPage={mePage}
-            onChange={(page) => meClass.selectPage(page)}
-          />
-        </div>
-      </section>
-      {openDialog === 'add' && <AddDialog open={!!openDialog} setOpen={setOpenDialog} />}
-      {openDialog === 'price' && (
-        <Modal onOk={onSetPrice} title='Change Price'>
+      )}
+      <AddDialog open={openDialog === 'add'} setOpen={setOpenDialog} />
+      {(openDialog === 'price' || openDialog === 'list') && (
+        <Modal
+          onOk={(data) => {
+            if (openDialog === 'price') {
+              onSetPrice(data)
+            } else {
+              onList(data)
+            }
+          }}
+          title='Change Price'
+        >
           <form className='w-full text-[#57596C]' id='form_change_price'>
             <div className=''>
               <label htmlFor='price' className='mb-[10px] block text-base'>
-                Price:
+                Price(FIL):
               </label>
 
               <input

@@ -13,6 +13,7 @@ export default class Me extends Table {
     getMeList({
       ordering: '-list_time',
       page,
+      owner: this.rootState.root.metaMaskAccount,
       page_size: this.page_size
     }).then((res) => {
       res = res._data

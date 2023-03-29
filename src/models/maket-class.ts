@@ -12,6 +12,7 @@ export default class Maket extends Table {
   private getList(page) {
     getMaketList({
       ordering: '-list_time',
+      is_list: true,
       page,
       page_size: this.page_size
     }).then((res) => {

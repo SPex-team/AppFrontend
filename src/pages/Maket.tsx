@@ -12,6 +12,7 @@ import { Contract, parseUnits } from 'ethers'
 import { abi, config } from '@/config'
 import { postUpdataMiners } from '@/api/modules'
 import { setRootData } from '@/store/modules/root'
+import Tip, { message } from '@/components/Tip'
 
 const Maket = (props) => {
   const dispatch = useDispatch()
@@ -39,6 +40,11 @@ const Maket = (props) => {
         value: parseUnits(price_raw, 'wei')
       })
 
+      message({
+        title: 'TIP',
+        type: 'success',
+        content: tx.hash
+      })
       ;(await tx)?.wait()
 
       if (data.metaMaskAccount) {
@@ -47,9 +53,26 @@ const Maket = (props) => {
           dispatch(setRootData({ loading: false }))
         })
       }
-    } catch (error) {
-      console.log('error', error)
-
+    } catch (error: any) {
+      if (error.info.error.code === 4001) {
+        message({
+          title: 'TIP',
+          type: 'warning',
+          content: 'User denied transaction signature.'
+        })
+      } else if (error.info.error.message) {
+        message({
+          title: 'TIP',
+          type: 'error',
+          content: error.info.error.message
+        })
+      } else {
+        message({
+          title: 'TIP',
+          type: 'error',
+          content: 'Error'
+        })
+      }
       dispatch(setRootData({ loading: false }))
     }
   }
@@ -130,7 +153,7 @@ const Maket = (props) => {
           />
         </div>
       </section>
-      {open && <AddDialog open={open} setOpen={setOpen} />}
+      <AddDialog open={open} setOpen={setOpen} />
     </Layout>
   )
 }

@@ -24,10 +24,10 @@ export default function AddDialog(props: IProps) {
 
   const [stepNum, setStepNum] = useState(1)
   const [loading, setLoading] = useState(false)
-  const [data, setData] = useState<any>({})
+  const [data, setData] = useState<any>()
 
   const onClose = () => {
-    // TODO: 清除状态。可以考虑直接销毁组建
+    setData({})
     setOpen(false)
   }
 
@@ -98,6 +98,7 @@ export default function AddDialog(props: IProps) {
             className='h-[49px] w-full rounded-[10px] border border-[#EAEAEF] px-5'
             required
             autoComplete='off'
+            placeholder='t0xxxxxx'
           />
         </div>
       </form>
@@ -160,7 +161,7 @@ export default function AddDialog(props: IProps) {
       <form className='text-[#57596C]' id='form_price'>
         <div className=''>
           <label htmlFor='price' className='mb-[10px] block text-base'>
-            Price:
+            Price(FIL):
           </label>
 
           <input
@@ -260,8 +261,7 @@ export default function AddDialog(props: IProps) {
             const form = document.getElementById('form_sign') as HTMLFormElement
             const formData = new FormData(form)
 
-            const sign = formData.get('sign')?.toString() || ''
-
+            const sign = '0x' + (formData.get('sign')?.toString() || '')
             const post_data = {
               message: data.msg_hex as string,
               sign,
@@ -296,12 +296,11 @@ export default function AddDialog(props: IProps) {
             try {
               const formData = new FormData(form)
 
-              const sign = formData.get('sign')
+              const sign = '0x' + formData.get('sign')
 
               const signer = await provider?.getSigner()
               const contract = new Contract(config.contractAddress, abi, signer)
 
-              // 需要加0x
               const tx = await contract?.confirmTransferMinerIntoSPex(data.miner_id, sign, data.timestamp, {
                 gasLimit: 10000000
               })
@@ -320,7 +319,6 @@ export default function AddDialog(props: IProps) {
                   setData({
                     ...data,
                     miner: res
-                    // tx
                   })
                   onHiddenLoading(form)
                   setStepNum(stepNum + 1)
@@ -398,123 +396,137 @@ export default function AddDialog(props: IProps) {
   const btnData = useMemo(() => btnEvent(stepNum), [stepNum])
 
   return (
-    <Transition appear show={open} as={Fragment}>
-      <Dialog as='div' className='relative z-30' onClose={() => {}}>
-        <Transition.Child
-          as={Fragment}
-          enter='ease-out duration-300'
-          enterFrom='opacity-0'
-          enterTo='opacity-100'
-          leave='ease-in duration-200'
-          leaveFrom='opacity-100'
-          leaveTo='opacity-0'
-        >
-          <div className='fixed inset-0 bg-black bg-opacity-25' />
-        </Transition.Child>
-
-        {data?.tx && <Tip className='z-20 max-w-[1102px]' title='TIP' messages={data.tx.hash} />}
-        <div className='fixed inset-0 overflow-y-auto'>
-          <div className='flex min-h-full items-center justify-center p-4 text-center'>
+    <>
+      <Transition
+        className='z-40'
+        appear
+        show={!!data?.tx}
+        as='div'
+        leave='ease-in duration-200'
+        leaveFrom='opacity-100'
+        leaveTo='opacity-0'
+      >
+        <Tip className='z-40 max-w-[1102px]' title='TIP' content={data?.tx?.hash} />
+      </Transition>
+      {open && (
+        <Transition appear show={open} as={Fragment}>
+          <Dialog as='div' className='relative z-30' onClose={onClose}>
             <Transition.Child
               as={Fragment}
               enter='ease-out duration-300'
-              enterFrom='opacity-0 scale-95'
-              enterTo='opacity-100 scale-100'
+              enterFrom='opacity-0'
+              enterTo='opacity-100'
               leave='ease-in duration-200'
-              leaveFrom='opacity-100 scale-100'
-              leaveTo='opacity-0 scale-95'
+              leaveFrom='opacity-100'
+              leaveTo='opacity-0'
             >
-              <Dialog.Panel className='flex min-h-[523px] w-full max-w-[1102px] transform flex-col justify-between overflow-hidden rounded-2xl bg-white p-[30px] text-left align-middle shadow-xl transition-all'>
-                <div>
-                  <Dialog.Title as='h3' className='mb-6 flex items-center justify-between text-2xl font-medium'>
-                    Add List
-                    <svg
-                      xmlns='http://www.w3.org/2000/svg'
-                      fill='none'
-                      viewBox='0 0 24 24'
-                      strokeWidth={2}
-                      stroke='currentColor'
-                      className='h-6 w-6 cursor-pointer'
-                      onClick={() => setOpen(false)}
-                    >
-                      <path strokeLinecap='round' strokeLinejoin='round' d='M6 18L18 6M6 6l12 12' />
-                    </svg>
-                  </Dialog.Title>
-                  <hr />
-                  <div className='mt-[30px] mb-[22px] flex justify-between'>
-                    {steps.map((step) => (
-                      <Fragment key={step.key}>
-                        <div
-                          data-active={step.key <= stepNum}
-                          className='group flex rounded-[10px] border-[#0077FE] p-[17px] data-[active=true]:border'
-                        >
-                          <span className='mr-[10px] box-border inline-block h-10 w-10 rounded-full border-[6px] border-[#EEEEF0] bg-[#57596c] text-center text-xl font-semibold leading-[28px] text-white group-data-[active=true]:border-[#EFF3FC] group-data-[active=true]:bg-[#0077FE]'>
-                            {step.key}
-                          </span>
-                          <div>
-                            <div className='text-lg font-bold leading-none'>{step.name}</div>
-                            <div className='font-light capitalize'>{'step ' + step.key}</div>
-                          </div>
-                        </div>
+              <div className='fixed inset-0 bg-black bg-opacity-25' />
+            </Transition.Child>
 
+            <div className='fixed inset-0 overflow-y-auto'>
+              <div className='flex min-h-full items-center justify-center p-4 text-center'>
+                <Transition.Child
+                  as={Fragment}
+                  enter='ease-out duration-300'
+                  enterFrom='opacity-0 scale-95'
+                  enterTo='opacity-100 scale-100'
+                  leave='ease-in duration-200'
+                  leaveFrom='opacity-100 scale-100'
+                  leaveTo='opacity-0 scale-95'
+                >
+                  <Dialog.Panel className='flex min-h-[523px] w-full max-w-[1102px] transform flex-col justify-between overflow-hidden rounded-2xl bg-white p-[30px] text-left align-middle shadow-xl transition-all'>
+                    <div>
+                      <Dialog.Title as='h3' className='mb-6 flex items-center justify-between text-2xl font-medium'>
+                        Add List
                         <svg
-                          key={step.key + 'a'}
                           xmlns='http://www.w3.org/2000/svg'
                           fill='none'
                           viewBox='0 0 24 24'
-                          strokeWidth={1.5}
+                          strokeWidth={2}
                           stroke='currentColor'
-                          className='w-5 data-[hidden=true]:hidden'
-                          data-hidden={step.key === steps.length}
+                          className='h-6 w-6 cursor-pointer'
+                          onClick={onClose}
                         >
-                          <path strokeLinecap='round' strokeLinejoin='round' d='M8.25 4.5l7.5 7.5-7.5 7.5' />
+                          <path strokeLinecap='round' strokeLinejoin='round' d='M6 18L18 6M6 6l12 12' />
                         </svg>
-                      </Fragment>
-                    ))}
-                  </div>
-                  {stepContent}
-                </div>
+                      </Dialog.Title>
+                      <hr />
+                      <div className='mt-[30px] mb-[22px] flex justify-between'>
+                        {steps.map((step) => (
+                          <Fragment key={step.key}>
+                            <div
+                              data-active={step.key <= stepNum}
+                              className='group flex rounded-[10px] border-[#0077FE] p-[17px] data-[active=true]:border'
+                            >
+                              <span className='mr-[10px] box-border inline-block h-10 w-10 rounded-full border-[6px] border-[#EEEEF0] bg-[#57596c] text-center text-xl font-semibold leading-[28px] text-white group-data-[active=true]:border-[#EFF3FC] group-data-[active=true]:bg-[#0077FE]'>
+                                {step.key}
+                              </span>
+                              <div>
+                                <div className='text-lg font-bold leading-none'>{step.name}</div>
+                                <div className='font-light capitalize'>{'step ' + step.key}</div>
+                              </div>
+                            </div>
 
-                <div className='text-center'>
-                  <button
-                    type='button'
-                    className={clsx([
-                      'inline-flex h-[44px] w-[256px] items-center justify-center rounded-full bg-gradient-to-r from-[#0077FE] to-[#3BF4BB] text-white focus-visible:ring-0',
-                      { 'cursor-not-allowed': loading }
-                    ])}
-                    onClick={btnData.onClick}
-                    disabled={loading}
-                  >
-                    {loading && (
-                      <svg
-                        className='-ml-1 mr-3 h-5 w-5 animate-spin text-white'
-                        xmlns='http://www.w3.org/2000/svg'
-                        fill='none'
-                        viewBox='0 0 24 24'
+                            <svg
+                              key={step.key + 'a'}
+                              xmlns='http://www.w3.org/2000/svg'
+                              fill='none'
+                              viewBox='0 0 24 24'
+                              strokeWidth={1.5}
+                              stroke='currentColor'
+                              className='w-5 data-[hidden=true]:hidden'
+                              data-hidden={step.key === steps.length}
+                            >
+                              <path strokeLinecap='round' strokeLinejoin='round' d='M8.25 4.5l7.5 7.5-7.5 7.5' />
+                            </svg>
+                          </Fragment>
+                        ))}
+                      </div>
+                      {stepContent}
+                    </div>
+
+                    <div className='text-center'>
+                      <button
+                        type='button'
+                        className={clsx([
+                          'inline-flex h-[44px] w-[256px] items-center justify-center rounded-full bg-gradient-to-r from-[#0077FE] to-[#3BF4BB] text-white focus-visible:ring-0',
+                          { 'cursor-not-allowed': loading }
+                        ])}
+                        onClick={btnData.onClick}
+                        disabled={loading}
                       >
-                        <circle
-                          className='opacity-25'
-                          cx='12'
-                          cy='12'
-                          r='10'
-                          stroke='currentColor'
-                          strokeWidth='4'
-                        ></circle>
-                        <path
-                          className='opacity-75'
-                          fill='currentColor'
-                          d='M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z'
-                        ></path>
-                      </svg>
-                    )}
-                    {btnData.text}
-                  </button>
-                </div>
-              </Dialog.Panel>
-            </Transition.Child>
-          </div>
-        </div>
-      </Dialog>
-    </Transition>
+                        {loading && (
+                          <svg
+                            className='-ml-1 mr-3 h-5 w-5 animate-spin text-white'
+                            xmlns='http://www.w3.org/2000/svg'
+                            fill='none'
+                            viewBox='0 0 24 24'
+                          >
+                            <circle
+                              className='opacity-25'
+                              cx='12'
+                              cy='12'
+                              r='10'
+                              stroke='currentColor'
+                              strokeWidth='4'
+                            ></circle>
+                            <path
+                              className='opacity-75'
+                              fill='currentColor'
+                              d='M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z'
+                            ></path>
+                          </svg>
+                        )}
+                        {btnData.text}
+                      </button>
+                    </div>
+                  </Dialog.Panel>
+                </Transition.Child>
+              </div>
+            </div>
+          </Dialog>
+        </Transition>
+      )}
+    </>
   )
 }

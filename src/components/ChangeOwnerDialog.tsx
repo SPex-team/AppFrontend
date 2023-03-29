@@ -219,7 +219,7 @@ export default function ChangeOwnerDialog(props: IProps) {
           <div className='fixed inset-0 bg-black bg-opacity-25' />
         </Transition.Child>
 
-        {data?.tx && <Tip className='z-20 max-w-[702px]' title='TIP' messages={data.tx} />}
+        <Tip className='z-40 max-w-[702px]' open={!!data?.tx} title='TIP' content={data?.tx} />
         <div className='fixed inset-0 overflow-y-auto'>
           <div className='flex min-h-full items-center justify-center p-4 text-center'>
             <Transition.Child
