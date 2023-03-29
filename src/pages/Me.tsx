@@ -10,7 +10,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from '@/store'
 import Modal from '@/components/Modal'
 import ChangeOwnerDialog from '@/components/ChangeOwnerDialog'
-import { Contract } from 'ethers'
+import { Contract, parseUnits } from 'ethers'
 import { abi, config } from '@/config'
 import { postUpdataMiners } from '@/api/modules'
 import { setRootData } from '@/store/modules/root'
@@ -38,7 +38,7 @@ const Me = (props) => {
       const signer = await provider?.getSigner()
       const contract = new Contract(config.contractAddress, abi, signer)
 
-      const tx = await contract.changePrice(minerId, data.price, { gasLimit: 10000000 })
+      const tx = await contract.changePrice(minerId, parseUnits(data.price, 'wei'), { gasLimit: 10000000 })
       message({
         title: 'TIP',
         type: 'success',

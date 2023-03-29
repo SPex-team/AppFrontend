@@ -3,7 +3,7 @@ import { Fragment, useMemo, useState } from 'react'
 import clsx from 'clsx'
 import { useSelector } from 'react-redux'
 import { RootState } from '@/store'
-import { Contract, ethers } from 'ethers'
+import { Contract, ethers, parseUnits } from 'ethers'
 import { abi, config } from '@/config'
 import { postBuildMessage, postMiners, postPushMessage, putMiners } from '@/api/modules'
 import Tip from './Tip'
@@ -350,7 +350,7 @@ export default function AddDialog(props: IProps) {
               const signer = await provider?.getSigner()
               const contract = new Contract(config.contractAddress, abi, signer)
 
-              const tx = await contract?.listMiner(data.miner_id, price, {
+              const tx = await contract?.listMiner(data.miner_id, parseUnits(data.price, 'wei'), {
                 gasLimit: 10000000
               })
 
