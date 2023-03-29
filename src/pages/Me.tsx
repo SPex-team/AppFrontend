@@ -6,15 +6,17 @@ import Pagination from '@/components/Pagination'
 import { useEffect, useMemo, useState } from 'react'
 import AddDialog from '@/components/AddDialog'
 import MeClass from '@/models/me-class'
-import { useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from '@/store'
 import Modal from '@/components/Modal'
 import ChangeOwnerDialog from '@/components/ChangeOwnerDialog'
 import { Contract } from 'ethers'
 import { abi, config } from '@/config'
 import { postUpdataMiners } from '@/api/modules'
+import { setRootData } from '@/store/modules/root'
 
 const Me = (props) => {
+  const dispatch = useDispatch()
   const meClass = useMemo(() => new MeClass(), [])
   const [openDialog, setOpenDialog] = useState<any>(false)
   const [minerId, setMinerId] = useState<any>()
@@ -29,7 +31,7 @@ const Me = (props) => {
 
   const onSetPrice = async (data) => {
     try {
-      // TODO: add error message and loading
+      // TODO: add error message
       const signer = await provider?.getSigner()
       const contract = new Contract(config.contractAddress, abi, signer)
 
@@ -54,20 +56,28 @@ const Me = (props) => {
   }
 
   const onCancal = async (data) => {
-    data = { ...data }
-    data.is_list = false
-    data.price = 0
+    try {
+      dispatch(setRootData({ loading: true }))
+      data = { ...data }
+      data.is_list = false
+      data.price = 0
 
-    const signer = await provider?.getSigner()
-    const contract = new Contract(config.contractAddress, abi, signer)
+      const signer = await provider?.getSigner()
+      const contract = new Contract(config.contractAddress, abi, signer)
 
-    const tx = await contract.cancelList(minerId, { gasLimit: 10000000 })
-    // this.$message.info(`Waiting transaction: ${tx.hash}`)
-    console.log('tx: ', tx)
-    ;(await tx)?.wait()
+      const tx = await contract.cancelList(minerId, { gasLimit: 10000000 })
+      // this.$message.info(`Waiting transaction: ${tx.hash}`)
+      console.log('tx: ', tx)
+      ;(await tx)?.wait()
 
-    await postUpdataMiners(data.miner_id)
-    meClass.removeDataOfList(minerId)
+      await postUpdataMiners(data.miner_id)
+      dispatch(setRootData({ loading: false }))
+      meClass.removeDataOfList(minerId)
+    } catch (error) {
+      console.error('error', error)
+
+      dispatch(setRootData({ loading: false }))
+    }
   }
 
   useEffect(() => {
@@ -103,26 +113,26 @@ const Me = (props) => {
           </button>
         </div>
         <div>
-          <div className='mb-[11px] px-12 text-2xl font-semibold'>
-            <span className='inline-block w-[13vw] min-w-[100px]'>Miner ID</span>
-            <span className='inline-block w-[13vw] min-w-[90px]'>Order Status</span>
-            <span className='inline-block w-[10vw] min-w-[75px]'>Price(Fil)</span>
-            <span className='inline-block w-[10vw] min-w-[105px]'>List Time</span>
+          <div className='mb-[11px] flex px-12 text-2xl font-semibold'>
+            <span className='inline-block w-[13%] min-w-[100px]'>Miner ID</span>
+            <span className='inline-block w-[16%] min-w-[90px]'>Order Status</span>
+            <span className='inline-block w-[14%] min-w-[75px]'>Price(Fil)</span>
+            <span className='inline-block w-[14%] min-w-[105px]'>List Time</span>
           </div>
           <div className='space-y-[18px]'>
             {meList.map((item) => (
               <div
                 key={item.miner_id}
-                className='box-border h-[74px] rounded-[10px] border border-[#eaeaef] bg-white px-12 text-lg leading-[74px] text-[#57596c] hover:border-0 hover:shadow-[0_0_10px_0_rgba(17,16,41,0.15)]'
+                className='box-border flex h-[74px] rounded-[10px] border border-[#eaeaef] bg-white px-12 text-lg leading-[74px] text-[#57596c] hover:border-0 hover:shadow-[0_0_10px_0_rgba(17,16,41,0.15)]'
               >
-                <span className='inline-block w-[13vw] min-w-[100px]'>{item.miner_id ?? '-'}</span>
-                <span className='inline-block w-[13vw] min-w-[90px]'>
+                <span className='inline-block w-[13%] min-w-[100px] truncate'>{item.miner_id ?? '-'}</span>
+                <span className='inline-block w-[16%] min-w-[90px] truncate'>
                   <span className='inline-block h-[26px] w-[85px] rounded-full bg-[rgba(0,119,254,0.1)] text-center text-sm leading-[26px] text-[#0077fe]'>
                     {item.status ?? '-'}
                   </span>
                 </span>
-                <span className='inline-block w-[10vw] min-w-[75px]'>{item.power ?? '-'}</span>
-                <span className='inline-block w-[10vw] min-w-[105px]'>{item.price ?? '-'}</span>
+                <span className='inline-block w-[14%] min-w-[75px] truncate'>{item.power ?? '-'}</span>
+                <span className='inline-block w-[14%] min-w-[105px] truncate'>{item.price ?? '-'}</span>
                 <div className='inline-block text-black' onClick={() => setMinerId(item.miner_id)}>
                   <button className='hover:text-[#0077FE]' onClick={() => setOpenDialog('price')}>
                     Change Price

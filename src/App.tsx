@@ -14,7 +14,7 @@ const App = () => {
   }, [])
 
   return (
-    <div className='App'>
+    <div className='App h-full w-full'>
       {loading && <Loading />}
       <RouterProvider router={router} />
     </div>

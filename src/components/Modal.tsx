@@ -7,14 +7,15 @@ interface IProps {
   maskClosable?: boolean
   title?: string
   children: JSX.Element
-  onOk: (data?: IObject) => void
+  onOk: (data?: IObject) => void | Promise<any>
   okText?: string
 }
 
 export default function Modal(props: IProps) {
   const { maskClosable = true, title = '', children, onOk, okText = 'Confirm' } = props
+  const [loading, setLoading] = useState<any>(false)
 
-  const _onOk = () => {
+  const _onOk = async () => {
     //   setLoading(true)
     const form_wrap = document.getElementById('form_wrap')
     if (!form_wrap) {
@@ -25,7 +26,12 @@ export default function Modal(props: IProps) {
     const form = form_wrap.children[0] as HTMLFormElement | undefined
 
     if (form) {
-      console.log('form', form)
+      if (
+        Object.prototype.toString.call(onOk) === '[object AsyncFunction]' ||
+        Object.prototype.toString.call(onOk) === '[object Promise]'
+      ) {
+        setLoading(true)
+      }
 
       const formData = new FormData(form)
 
@@ -37,7 +43,16 @@ export default function Modal(props: IProps) {
         }
       })
 
-      onOk(jsondata)
+      if (Object.prototype.toString.call(onOk) === '[object Promise]') {
+        ;(onOk(jsondata) as Promise<any>).finally(() => {
+          setLoading(false)
+        })
+      } else if (Object.prototype.toString.call(onOk) === '[object AsyncFunction]') {
+        await onOk(jsondata)
+        setLoading(false)
+      } else {
+        onOk(jsondata)
+      }
     } else {
       onOk()
     }
@@ -109,9 +124,9 @@ export default function Modal(props: IProps) {
                       //   { 'cursor-not-allowed': loading }
                     ])}
                     onClick={_onOk}
-                    // disabled={loading}
+                    disabled={loading}
                   >
-                    {/* {loading && (
+                    {loading && (
                       <svg
                         className='-ml-1 mr-3 h-5 w-5 animate-spin text-white'
                         xmlns='http://www.w3.org/2000/svg'
@@ -132,7 +147,7 @@ export default function Modal(props: IProps) {
                           d='M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z'
                         ></path>
                       </svg>
-                    )} */}
+                    )}
                     {okText}
                   </button>
                 </div>

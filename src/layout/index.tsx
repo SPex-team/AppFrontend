@@ -11,7 +11,7 @@ const Layout = (props) => {
           className: `${child.props.className} img-special-class`
         })
       )} */}
-      <main className="bg-[url('./assets/images/bg.png')] bg-cover">{children}</main>
+      <main className="bg-[url('./assets/images/bg.png')] bg-cover [min-height:calc(100%-279px)]">{children}</main>
       <Footer />
     </>
   )

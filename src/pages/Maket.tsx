@@ -87,25 +87,25 @@ const Maket = (props) => {
           </button>
         </div>
         <div>
-          <div className='mb-[11px] px-12 text-2xl font-semibold'>
-            <span className='inline-block w-[13vw] min-w-[100px]'>Miner ID</span>
-            <span className='inline-block w-[13vw] min-w-[90px]'>Balance</span>
-            <span className='inline-block w-[10vw] min-w-[75px]'>Power</span>
-            <span className='inline-block w-[10vw] min-w-[105px]'>Price(Fil)</span>
-            <span className='inline-block w-[20vw] min-w-[140px]'>List Time</span>
+          <div className='mb-[11px] flex px-12 text-2xl font-semibold'>
+            <span className='inline-block w-[13%] min-w-[100px] px-2'>Miner ID</span>
+            <span className='inline-block w-[13%] min-w-[90px] px-2'>Balance</span>
+            <span className='inline-block w-[10%] min-w-[75px] px-2'>Power</span>
+            <span className='inline-block w-[10%] min-w-[105px] px-2'>Price(Fil)</span>
+            <span className='inline-block w-[20%] min-w-[140px] px-2'>List Time</span>
           </div>
           <div className='space-y-[18px]'>
             {data.maketList.map((item) => (
               <div
                 key={item.miner_id}
-                className='box-border h-[74px] rounded-[10px] border border-[#eaeaef] bg-white px-12 text-lg leading-[74px] text-[#57596c] hover:border-0 hover:shadow-[0_0_10px_0_rgba(17,16,41,0.15)]'
+                className='box-border flex h-[74px] rounded-[10px] border border-[#eaeaef] bg-white px-12 text-lg leading-[74px] text-[#57596c] hover:border-0 hover:shadow-[0_0_10px_0_rgba(17,16,41,0.15)]'
               >
-                <span className='inline-block w-[13%] min-w-[100px]'>{item.miner_id ?? '-'}</span>
-                <span className='inline-block w-[13%] min-w-[90px]'>{item.balance ?? '-'}</span>
-                <span className='inline-block w-[10%] min-w-[75px]'>{item.power ?? '-'}</span>
-                <span className='inline-block w-[10%] min-w-[105px]'>{item.price ?? '-'}</span>
-                <span className='inline-block w-[20%] min-w-[140px]'>
-                  {item.list_time ? formatTime(item.list_time) : '-'}
+                <span className='inline-block w-[13%] min-w-[100px] truncate px-2'>{item.miner_id ?? '-'}</span>
+                <span className='inline-block w-[13%] min-w-[90px] truncate px-2'>{item.balance ?? '-'}</span>
+                <span className='inline-block w-[10%] min-w-[75px] truncate px-2'>{item.power ?? '-'}</span>
+                <span className='inline-block w-[10%] min-w-[105px] truncate px-2'>{item.price ?? '-'}</span>
+                <span className='inline-block w-[20%] min-w-[140px] truncate px-2'>
+                  {item.list_time ? formatTime(item.list_time * 1000) : '-'}
                 </span>
                 <div className='inline-block text-black'>
                   <button
