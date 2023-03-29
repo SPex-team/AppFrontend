@@ -1,25 +1,25 @@
-import axios, { AxiosRequestConfig, Method } from 'axios';
+import axios, { AxiosRequestConfig, Method } from 'axios'
 
 interface PendingType {
-  url: string | undefined;
-  method: Method | undefined;
-  params: object;
-  data: object;
-  cancel: Function;
+  url: string | undefined
+  method: Method | undefined
+  params: object
+  data: object
+  cancel: Function
 }
 
-const pending: Array<PendingType> = [];
-const CancelToken = axios.CancelToken;
+const pending: Array<PendingType> = []
+const CancelToken = axios.CancelToken
 
 const service = axios.create({
   withCredentials: false,
-  timeout: 35000,
-});
+  timeout: 350000
+})
 
 const removePending = (config: AxiosRequestConfig) => {
   for (const key in pending) {
-    const item: number = +key;
-    const list: PendingType = pending[key];
+    const item: number = +key
+    const list: PendingType = pending[key]
     if (
       list.url === config.url &&
       list.method === config.method &&
@@ -27,38 +27,38 @@ const removePending = (config: AxiosRequestConfig) => {
       JSON.stringify(list.data) === JSON.stringify(config.data)
     ) {
       // 从数组中移除记录
-      pending.splice(item, 1);
+      pending.splice(item, 1)
     }
   }
-};
+}
 
 service.interceptors.request.use(
   (request) => {
-    removePending(request);
+    removePending(request)
     request.cancelToken = new CancelToken((c) => {
       pending.push({
         url: request.url,
         method: request.method,
         params: request.params,
         data: request.data,
-        cancel: c,
-      });
-    });
-    request.baseURL = process.env['REACT_APP_BASE_URL'];
-    return request;
+        cancel: c
+      })
+    })
+    request.baseURL = process.env['REACT_APP_BASE_URL']
+    return request
   },
-  (error) => {},
-);
+  (error) => {}
+)
 
 service.interceptors.response.use(
   (response) => {
-    removePending(response.config);
-    response.data.data = JSON.parse(response.data.data);
-    return response;
+    removePending(response.config)
+    // response.data.data = JSON.parse(response.data.data)
+    return response
   },
   (error) => {
-    return error;
-  },
-);
+    return error
+  }
+)
 
-export default service;
+export default service

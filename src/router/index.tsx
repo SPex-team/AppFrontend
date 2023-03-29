@@ -1,25 +1,34 @@
 import Maket from '@/pages/Maket'
+import History from '@/pages/History'
+import Me from '@/pages/Me'
 // import { lazy, ReactNode, Suspense } from 'react'
-import { createBrowserRouter } from 'react-router-dom'
+import { createBrowserRouter, Navigate } from 'react-router-dom'
+import { getMaketList } from '@/api/modules'
+import { ReactNode, Suspense } from 'react'
 
 // const Error = lazy(() => import('@/404'))
 
-// const lazyLoad = (children: ReactNode): ReactNode => {
-//   return <Suspense fallback={<>loading...</>}>{children}</Suspense>
-// }
+const lazyLoad = (children: ReactNode): ReactNode => {
+  return <Suspense fallback={<>loading...</>}>{children}</Suspense>
+}
 
 const router = createBrowserRouter([
   {
     path: '/',
-    element: <Maket />,
-    children: [
-      // { path: '', element: lazyLoad(<Home />) },
-      // { path: RouterPath.home, element: lazyLoad(<Home />) },
-      // { path: RouterPath.detail, element: lazyLoad(<Detail />) },
-      // { path: RouterPath.error, element: lazyLoad(<Error />) }
-    ]
+    element: <Navigate to='/maket' replace />
+  },
+  {
+    path: '/maket',
+    element: lazyLoad(<Maket />)
+  },
+  {
+    path: '/history',
+    element: lazyLoad(<History />)
+  },
+  {
+    path: '/me',
+    element: lazyLoad(<Me />)
   }
-  // { path: RouterPath.auth, element: lazyLoad(<Auth />) }
 ])
 
 export default router
