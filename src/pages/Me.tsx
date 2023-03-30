@@ -113,7 +113,9 @@ const Me = (props) => {
 
   const onList = async (data) => {
     try {
-      const tx = await contract.listMiner(minerId, data.price)
+      console.log('parseEther(price)', parseEther(data.price))
+
+      const tx = await contract.listMiner(minerId, parseEther(data.price))
       message({
         title: 'TIP',
         type: 'success',

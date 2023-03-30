@@ -54,6 +54,10 @@ export default function Header() {
   }
 
   useEffect(() => {
+    if (window.ethereum.isConnected()) {
+      fetchSetAccount()
+    }
+
     window.ethereum.on('connect', (connectInfo) => {
       console.log('connect')
 
