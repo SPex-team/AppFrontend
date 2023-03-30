@@ -53,14 +53,14 @@ const History = (props) => {
       <section className='container mx-auto pt-[190px] pb-[60px]'>
         <div className='flex justify-between'>
           <div className='mb-20'>
-            <h2 className='mb-[13px] text-[56px] font-bold leading-[61px]'>History</h2>
+            <h2 className='mb-[13px] text-[56px] font-semibold leading-[61px]'>History</h2>
             <p className='w-[462px] text-lg text-[#57596C]'>
               Allowing Storage Providers to trade their account belongings such as ID address, Beneficiary, etc.
             </p>
           </div>
         </div>
         <div>
-          <div className='mb-[11px] px-12 text-2xl font-semibold'>
+          <div className='mb-[11px] px-12 text-2xl font-medium'>
             <span className='inline-block w-[13vw] min-w-[100px]'>Account</span>
             <span className='inline-block w-[13vw] min-w-[90px]'>Balance</span>
             <span className='inline-block w-[10vw] min-w-[75px]'>Power</span>

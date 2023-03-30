@@ -67,7 +67,7 @@ const Maket = (props) => {
       <section className='container mx-auto pt-[190px] pb-[60px]'>
         <div className='flex justify-between'>
           <div className='mb-20'>
-            <h2 className='mb-[13px] text-[56px] font-bold leading-[61px]'>Native Exchange Market</h2>
+            <h2 className='mb-[13px] text-[56px] font-semibold leading-[61px]'>Native Exchange Market</h2>
             <p className='w-[462px] text-lg text-[#57596C]'>
               Allowing Storage Providers to trade their account belongings such as ID address, Beneficiary, etc.
             </p>
@@ -90,7 +90,7 @@ const Maket = (props) => {
           </button>
         </div>
         <div>
-          <div className='mb-[11px] flex px-12 text-2xl font-semibold'>
+          <div className='mb-[11px] flex px-12 text-2xl font-medium'>
             <span className='inline-block w-[13%] min-w-[100px] px-2'>Miner ID</span>
             <span className='inline-block w-[13%] min-w-[90px] px-2'>Balance</span>
             {/* <span className='inline-block w-[10%] min-w-[75px] px-2'>Power</span> */}
