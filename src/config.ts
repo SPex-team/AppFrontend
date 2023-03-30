@@ -1,5 +1,6 @@
 export const dev_config = {
-  contractAddress: '0x6e67b6D8a990341D3F4624C639e767Ccc66eD52D',
+  // contractAddress: '0x6e67b6D8a990341D3F4624C639e767Ccc66eD52D',
+  contractAddress: '0x7579F0eF2E9be2adBe7e96B5656dc9E38F70b9d8',
   contractT4Address: 't410f3nvnh2rhtfkd72565nmjiqmiphig775xikkfs5y'
 }
 

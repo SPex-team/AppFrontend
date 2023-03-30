@@ -340,9 +340,7 @@ export default function AddDialog(props: IProps) {
 
               const sign = formData.get('sign')
 
-              const tx = await contract?.confirmTransferMinerIntoSPex(data.miner_id, sign, data.timestamp, {
-                gasLimit: 10000000
-              })
+              const tx = await contract?.confirmTransferMinerIntoSPex(data.miner_id, sign, data.timestamp)
 
               message({
                 title: 'TIP',
@@ -381,9 +379,7 @@ export default function AddDialog(props: IProps) {
                 throw new Error('Please input Price')
               }
 
-              const tx = await contract?.listMiner(data.miner_id, parseUnits(price, 'wei'), {
-                gasLimit: 10000000
-              })
+              const tx = await contract?.listMiner(data.miner_id, parseUnits(price, 'wei'))
               message({
                 title: 'TIP',
                 type: 'success',
