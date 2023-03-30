@@ -3,7 +3,7 @@ import { Fragment, useMemo, useState } from 'react'
 import clsx from 'clsx'
 import { useSelector } from 'react-redux'
 import { RootState } from '@/store'
-import { Contract, ethers, parseUnits } from 'ethers'
+import { Contract, ethers, parseEther } from 'ethers'
 import { abi, config } from '@/config'
 import { postBuildMessage, postMiners, postPushMessage, putMiners } from '@/api/modules'
 import Tip, { message } from './Tip'
@@ -176,13 +176,20 @@ export default function AddDialog(props: IProps) {
             Sign:
           </label>
 
+          {/* <div className='relative flex h-10 w-full flex-row-reverse overflow-clip rounded-lg'> */}
           <input
             type='text'
             name='sign'
             className='h-[49px] w-full rounded-[10px] border border-[#EAEAEF] px-5'
+            // className='peer w-full rounded-r-lg border border-slate-400 px-2 text-slate-900 placeholder-slate-400 transition-colors duration-300 focus:border-sky-400 focus:outline-none'
+
             required
             autoComplete='off'
           />
+          {/* <span className='flex items-center rounded-l-lg border border-slate-400 bg-slate-50 px-2 text-sm text-slate-400 transition-colors duration-300 peer-focus:border-sky-400 peer-focus:bg-sky-400 peer-focus:text-white'>
+              https://
+            </span>
+          </div> */}
         </div>
       </form>
     )
@@ -379,7 +386,7 @@ export default function AddDialog(props: IProps) {
                 throw new Error('Please input Price')
               }
 
-              const tx = await contract?.listMiner(data.miner_id, parseUnits(price, 'wei'))
+              const tx = await contract?.listMiner(data.miner_id, parseEther(price))
               message({
                 title: 'TIP',
                 type: 'success',

@@ -10,7 +10,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from '@/store'
 import Modal from '@/components/Modal'
 import ChangeOwnerDialog from '@/components/ChangeOwnerDialog'
-import { Contract, parseUnits } from 'ethers'
+import { Contract, parseEther } from 'ethers'
 import { abi, config } from '@/config'
 import { postUpdataMiners } from '@/api/modules'
 import { setRootData } from '@/store/modules/root'
@@ -43,8 +43,8 @@ const Me = (props) => {
         throw new Error('Please input Price')
       }
 
-      console.log('parseUnits(data.price, wei)', parseUnits(data.price, 'wei'))
-      const tx = await contract.changePrice(minerId, parseUnits(data.price, 'wei'), { gasLimit: 10000000 })
+      console.log('parseEther(data.price, wei)', parseEther(data.price))
+      const tx = await contract.changePrice(minerId, parseEther(data.price), { gasLimit: 10000000 })
 
       message({
         title: 'TIP',

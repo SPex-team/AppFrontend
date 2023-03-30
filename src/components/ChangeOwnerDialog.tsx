@@ -8,6 +8,7 @@ import { abi, config } from '@/config'
 import { postPushMessage, postTransferOut } from '@/api/modules'
 import Tip, { message } from './Tip'
 import { handleError } from './AddDialog'
+import fa from '@glif/filecoin-address'
 
 interface IProps {
   open?: boolean
@@ -137,20 +138,10 @@ export default function ChangeOwnerDialog(props: IProps) {
                 throw new Error('Please output t0xxxxxx format')
               }
 
-              const data = {
-                miner_id: minerId,
-                new_owner_address
-              }
+              new_owner_address = fa.newFromString(new_owner_address)
+              console.log('filAddress.bytes: ', new_owner_address.bytes)
 
-              let res = await postTransferOut(data)
-              res = res._data
-
-              setData({
-                owner: new_owner_address,
-                ...res
-              })
-
-              const tx = await contract.changeOwner(minerId, res.newOwner, { gasLimit: 10000000 })
+              const tx = await contract.transferOwnerOut(minerId, [new_owner_address.bytes], { gasLimit: 10000000 })
               message({
                 title: 'TIP',
                 type: 'success',
@@ -160,6 +151,19 @@ export default function ChangeOwnerDialog(props: IProps) {
 
               const result = await tx.wait()
               console.log('result: ', result)
+
+              const data = {
+                miner_id: minerId,
+                new_owner_address: new_owner_address.bytes
+              }
+
+              let res = await postTransferOut(data)
+              res = res._data
+
+              setData({
+                owner: new_owner_address.bytes,
+                ...res
+              })
 
               onNext(form)
             } catch (error) {

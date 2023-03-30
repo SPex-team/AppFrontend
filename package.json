@@ -8,6 +8,7 @@
   "dependencies": {
     "@babel/core": "^7.16.0",
     "@craco/craco": "^6.4.3",
+    "@glif/filecoin-address": "^2.0.43",
     "@headlessui/react": "^1.7.13",
     "@pmmmwh/react-refresh-webpack-plugin": "^0.5.3",
     "@reduxjs/toolkit": "^1.9.3",
