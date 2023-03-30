@@ -95,7 +95,7 @@ const Maket = (props) => {
             <span className='inline-block w-[13%] min-w-[100px] px-2'>Miner ID</span>
             <span className='inline-block w-[13%] min-w-[90px] px-2'>Balance</span>
             <span className='inline-block w-[10%] min-w-[75px] px-2'>Power</span>
-            <span className='inline-block w-[10%] min-w-[105px] px-2'>Price(Fil)</span>
+            <span className='inline-block w-[10%] min-w-[105px] px-2'>Price</span>
             <span className='inline-block w-[20%] min-w-[140px] px-2'>List Time</span>
           </div>
           <div className='space-y-[18px]'>
@@ -105,16 +105,22 @@ const Maket = (props) => {
                 className='box-border flex h-[74px] rounded-[10px] border border-[#eaeaef] bg-white px-12 text-lg leading-[74px] text-[#57596c] hover:border-0 hover:shadow-[0_0_10px_0_rgba(17,16,41,0.15)]'
               >
                 <span className='inline-block w-[13%] min-w-[100px] truncate px-2'>{item.miner_id ?? '-'}</span>
-                <span className='inline-block w-[13%] min-w-[90px] truncate px-2'>{item.balance ?? '-'}</span>
+                <span className='inline-block w-[13%] min-w-[90px] truncate px-2'>
+                  {item.balance_human ? item.balance_human + ' FIL' : '-'}
+                </span>
                 <span className='inline-block w-[10%] min-w-[75px] truncate px-2'>{item.power ?? '-'}</span>
-                <span className='inline-block w-[10%] min-w-[105px] truncate px-2'>{item.price ?? '-'}</span>
+                <span className='inline-block w-[10%] min-w-[105px] truncate px-2'>
+                  {item.price ? item.price + ' FIL' : '-'}
+                </span>
                 <span className='inline-block w-[20%] min-w-[140px] truncate px-2'>
                   {item.list_time ? formatTime(item.list_time * 1000) : '-'}
                 </span>
                 <div className='inline-block text-black'>
                   <button
                     className='hover:text-[#0077FE]'
-                    onClick={() => window.open('https://filscan.io/tipset/pool-detail?address=f01860588')}
+                    onClick={() =>
+                      window.open(`https://hyperspace.filscan.io/address/miner?address=f0${item.miner_id}`)
+                    }
                   >
                     Detail
                     <DetailIcon className='ml-2 inline-block w-[14px]' />
@@ -134,7 +140,7 @@ const Maket = (props) => {
           />
         </div>
       </section>
-      <AddDialog open={open} setOpen={setOpen} />
+      <AddDialog open={open} setOpen={setOpen} cl={maketClass} />
     </Layout>
   )
 }

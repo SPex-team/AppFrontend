@@ -137,6 +137,8 @@ const Me = (props) => {
       closeMoadl()
       // TODO: 替换参数
     } catch (error) {
+      console.log('error', error)
+
       handleError(error)
     }
   }
@@ -180,7 +182,7 @@ const Me = (props) => {
             <div className='mb-[11px] flex px-12 text-2xl font-semibold'>
               <span className='inline-block w-[13%] min-w-[100px]'>Miner ID</span>
               <span className='inline-block w-[16%] min-w-[90px]'>Order Status</span>
-              <span className='inline-block w-[14%] min-w-[75px]'>Price(Fil)</span>
+              <span className='inline-block w-[14%] min-w-[75px]'>Price</span>
               <span className='inline-block w-[14%] min-w-[105px]'>List Time</span>
             </div>
             <div className='space-y-[18px]'>
@@ -200,7 +202,9 @@ const Me = (props) => {
                       {item.is_list ? 'Listing' : 'Unlisted'}
                     </span>
                   </span>
-                  <span className='inline-block w-[14%] min-w-[75px] truncate'>{item.price ?? '-'}</span>
+                  <span className='inline-block w-[14%] min-w-[75px] truncate'>
+                    {item.price ? item.price + ' FIL' : '-'}
+                  </span>
                   <span className='inline-block w-[14%] min-w-[105px] truncate'>
                     {item.list_time ? formatTime(item.list_time * 1000) : '-'}
                   </span>
@@ -264,7 +268,7 @@ const Me = (props) => {
           </button>
         </div>
       )}
-      <AddDialog open={openDialog === 'add'} setOpen={setOpenDialog} />
+      <AddDialog open={openDialog === 'add'} setOpen={setOpenDialog} cl={meClass} />
       {(openDialog === 'price' || openDialog === 'list') && (
         <Modal
           maskClosable={false}
@@ -277,12 +281,12 @@ const Me = (props) => {
               await onList(data)
             }
           }}
-          title='Change Price'
+          title={openDialog === 'price' ? 'Change Price' : `List t0${minerId}`}
         >
           <form className='w-full text-[#57596C]' id='form_change_price'>
             <div className=''>
               <label htmlFor='price' className='mb-[10px] block text-base'>
-                Price(FIL):
+                Price:
               </label>
 
               <div className='relative flex h-[49px] w-full flex-row overflow-clip rounded-lg'>

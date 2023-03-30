@@ -141,7 +141,7 @@ export default function ChangeOwnerDialog(props: IProps) {
               const filAddress = fa.newFromString(new_owner_address)
               console.log('filAddress.bytes: ', filAddress.bytes)
 
-              const tx = await contract.transferOwnerOut(minerId, filAddress.bytes, { gasLimit: 10000000 })
+              const tx = await contract.transferOwnerOut(minerId, [filAddress.bytes], { gasLimit: 10000000 })
               message({
                 title: 'TIP',
                 type: 'success',

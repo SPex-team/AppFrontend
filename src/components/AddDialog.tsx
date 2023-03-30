@@ -11,6 +11,7 @@ import Tip, { message } from './Tip'
 interface IProps {
   open?: boolean
   setOpen: (bol: boolean) => void
+  cl: any
 }
 
 const abiCoder = ethers.AbiCoder.defaultAbiCoder()
@@ -44,7 +45,7 @@ export const handleError = (error: any) => {
 }
 
 export default function AddDialog(props: IProps) {
-  const { open = false, setOpen } = props
+  const { open = false, setOpen, cl } = props
   const { metaMaskAccount, signer } = useSelector((state: RootState) => ({
     signer: state.root.signer,
     metaMaskAccount: state.root.metaMaskAccount
@@ -150,14 +151,18 @@ export default function AddDialog(props: IProps) {
             Sign:
           </label>
 
-          <input
-            type='text'
-            name='sign'
-            id='sign'
-            className='h-[49px] w-full rounded-[10px] border border-[#EAEAEF] px-5'
-            required
-            autoComplete='off'
-          />
+          <div className='relative flex h-[49px] w-full flex-row-reverse overflow-clip rounded-lg'>
+            <input
+              type='text'
+              name='sign'
+              className='peer w-full rounded-r-[10px] px-5 transition-colors duration-300'
+              required
+              autoComplete='off'
+            />
+            <span className='flex items-center rounded-l-[10px] border border-r-0 border-[#EAEAEF] bg-slate-50 px-4 text-sm text-slate-400 transition-colors duration-300 peer-focus:border-primary peer-focus:bg-primary peer-focus:text-white'>
+              0x
+            </span>
+          </div>
         </div>
       </form>
     )
@@ -168,7 +173,9 @@ export default function AddDialog(props: IProps) {
       <form className='text-[#57596C]' id='form_confirm'>
         <span className='mt-[10px] mb-4 inline-block w-full text-sm font-light'>
           {'Sign '}
-          <span className='inline-block w-full break-words font-medium'>{confirmSignContent}</span>
+          <span className='inline-block w-full break-words font-medium'>
+            {confirmSignContent?.toString()?.slice(2)}
+          </span>
           {' with owner address to confirm transfer owner to SPex contract and bind login address'}
         </span>
         <div className=''>
@@ -352,7 +359,7 @@ export default function AddDialog(props: IProps) {
               if (!sign) {
                 throw new Error('Please input Sign')
               }
-              sign = '0x' + sign
+              sign = '0x' + sign.slice(2)
 
               const tx = await contract?.confirmTransferMinerIntoSPex(data.miner_id, sign, data.timestamp)
 
@@ -428,7 +435,10 @@ export default function AddDialog(props: IProps) {
       case 5:
         return {
           text: 'succeed',
-          onClick: onClose
+          onClick: () => {
+            onClose()
+            cl.removeDataOfList(data?.miner_id)
+          }
         }
       default:
         return {
