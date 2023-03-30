@@ -6,7 +6,8 @@ import { RootState } from '@/store'
 import { Contract } from 'ethers'
 import { abi, config } from '@/config'
 import { postPushMessage, postTransferOut } from '@/api/modules'
-import Tip from './Tip'
+import Tip, { message } from './Tip'
+import { handleError } from './AddDialog'
 
 interface IProps {
   open?: boolean
@@ -16,25 +17,28 @@ interface IProps {
 
 export default function ChangeOwnerDialog(props: IProps) {
   const { open = false, setOpen, minerId } = props
-  const { provider, metaMaskAccount } = useSelector((state: RootState) => ({
-    provider: state.root.provider,
+  const { signer, metaMaskAccount } = useSelector((state: RootState) => ({
+    signer: state.root.signer,
     metaMaskAccount: state.root.metaMaskAccount
   }))
+  const contract = useMemo(() => new Contract(config.contractAddress, abi, signer), [signer])
 
-  const [stepNum, setStepNum] = useState(2)
+  const [stepNum, setStepNum] = useState(1)
   const [loading, setLoading] = useState(false)
   const [data, setData] = useState<any>()
 
   const onClose = () => {
-    // TODO: 清除状态。可以考虑直接销毁组建
+    setStepNum(1)
+    setData({})
     setOpen(false)
   }
 
-  const onHiddenLoading = (form?: HTMLFormElement) => {
+  const onNext = (form?: HTMLFormElement) => {
     if (form) {
       form.reset()
     }
     setLoading(false)
+    setStepNum(stepNum + 1)
   }
 
   const steps = [
@@ -61,6 +65,7 @@ export default function ChangeOwnerDialog(props: IProps) {
             name='new_owner_address'
             className='h-[49px] w-full rounded-[10px] border border-[#EAEAEF] px-5'
             required
+            placeholder='t0xxxxxx'
             autoComplete='off'
           />
         </div>
@@ -122,32 +127,43 @@ export default function ChangeOwnerDialog(props: IProps) {
               const formData = new FormData(form)
 
               let new_owner_address: any = formData.get('new_owner_address')
+              if (!new_owner_address) {
+                throw new Error('Please input Address')
+              }
+
+              const reg = /^t0.{1,}/
+
+              if (!reg.test(new_owner_address)) {
+                throw new Error('Please output t0xxxxxx format')
+              }
 
               const data = {
                 miner_id: minerId,
                 new_owner_address
               }
+
               let res = await postTransferOut(data)
               res = res._data
+
               setData({
                 owner: new_owner_address,
                 ...res
               })
 
-              const signer = await provider?.getSigner()
-              const contract = new Contract(config.contractAddress, abi, signer)
-              // debugger
-
               const tx = await contract.changeOwner(minerId, res.newOwner, { gasLimit: 10000000 })
-              // this.$message.info(`Waiting transaction: ${tx.hash}`)
+              message({
+                title: 'TIP',
+                type: 'success',
+                content: tx.hash
+              })
               console.log('tx: ', tx)
 
-              let result = (await tx)?.wait()
+              const result = await tx.wait()
               console.log('result: ', result)
-              onHiddenLoading()
-              onClose()
+
+              onNext(form)
             } catch (error) {
-              console.log('error', error)
+              handleError(error)
 
               setLoading(false)
             }
@@ -157,40 +173,43 @@ export default function ChangeOwnerDialog(props: IProps) {
         return {
           // push
           text: 'Next',
-          onClick: () => {
-            // TODO: add error message
-            setLoading(true)
+          onClick: async () => {
+            try {
+              // TODO: add error message
+              setLoading(true)
 
-            const form = document.getElementById('form_sign') as HTMLFormElement
-            const formData = new FormData(form)
+              const form = document.getElementById('form_sign') as HTMLFormElement
+              const formData = new FormData(form)
+              const sign = formData.get('sign')?.toString()
+              if (!sign) {
+                throw new Error('Please input Sign')
+              }
 
-            const sign = formData.get('sign')?.toString() || ''
+              const post_data = {
+                message: data.msg_hex as string,
+                sign,
+                cid: data.msg_cid_str as string,
+                wait: true
+              }
 
-            const post_data = {
-              message: data.msg_hex as string,
-              sign,
-              cid: data.msg_cid_str as string,
-              wait: true
+              let res = await postPushMessage(post_data)
+              res = res._data
+
+              setData({
+                ...data,
+                ...res
+              })
+
+              onClose()
+              message({
+                title: 'TIP',
+                type: 'success',
+                content: 'succeed'
+              })
+            } catch (error) {
+              handleError(error)
+              setLoading(false)
             }
-
-            postPushMessage(post_data)
-              .then((res) => {
-                res = res._data
-                console.log('res', res)
-
-                onHiddenLoading(form)
-                setData({
-                  ...data,
-                  ...res
-                })
-                setStepNum(stepNum + 1)
-              })
-              .catch((err) => {
-                console.log(err)
-
-                // TODO: add error message
-                setLoading(false)
-              })
           }
         }
       default:

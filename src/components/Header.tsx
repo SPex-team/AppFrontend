@@ -45,14 +45,12 @@ export default function Header() {
 
   const initEthers = async (account: string) => {
     const provider = new ethers.BrowserProvider(window.ethereum)
-    // const signer = await provider.getSigner()
+    const signer = await provider.getSigner()
 
     // FIXME: contract cannot exist redux
     // const contract = new Contract(config.contractAddress, abi, signer)
 
-    // console.log('initEthers', provider, contract)
-
-    dispatch(setRootData({ metaMaskAccount: account, provider }))
+    dispatch(setRootData({ metaMaskAccount: account, provider, signer }))
   }
 
   useEffect(() => {

@@ -4,6 +4,7 @@ import { Fragment, useState } from 'react'
 
 interface IProps {
   open?: boolean
+  onClose: () => void
   maskClosable?: boolean
   title?: string
   children: JSX.Element
@@ -12,7 +13,7 @@ interface IProps {
 }
 
 export default function Modal(props: IProps) {
-  const { maskClosable = true, title = '', children, onOk, okText = 'Confirm' } = props
+  const { maskClosable = true, title = '', children, onClose, open, onOk, okText = 'Confirm' } = props
   const [loading, setLoading] = useState<any>(false)
 
   const _onOk = async () => {
@@ -58,8 +59,6 @@ export default function Modal(props: IProps) {
     }
   }
 
-  const [open, setOpen] = useState(true)
-
   return (
     <Transition appear show={open} as={Fragment}>
       <Dialog
@@ -67,7 +66,7 @@ export default function Modal(props: IProps) {
         className='relative z-30'
         onClose={() => {
           if (maskClosable) {
-            setOpen(false)
+            onClose()
           }
         }}
       >
@@ -105,7 +104,7 @@ export default function Modal(props: IProps) {
                       strokeWidth={2}
                       stroke='currentColor'
                       className='h-6 w-6 cursor-pointer'
-                      onClick={() => setOpen(false)}
+                      onClick={onClose}
                     >
                       <path strokeLinecap='round' strokeLinejoin='round' d='M6 18L18 6M6 6l12 12' />
                     </svg>

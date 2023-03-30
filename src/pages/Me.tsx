@@ -4,7 +4,7 @@ import { ReactComponent as OutIcon } from '@/assets/images/out.svg'
 import { ReactComponent as PriceIcon } from '@/assets/images/price.svg'
 import Pagination from '@/components/Pagination'
 import { useEffect, useMemo, useState } from 'react'
-import AddDialog from '@/components/AddDialog'
+import AddDialog, { handleError } from '@/components/AddDialog'
 import MeClass from '@/models/me-class'
 import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from '@/store'
@@ -24,42 +24,56 @@ const Me = (props) => {
   const [openDialog, setOpenDialog] = useState<any>(false)
   const [minerId, setMinerId] = useState<any>()
 
-  const { meCount, mePage, meList, provider, metaMaskAccount } = useSelector((state: RootState) => ({
+  const { meCount, mePage, meList, signer, metaMaskAccount } = useSelector((state: RootState) => ({
     meCount: state.root.meCount,
     mePage: state.root.mePage,
     meList: state.root.meList,
-    provider: state.root.provider,
+    signer: state.root.signer,
     metaMaskAccount: state.root.metaMaskAccount
   }))
+  const contract = useMemo(() => new Contract(config.contractAddress, abi, signer), [signer])
+
+  const closeMoadl = () => {
+    setOpenDialog('')
+  }
 
   const onSetPrice = async (data) => {
     try {
-      // TODO: add error message
-      const signer = await provider?.getSigner()
-      const contract = new Contract(config.contractAddress, abi, signer)
+      if (!data.price) {
+        throw new Error('Please input Price')
+      }
 
+      console.log('parseUnits(data.price, wei)', parseUnits(data.price, 'wei'))
       const tx = await contract.changePrice(minerId, parseUnits(data.price, 'wei'), { gasLimit: 10000000 })
+
       message({
         title: 'TIP',
         type: 'success',
         content: tx.hash
       })
-      ;(await tx)?.wait()
+
+      const result = await tx.wait()
+      console.log('result', result)
 
       let row = meList.find((item) => item.miner_id === minerId)
-      row = { ...row }
+      // row = { ...row }
 
-      console.log('row', row, data)
-      row.price = data.price
+      // console.log('row', row, data)
+      // row.price = data.price
 
       await postUpdataMiners(row.miner_id)
 
       meClass.removeDataOfList(minerId)
-      setOpenDialog('')
+
+      message({
+        title: 'TIP',
+        type: 'success',
+        content: 'succeed'
+      })
+      closeMoadl()
       // TODO: 替换参数
     } catch (error) {
-      console.log('error', error)
-      setOpenDialog('')
+      handleError(error)
     }
   }
 
@@ -70,9 +84,6 @@ const Me = (props) => {
       data.is_list = false
       data.price = 0
 
-      const signer = await provider?.getSigner()
-      const contract = new Contract(config.contractAddress, abi, signer)
-
       const tx = await contract.cancelList(minerId, { gasLimit: 10000000 })
       message({
         title: 'TIP',
@@ -80,44 +91,53 @@ const Me = (props) => {
         content: tx.hash
       })
       console.log('tx: ', tx)
-      ;(await tx)?.wait()
+
+      const result = await tx.wait()
+      console.log('result', result)
 
       await postUpdataMiners(data.miner_id)
       dispatch(setRootData({ loading: false }))
       meClass.removeDataOfList(minerId)
-      setOpenDialog('')
-    } catch (error) {
-      console.error('error', error)
 
+      message({
+        title: 'TIP',
+        type: 'success',
+        content: 'succeed'
+      })
+      closeMoadl()
+    } catch (error) {
+      handleError(error)
       dispatch(setRootData({ loading: false }))
-      setOpenDialog('')
     }
   }
 
   const onList = async (data) => {
     try {
-      // TODO: add error message
-      const signer = await provider?.getSigner()
-      const contract = new Contract(config.contractAddress, abi, signer)
-
       const tx = await contract.listMiner(minerId, data.price, { gasLimit: 10000000 })
       message({
         title: 'TIP',
         type: 'success',
         content: tx.hash
       })
-      ;(await tx)?.wait()
+
+      const result = await tx.wait()
+      console.log('result', result)
 
       let row = meList.find((item) => item.miner_id === minerId)
 
       await postUpdataMiners(row.miner_id)
 
       meClass.removeDataOfList(minerId)
-      setOpenDialog('')
+
+      message({
+        title: 'TIP',
+        type: 'success',
+        content: 'succeed'
+      })
+      closeMoadl()
       // TODO: 替换参数
     } catch (error) {
-      console.log('error', error)
-      setOpenDialog('')
+      handleError(error)
     }
   }
 
@@ -238,7 +258,7 @@ const Me = (props) => {
           </div>
         </section>
       ) : (
-        <div className='container flex items-center justify-center [min-height:calc(100vh-279px)]'>
+        <div className='container mx-auto flex items-center justify-center [min-height:calc(100vh-279px)]'>
           <button className='hidden h-11 cursor-default rounded-full bg-gradient-to-r from-[#0077FE] to-[#3BF4BB] px-6 text-white md:block'>
             Please Connect Wallet
           </button>
@@ -247,11 +267,14 @@ const Me = (props) => {
       <AddDialog open={openDialog === 'add'} setOpen={setOpenDialog} />
       {(openDialog === 'price' || openDialog === 'list') && (
         <Modal
-          onOk={(data) => {
+          maskClosable={false}
+          open={openDialog === 'price' || openDialog === 'list'}
+          onClose={closeMoadl}
+          onOk={async (data) => {
             if (openDialog === 'price') {
-              onSetPrice(data)
+              await onSetPrice(data)
             } else {
-              onList(data)
+              await onList(data)
             }
           }}
           title='Change Price'

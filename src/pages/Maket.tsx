@@ -6,13 +6,13 @@ import { useEffect, useMemo, useState } from 'react'
 import MaketClass from '@/models/maket-class'
 import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from '@/store'
-import AddDialog from '@/components/AddDialog'
+import AddDialog, { handleError } from '@/components/AddDialog'
 import { formatTime } from '@/plugins/dayjs'
 import { Contract, parseUnits } from 'ethers'
 import { abi, config } from '@/config'
 import { postUpdataMiners } from '@/api/modules'
 import { setRootData } from '@/store/modules/root'
-import Tip, { message } from '@/components/Tip'
+import { message } from '@/components/Tip'
 
 const Maket = (props) => {
   const dispatch = useDispatch()
@@ -23,16 +23,15 @@ const Maket = (props) => {
     maketCount: state.root.maketCount,
     maketPage: state.root.maketPage,
     maketList: state.root.maketList,
-    provider: state.root.provider,
+    signer: state.root.signer,
     metaMaskAccount: state.root.metaMaskAccount
   }))
+  const contract = useMemo(() => new Contract(config.contractAddress, abi, data.signer), [data.signer])
 
   const onBuy = async (miner_id: number, price_raw: string) => {
     try {
       dispatch(setRootData({ loading: true }))
-      const provider = data.provider
-      const signer = await provider?.getSigner()
-      const contract = new Contract(config.contractAddress, abi, signer)
+
       console.log('parseEther(price)', parseUnits(price_raw, 'wei'))
 
       const tx = await contract.buyMiner(miner_id, {
@@ -45,34 +44,16 @@ const Maket = (props) => {
         type: 'success',
         content: tx.hash
       })
-      ;(await tx)?.wait()
 
-      if (data.metaMaskAccount) {
-        postUpdataMiners({ miner_id }).then(() => {
-          maketClass.removeDataOfList(miner_id)
-          dispatch(setRootData({ loading: false }))
-        })
-      }
-    } catch (error: any) {
-      if (error.info.error.code === 4001) {
-        message({
-          title: 'TIP',
-          type: 'warning',
-          content: 'User denied transaction signature.'
-        })
-      } else if (error.info.error.message) {
-        message({
-          title: 'TIP',
-          type: 'error',
-          content: error.info.error.message
-        })
-      } else {
-        message({
-          title: 'TIP',
-          type: 'error',
-          content: 'Error'
-        })
-      }
+      const result = await tx.wait()
+      console.log('result', result)
+      // TODO: 全局 metaMaskAccount 判断
+      await postUpdataMiners({ miner_id })
+
+      maketClass.removeDataOfList(miner_id)
+      dispatch(setRootData({ loading: false }))
+    } catch (error) {
+      handleError(error)
       dispatch(setRootData({ loading: false }))
     }
   }

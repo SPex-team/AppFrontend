@@ -83,7 +83,7 @@ export function message(params: IParams) {
   ReactDOM.render(
     <div
       className={clsx([
-        'bg fixed top-[8%] left-1/2 -translate-x-1/2 rounded-[10px] border-l-[6px] px-[18px] py-5 ',
+        'bg fixed top-[8%] left-1/2 z-40 -translate-x-1/2 rounded-[10px] border-l-[6px] px-[18px] py-5',
         className
       ])}
       style={{

@@ -5,6 +5,7 @@ interface IState {
   metaMaskAccount?: string
 
   provider?: ethers.BrowserProvider
+  signer?: any
 
   maketList: any[]
   maketPage: number
@@ -42,5 +43,6 @@ const rootSlice = createSlice({
 })
 
 export const { setRootData } = rootSlice.actions
+export const selectSigner = (state: IState) => state.signer
 
 export default rootSlice.reducer

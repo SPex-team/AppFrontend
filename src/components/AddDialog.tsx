@@ -6,7 +6,7 @@ import { RootState } from '@/store'
 import { Contract, ethers, parseUnits } from 'ethers'
 import { abi, config } from '@/config'
 import { postBuildMessage, postMiners, postPushMessage, putMiners } from '@/api/modules'
-import Tip from './Tip'
+import Tip, { message } from './Tip'
 
 interface IProps {
   open?: boolean
@@ -15,27 +15,58 @@ interface IProps {
 
 const abiCoder = ethers.AbiCoder.defaultAbiCoder()
 
+export const handleError = (error: any) => {
+  if (error?.info?.error?.code === 4001) {
+    message({
+      title: 'TIP',
+      type: 'warning',
+      content: 'User denied transaction signature.'
+    })
+  } else if (error?.info?.error?.message) {
+    message({
+      title: 'TIP',
+      type: 'error',
+      content: error.info.error.message
+    })
+  } else if (error?.message) {
+    message({
+      title: 'TIP',
+      type: 'error',
+      content: error.message
+    })
+  } else {
+    message({
+      title: 'TIP',
+      type: 'error',
+      content: 'Error'
+    })
+  }
+}
+
 export default function AddDialog(props: IProps) {
   const { open = false, setOpen } = props
-  const { provider, metaMaskAccount } = useSelector((state: RootState) => ({
-    provider: state.root.provider,
+  const { metaMaskAccount, signer } = useSelector((state: RootState) => ({
+    signer: state.root.signer,
     metaMaskAccount: state.root.metaMaskAccount
   }))
+  const contract = useMemo(() => new Contract(config.contractAddress, abi, signer), [signer])
 
   const [stepNum, setStepNum] = useState(1)
   const [loading, setLoading] = useState(false)
   const [data, setData] = useState<any>()
 
   const onClose = () => {
+    setStepNum(1)
     setData({})
     setOpen(false)
   }
 
-  const onHiddenLoading = (form?: HTMLFormElement) => {
+  const onNext = (form?: HTMLFormElement) => {
     if (form) {
       form.reset()
     }
     setLoading(false)
+    setStepNum(stepNum + 1)
   }
 
   const confirmSignContent = useMemo(() => {
@@ -59,6 +90,7 @@ export default function AddDialog(props: IProps) {
     } else {
       return undefined
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data?.miner_id, data?.miner_info, metaMaskAccount])
 
   const steps = [
@@ -179,18 +211,20 @@ export default function AddDialog(props: IProps) {
   const step5 = () => {
     return (
       <div className='flex w-full flex-col items-center pt-10'>
-        <svg
-          xmlns='http://www.w3.org/2000/svg'
-          viewBox='0 0 20 20'
-          fill='currentColor'
-          className='h-10 w-10 rounded-full  bg-green-400 text-white'
-        >
-          <path
-            fillRule='evenodd'
-            d='M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z'
-            clipRule='evenodd'
-          />
-        </svg>
+        <span className='flex h-14 w-14 items-center justify-center rounded-full bg-green-400'>
+          <svg
+            xmlns='http://www.w3.org/2000/svg'
+            viewBox='0 0 20 20'
+            fill='currentColor'
+            className='h-12 w-12 text-white'
+          >
+            <path
+              fillRule='evenodd'
+              d='M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z'
+              clipRule='evenodd'
+            />
+          </svg>
+        </span>
         <span className='mt-2 inline-block font-medium capitalize'>succeed</span>
       </div>
     )
@@ -221,32 +255,35 @@ export default function AddDialog(props: IProps) {
       case 1:
         return {
           text: 'Next',
-          onClick: () => {
-            setLoading(true)
-            const form = document.getElementById('form_minerAddress') as HTMLFormElement
-            const formData = new FormData(form)
+          onClick: async () => {
+            try {
+              setLoading(true)
 
-            let miner_id: any = formData.get('miner_id')
+              const form = document.getElementById('form_minerAddress') as HTMLFormElement
+              const formData = new FormData(form)
 
-            if (miner_id) {
+              let miner_id: any = formData.get('miner_id')
+
+              if (!miner_id) {
+                throw new Error('Please input Miner Address')
+              }
+              const reg = /^t0.{1,}/
+
+              if (!reg.test(miner_id)) {
+                throw new Error('Please output t0xxxxxx format')
+              }
+
               miner_id = parseInt(miner_id.slice(2))
-              postBuildMessage({ miner_id })
-                .then((res) => {
-                  res = res._data
+              let res = await postBuildMessage({ miner_id })
 
-                  onHiddenLoading(form)
-                  setData({
-                    ...res,
-                    miner_id
-                  })
-                  setStepNum(stepNum + 1)
-                })
-                .catch(() => {
-                  // TODO: add error message
-                  setLoading(false)
-                })
-            } else {
-              // TODO: add error message
+              setData({
+                ...res,
+                miner_id
+              })
+
+              onNext(form)
+            } catch (error: any) {
+              handleError(error)
               setLoading(false)
             }
           }
@@ -254,83 +291,78 @@ export default function AddDialog(props: IProps) {
       case 2:
         return {
           text: 'Next',
-          onClick: () => {
-            // TODO: add error message
-            setLoading(true)
+          onClick: async () => {
+            try {
+              setLoading(true)
 
-            const form = document.getElementById('form_sign') as HTMLFormElement
-            const formData = new FormData(form)
+              const form = document.getElementById('form_sign') as HTMLFormElement
+              const formData = new FormData(form)
 
-            const sign = '0x' + (formData.get('sign')?.toString() || '')
-            const post_data = {
-              message: data.msg_hex as string,
-              sign,
-              cid: data.msg_cid_str as string,
-              wait: true
+              const sign = formData.get('sign')?.toString()
+              if (!sign) {
+                throw new Error('Please input Sign')
+              }
+
+              const post_data = {
+                message: data.msg_hex as string,
+                sign,
+                cid: data.msg_cid_str as string,
+                wait: true
+              }
+
+              let res = await postPushMessage(post_data)
+              res = res._data
+
+              setData({
+                ...data,
+                ...res
+              })
+              onNext(form)
+            } catch (error) {
+              handleError(error)
+              setLoading(false)
             }
-
-            postPushMessage(post_data)
-              .then((res) => {
-                res = res._data
-
-                onHiddenLoading(form)
-                setData({
-                  ...data,
-                  ...res
-                })
-                setStepNum(stepNum + 1)
-              })
-              .catch(() => {
-                // TODO: add error message
-                setLoading(false)
-              })
           }
         }
       case 3:
         return {
           text: 'Confirm',
           onClick: async () => {
-            setLoading(true)
-
-            const form = document.getElementById('form_confirm') as HTMLFormElement
             try {
+              setLoading(true)
+              setLoading(true)
+
+              setLoading(true)
+
+              const form = document.getElementById('form_confirm') as HTMLFormElement
+
               const formData = new FormData(form)
 
-              const sign = '0x' + formData.get('sign')
-
-              const signer = await provider?.getSigner()
-              const contract = new Contract(config.contractAddress, abi, signer)
+              const sign = formData.get('sign')
 
               const tx = await contract?.confirmTransferMinerIntoSPex(data.miner_id, sign, data.timestamp, {
                 gasLimit: 10000000
               })
-              // TODO: 交互提示不够友好
 
-              ;(await tx)?.wait()
-
-              setData({
-                tx
+              message({
+                title: 'TIP',
+                type: 'success',
+                content: tx.hash
               })
 
-              postMiners({ owner: metaMaskAccount as any, miner_id: data.miner_id })
-                .then((res) => {
-                  res = res._data
+              const result = await tx.wait()
+              console.log('result', result)
 
-                  setData({
-                    ...data,
-                    miner: res
-                  })
-                  onHiddenLoading(form)
-                  setStepNum(stepNum + 1)
-                })
-                .catch(() => {
-                  // TODO: add error message
-                  setLoading(false)
-                })
+              let res = await postMiners({ owner: metaMaskAccount as any, miner_id: data.miner_id })
+              res = res._data
+              setData({
+                ...data,
+                miner: res
+              })
+
+              onNext(form)
             } catch (error) {
-              console.log('error', error)
-
-              // TODO: add error message
+              handleError(error)
               setLoading(false)
             }
           }
@@ -339,22 +371,27 @@ export default function AddDialog(props: IProps) {
         return {
           text: 'List Order',
           onClick: async () => {
-            setLoading(true)
-            const form = document.getElementById('form_price') as HTMLFormElement
-
             try {
+              setLoading(true)
+              const form = document.getElementById('form_price') as HTMLFormElement
               const formData = new FormData(form)
 
-              const price = formData.get('price')
+              const price = formData.get('price')?.toString()
+              if (!price) {
+                throw new Error('Please input Price')
+              }
 
-              const signer = await provider?.getSigner()
-              const contract = new Contract(config.contractAddress, abi, signer)
-
-              const tx = await contract?.listMiner(data.miner_id, parseUnits(data.price, 'wei'), {
+              const tx = await contract?.listMiner(data.miner_id, parseUnits(price, 'wei'), {
                 gasLimit: 10000000
               })
+              message({
+                title: 'TIP',
+                type: 'success',
+                content: tx.hash
+              })
 
-              ;(await tx)?.wait()
+              const result = await tx.wait()
+              console.log('result', result)
 
               const _data = {
                 is_list: true,
@@ -367,14 +404,13 @@ export default function AddDialog(props: IProps) {
                 tx
               })
 
-              putMiners(data.miner_id, _data)
+              await putMiners(data.miner_id, _data)
               // this.$emit("add_item", response.data)
 
-              onHiddenLoading(form)
+              onNext(form)
             } catch (error) {
-              console.log('error', error)
+              handleError(error)
 
-              // TODO: add error message
               setLoading(false)
             }
           }
@@ -410,7 +446,7 @@ export default function AddDialog(props: IProps) {
       </Transition>
       {open && (
         <Transition appear show={open} as={Fragment}>
-          <Dialog as='div' className='relative z-30' onClose={onClose}>
+          <Dialog as='div' className='relative z-30' onClose={() => {}}>
             <Transition.Child
               as={Fragment}
               enter='ease-out duration-300'
@@ -489,7 +525,7 @@ export default function AddDialog(props: IProps) {
                       <button
                         type='button'
                         className={clsx([
-                          'inline-flex h-[44px] w-[256px] items-center justify-center rounded-full bg-gradient-to-r from-[#0077FE] to-[#3BF4BB] text-white focus-visible:ring-0',
+                          'mt-5 inline-flex h-[44px] w-[256px] items-center justify-center rounded-full bg-gradient-to-r from-[#0077FE] to-[#3BF4BB] text-white focus-visible:ring-0',
                           { 'cursor-not-allowed': loading }
                         ])}
                         onClick={btnData.onClick}

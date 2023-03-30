@@ -10,7 +10,7 @@ const store = configureStore({
         // 忽略所有 action 中的这些字段路径
         // ignoredActionPaths: ['root.loadClass`'],
         // 忽略 state 中的这些路径 paths in the state
-        ignoredPaths: ['root.provider']
+        ignoredPaths: ['root.provider', 'root.signer']
       }
       // serializableCheck: false
     }),
