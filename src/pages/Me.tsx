@@ -285,13 +285,18 @@ const Me = (props) => {
                 Price(FIL):
               </label>
 
-              <input
-                type='text'
-                name='price'
-                className='h-[49px] w-full rounded-[10px] border border-[#EAEAEF] px-5'
-                required
-                autoComplete='off'
-              />
+              <div className='relative flex h-[49px] w-full flex-row overflow-clip rounded-lg'>
+                <input
+                  type='text'
+                  name='price'
+                  className='peer w-full rounded-l-[10px] px-5 transition-colors duration-300'
+                  required
+                  autoComplete='off'
+                />
+                <span className='flex items-center rounded-r-[10px] border border-l-0 border-[#EAEAEF] bg-slate-50 px-4 text-sm text-slate-400 transition-colors duration-300 peer-focus:border-primary peer-focus:bg-primary peer-focus:text-white'>
+                  FIL
+                </span>
+              </div>
             </div>
           </form>
         </Modal>

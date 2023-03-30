@@ -176,20 +176,18 @@ export default function AddDialog(props: IProps) {
             Sign:
           </label>
 
-          {/* <div className='relative flex h-10 w-full flex-row-reverse overflow-clip rounded-lg'> */}
-          <input
-            type='text'
-            name='sign'
-            className='h-[49px] w-full rounded-[10px] border border-[#EAEAEF] px-5'
-            // className='peer w-full rounded-r-lg border border-slate-400 px-2 text-slate-900 placeholder-slate-400 transition-colors duration-300 focus:border-sky-400 focus:outline-none'
-
-            required
-            autoComplete='off'
-          />
-          {/* <span className='flex items-center rounded-l-lg border border-slate-400 bg-slate-50 px-2 text-sm text-slate-400 transition-colors duration-300 peer-focus:border-sky-400 peer-focus:bg-sky-400 peer-focus:text-white'>
-              https://
+          <div className='relative flex h-[49px] w-full flex-row-reverse overflow-clip rounded-lg'>
+            <input
+              type='text'
+              name='sign'
+              className='peer w-full rounded-r-[10px] px-5 transition-colors duration-300'
+              required
+              autoComplete='off'
+            />
+            <span className='flex items-center rounded-l-[10px] border border-r-0 border-[#EAEAEF] bg-slate-50 px-4 text-sm text-slate-400 transition-colors duration-300 peer-focus:border-primary peer-focus:bg-primary peer-focus:text-white'>
+              0x
             </span>
-          </div> */}
+          </div>
         </div>
       </form>
     )
@@ -200,16 +198,21 @@ export default function AddDialog(props: IProps) {
       <form className='text-[#57596C]' id='form_price'>
         <div className=''>
           <label htmlFor='price' className='mb-[10px] block text-base'>
-            Price(FIL):
+            Price:
           </label>
 
-          <input
-            type='text'
-            name='price'
-            className='h-[49px] w-full rounded-[10px] border border-[#EAEAEF] px-5'
-            required
-            autoComplete='off'
-          />
+          <div className='relative flex h-[49px] w-full flex-row overflow-clip rounded-lg'>
+            <input
+              type='text'
+              name='price'
+              className='peer w-full rounded-l-[10px] px-5 transition-colors duration-300'
+              required
+              autoComplete='off'
+            />
+            <span className='flex items-center rounded-r-[10px] border border-l-0 border-[#EAEAEF] bg-slate-50 px-4 text-sm text-slate-400 transition-colors duration-300 peer-focus:border-primary peer-focus:bg-primary peer-focus:text-white'>
+              FIL
+            </span>
+          </div>
         </div>
       </form>
     )
@@ -345,7 +348,11 @@ export default function AddDialog(props: IProps) {
 
               const formData = new FormData(form)
 
-              const sign = formData.get('sign')
+              let sign = formData.get('sign')
+              if (!sign) {
+                throw new Error('Please input Sign')
+              }
+              sign = '0x' + sign
 
               const tx = await contract?.confirmTransferMinerIntoSPex(data.miner_id, sign, data.timestamp)
 
