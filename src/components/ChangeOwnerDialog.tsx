@@ -14,10 +14,11 @@ interface IProps {
   open?: boolean
   setOpen: (bol: boolean) => void
   minerId: number
+  updataList: () => void
 }
 
 export default function ChangeOwnerDialog(props: IProps) {
-  const { open = false, setOpen, minerId } = props
+  const { open = false, setOpen, minerId, updataList } = props
   const { signer, metaMaskAccount } = useSelector((state: RootState) => ({
     signer: state.root.signer,
     metaMaskAccount: state.root.metaMaskAccount
@@ -50,6 +51,10 @@ export default function ChangeOwnerDialog(props: IProps) {
     {
       key: 2,
       name: 'Accept Miner'
+    },
+    {
+      key: 3,
+      name: 'Completed'
     }
   ]
 
@@ -102,12 +107,36 @@ export default function ChangeOwnerDialog(props: IProps) {
     )
   }
 
+  const step3 = () => {
+    return (
+      <div className='flex w-full flex-col items-center pt-10'>
+        <span className='flex h-14 w-14 items-center justify-center rounded-full bg-green-400'>
+          <svg
+            xmlns='http://www.w3.org/2000/svg'
+            viewBox='0 0 20 20'
+            fill='currentColor'
+            className='h-12 w-12 text-white'
+          >
+            <path
+              fillRule='evenodd'
+              d='M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z'
+              clipRule='evenodd'
+            />
+          </svg>
+        </span>
+        <span className='mt-2 inline-block font-medium capitalize'>succeed</span>
+      </div>
+    )
+  }
+
   const renderStep = (key: number) => {
     switch (key) {
       case 1:
         return step1()
       case 2:
         return step2()
+      case 3:
+        return step3()
       default:
         return <></>
     }
@@ -141,7 +170,7 @@ export default function ChangeOwnerDialog(props: IProps) {
               const filAddress = fa.newFromString(new_owner_address)
               console.log('filAddress.bytes: ', filAddress.bytes)
 
-              const tx = await contract.transferOwnerOut(minerId, [filAddress.bytes], { gasLimit: 10000000 })
+              const tx = await contract.transferOwnerOut(minerId, [filAddress.bytes])
               message({
                 title: 'TIP',
                 type: 'success',
@@ -204,7 +233,7 @@ export default function ChangeOwnerDialog(props: IProps) {
                 ...res
               })
 
-              onClose()
+              onNext(form)
               message({
                 title: 'TIP',
                 type: 'success',
@@ -214,6 +243,14 @@ export default function ChangeOwnerDialog(props: IProps) {
               handleError(error)
               setLoading(false)
             }
+          }
+        }
+      case 3:
+        return {
+          text: 'succeed',
+          onClick: () => {
+            onClose()
+            updataList()
           }
         }
       default:

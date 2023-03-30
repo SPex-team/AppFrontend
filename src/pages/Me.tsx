@@ -44,7 +44,7 @@ const Me = (props) => {
       }
 
       console.log('parseEther(data.price, wei)', parseEther(data.price))
-      const tx = await contract.changePrice(minerId, parseEther(data.price), { gasLimit: 10000000 })
+      const tx = await contract.changePrice(minerId, parseEther(data.price))
 
       message({
         title: 'TIP',
@@ -84,7 +84,7 @@ const Me = (props) => {
       data.is_list = false
       data.price = 0
 
-      const tx = await contract.cancelList(minerId, { gasLimit: 10000000 })
+      const tx = await contract.cancelList(minerId)
       message({
         title: 'TIP',
         type: 'success',
@@ -113,7 +113,7 @@ const Me = (props) => {
 
   const onList = async (data) => {
     try {
-      const tx = await contract.listMiner(minerId, data.price, { gasLimit: 10000000 })
+      const tx = await contract.listMiner(minerId, data.price)
       message({
         title: 'TIP',
         type: 'success',
@@ -202,9 +202,7 @@ const Me = (props) => {
                       {item.is_list ? 'Listing' : 'Unlisted'}
                     </span>
                   </span>
-                  <span className='inline-block w-[14%] min-w-[75px] truncate'>
-                    {item.price ? item.price + ' FIL' : '-'}
-                  </span>
+                  <span className='inline-block w-[14%] min-w-[75px] truncate'>{(item.price ?? '0') + ' FIL'}</span>
                   <span className='inline-block w-[14%] min-w-[105px] truncate'>
                     {item.list_time ? formatTime(item.list_time * 1000) : '-'}
                   </span>
@@ -213,7 +211,20 @@ const Me = (props) => {
                       Change Price
                       <PriceIcon className='ml-2 inline-block w-[14px]' />
                     </button>
-                    <button className='ml-7 hover:text-[#0077FE]' onClick={() => setOpenDialog('owner')}>
+                    <button
+                      className={clsx(['ml-7', item.is_list ? 'text-gray-400' : 'hover:text-[#0077FE'])}
+                      onClick={() => {
+                        if (item.is_list) {
+                          message({
+                            title: 'TIP',
+                            type: 'warning',
+                            content: 'You must cancel list'
+                          })
+                        } else {
+                          setOpenDialog('owner')
+                        }
+                      }}
+                    >
                       Transfer Out
                       <OutIcon className='ml-2 inline-block w-[14px]' />
                     </button>
@@ -268,7 +279,11 @@ const Me = (props) => {
           </button>
         </div>
       )}
-      <AddDialog open={openDialog === 'add'} setOpen={setOpenDialog} cl={meClass} />
+      <AddDialog
+        open={openDialog === 'add'}
+        setOpen={setOpenDialog}
+        updataList={() => meClass.removeDataOfList(minerId)}
+      />
       {(openDialog === 'price' || openDialog === 'list') && (
         <Modal
           maskClosable={false}
@@ -305,7 +320,14 @@ const Me = (props) => {
           </form>
         </Modal>
       )}
-      {openDialog === 'owner' && <ChangeOwnerDialog open={true} setOpen={setOpenDialog} minerId={minerId} />}
+      {openDialog === 'owner' && (
+        <ChangeOwnerDialog
+          open={true}
+          setOpen={setOpenDialog}
+          minerId={minerId}
+          updataList={() => meClass.removeDataOfList(minerId)}
+        />
+      )}
     </Layout>
   )
 }

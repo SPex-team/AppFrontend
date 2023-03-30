@@ -11,7 +11,7 @@ import Tip, { message } from './Tip'
 interface IProps {
   open?: boolean
   setOpen: (bol: boolean) => void
-  cl: any
+  updataList: () => void
 }
 
 const abiCoder = ethers.AbiCoder.defaultAbiCoder()
@@ -45,7 +45,7 @@ export const handleError = (error: any) => {
 }
 
 export default function AddDialog(props: IProps) {
-  const { open = false, setOpen, cl } = props
+  const { open = false, setOpen, updataList } = props
   const { metaMaskAccount, signer } = useSelector((state: RootState) => ({
     signer: state.root.signer,
     metaMaskAccount: state.root.metaMaskAccount
@@ -437,7 +437,7 @@ export default function AddDialog(props: IProps) {
           text: 'succeed',
           onClick: () => {
             onClose()
-            cl.removeDataOfList(data?.miner_id)
+            updataList()
           }
         }
       default:

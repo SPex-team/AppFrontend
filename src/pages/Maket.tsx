@@ -35,7 +35,6 @@ const Maket = (props) => {
       console.log('parseEther(price)', parseEther(price_raw))
 
       const tx = await contract.buyMiner(miner_id, {
-        gasLimit: 100000000,
         value: parseEther(price_raw)
       })
 
@@ -94,7 +93,7 @@ const Maket = (props) => {
           <div className='mb-[11px] flex px-12 text-2xl font-semibold'>
             <span className='inline-block w-[13%] min-w-[100px] px-2'>Miner ID</span>
             <span className='inline-block w-[13%] min-w-[90px] px-2'>Balance</span>
-            <span className='inline-block w-[10%] min-w-[75px] px-2'>Power</span>
+            {/* <span className='inline-block w-[10%] min-w-[75px] px-2'>Power</span> */}
             <span className='inline-block w-[10%] min-w-[105px] px-2'>Price</span>
             <span className='inline-block w-[20%] min-w-[140px] px-2'>List Time</span>
           </div>
@@ -106,12 +105,10 @@ const Maket = (props) => {
               >
                 <span className='inline-block w-[13%] min-w-[100px] truncate px-2'>{item.miner_id ?? '-'}</span>
                 <span className='inline-block w-[13%] min-w-[90px] truncate px-2'>
-                  {item.balance_human ? item.balance_human + ' FIL' : '-'}
+                  {(item.balance_human ?? '0') + ' FIL'}
                 </span>
-                <span className='inline-block w-[10%] min-w-[75px] truncate px-2'>{item.power ?? '-'}</span>
-                <span className='inline-block w-[10%] min-w-[105px] truncate px-2'>
-                  {item.price ? item.price + ' FIL' : '-'}
-                </span>
+                {/* <span className='inline-block w-[10%] min-w-[75px] truncate px-2'>{item.power ?? '-'}</span> */}
+                <span className='inline-block w-[10%] min-w-[105px] truncate px-2'>{(item.price ?? '0') + ' FIL'}</span>
                 <span className='inline-block w-[20%] min-w-[140px] truncate px-2'>
                   {item.list_time ? formatTime(item.list_time * 1000) : '-'}
                 </span>
@@ -140,7 +137,7 @@ const Maket = (props) => {
           />
         </div>
       </section>
-      <AddDialog open={open} setOpen={setOpen} cl={maketClass} />
+      <AddDialog open={open} setOpen={setOpen} updataList={() => maketClass.removeDataOfList(1)} />
     </Layout>
   )
 }
