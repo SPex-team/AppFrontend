@@ -1,4 +1,3 @@
-import Layout from '@/layout'
 import { ReactComponent as CanelIcon } from '@/assets/images/canel.svg'
 import { ReactComponent as OutIcon } from '@/assets/images/out.svg'
 import { ReactComponent as PriceIcon } from '@/assets/images/price.svg'
@@ -153,7 +152,7 @@ const Me = (props) => {
   }, [metaMaskAccount])
 
   return (
-    <Layout>
+    <>
       {metaMaskAccount ? (
         <section className='container mx-auto pt-[190px] pb-[60px]'>
           <div className='flex justify-between'>
@@ -330,7 +329,7 @@ const Me = (props) => {
           updataList={() => meClass.removeDataOfList(minerId)}
         />
       )}
-    </Layout>
+    </>
   )
 }
 

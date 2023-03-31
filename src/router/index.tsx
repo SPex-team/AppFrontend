@@ -5,6 +5,7 @@ import Me from '@/pages/Me'
 import { createBrowserRouter, Navigate } from 'react-router-dom'
 import { getMaketList } from '@/api/modules'
 import { ReactNode, Suspense } from 'react'
+import Layout from '@/layout'
 
 // const Error = lazy(() => import('@/404'))
 
@@ -15,19 +16,21 @@ const lazyLoad = (children: ReactNode): ReactNode => {
 const router = createBrowserRouter([
   {
     path: '/',
-    element: <Navigate to='/maket' replace />
-  },
-  {
-    path: '/maket',
-    element: lazyLoad(<Maket />)
-  },
-  {
-    path: '/history',
-    element: lazyLoad(<History />)
-  },
-  {
-    path: '/me',
-    element: lazyLoad(<Me />)
+    element: <Layout />,
+    children: [
+      {
+        path: '/maket',
+        element: lazyLoad(<Maket />)
+      },
+      {
+        path: '/history',
+        element: lazyLoad(<History />)
+      },
+      {
+        path: '/me',
+        element: lazyLoad(<Me />)
+      }
+    ]
   }
 ])
 

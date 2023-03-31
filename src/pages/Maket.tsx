@@ -1,4 +1,3 @@
-import Layout from '@/layout'
 import { ReactComponent as BuyIcon } from '@/assets/images/buy.svg'
 import { ReactComponent as DetailIcon } from '@/assets/images/detail.svg'
 import Pagination from '@/components/Pagination'
@@ -63,7 +62,7 @@ const Maket = (props) => {
   }, [])
 
   return (
-    <Layout>
+    <>
       <section className='container mx-auto pt-[190px] pb-[60px]'>
         <div className='flex justify-between'>
           <div className='mb-20'>
@@ -138,7 +137,7 @@ const Maket = (props) => {
         </div>
       </section>
       <AddDialog open={open} setOpen={setOpen} updataList={() => maketClass.removeDataOfList(1)} />
-    </Layout>
+    </>
   )
 }
 
