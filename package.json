@@ -91,7 +91,8 @@
     "postinstall": "patch-package",
     "prepare": "husky install",
     "lint-staged": "lint-staged",
-    "lint-staged:js": "eslint --fix"
+    "lint-staged:js": "eslint --fix",
+    "serve": "http-server build -p 8080"
   },
   "devDependencies": {
     "autoprefixer": "^10.4.14",
@@ -111,6 +112,7 @@
     "eslint-plugin-testing-library": "^3.9.2",
     "eslint-webpack-plugin": "^2.5.2",
     "git-commit-msg-linter": "^4.1.1",
+    "http-server": "^14.1.1",
     "husky": "^7.0.4",
     "js-yaml": "^4.1.0",
     "lint-staged": "^12.3.7",

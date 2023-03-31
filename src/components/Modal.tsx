@@ -20,8 +20,7 @@ export default function Modal(props: IProps) {
     //   setLoading(true)
     const form_wrap = document.getElementById('form_wrap')
     if (!form_wrap) {
-      // TODO: add error message
-      return
+      throw new Error('error')
     }
 
     const form = form_wrap.children[0] as HTMLFormElement | undefined

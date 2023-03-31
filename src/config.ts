@@ -1,12 +1,12 @@
 export const dev_config = {
-  contractAddress: '0x6e67b6D8a990341D3F4624C639e767Ccc66eD52D',
-  // contractAddress: '0x7579F0eF2E9be2adBe7e96B5656dc9E38F70b9d8',
-  contractT4Address: 't410f3nvnh2rhtfkd72565nmjiqmiphig775xikkfs5y'
+  // contractAddress: '0x6e67b6D8a990341D3F4624C639e767Ccc66eD52D',
+  contractAddress: '0xD20E95A0Cfa1F3263e46a8d79f3e4B995Bf7c709',
+  contractT4Address: 't410f2ihjligpuhzsmpsgvdlz6psltfn7pryj3vf2ivq'
 }
 
 export const prod_config = {
-  contractAddress: '0xb81dFE627379bD869179Eb19dc1682c36EbAE2a0',
-  contractT4Address: 't410fxao74yttpg6ynelz5mm5yfucynxlvyva2toihli'
+  contractAddress: '0xD20E95A0Cfa1F3263e46a8d79f3e4B995Bf7c709',
+  contractT4Address: 't410f2ihjligpuhzsmpsgvdlz6psltfn7pryj3vf2ivq'
 }
 
 export const config = Object.assign({}, process.env.NODE_ENV === 'production' ? prod_config : dev_config)

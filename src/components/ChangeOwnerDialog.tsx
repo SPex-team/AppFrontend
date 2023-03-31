@@ -209,7 +209,6 @@ export default function ChangeOwnerDialog(props: IProps) {
           text: 'Next',
           onClick: async () => {
             try {
-              // TODO: add error message
               setLoading(true)
 
               const form = document.getElementById('form_sign') as HTMLFormElement

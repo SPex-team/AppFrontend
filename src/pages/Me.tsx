@@ -71,7 +71,6 @@ const Me = (props) => {
         content: 'succeed'
       })
       closeMoadl()
-      // TODO: 替换参数
     } catch (error) {
       handleError(error)
     }
@@ -139,7 +138,6 @@ const Me = (props) => {
         content: 'succeed'
       })
       closeMoadl()
-      // TODO: 替换参数
     } catch (error) {
       console.log('error', error)
 

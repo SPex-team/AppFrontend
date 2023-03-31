@@ -6,8 +6,13 @@ interface IProps {
 
 export default function Pagination(props: IProps) {
   const { pageNum, currentPage, onChange } = props
+  const MAX_PAGE_NUM = 9
 
+  // if (pageNum < MAX_PAGE_NUM) {
   const pageNumArr = Array.from({ length: pageNum }, (_, index) => index + 1)
+  // } else {
+  // const a = [1, 2, 3, 4, 5, 6, '...', pageNum]
+  // }
 
   // TODO: 多页面缩略
 
