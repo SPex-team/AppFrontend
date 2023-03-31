@@ -31,11 +31,8 @@ const Maket = (props) => {
     try {
       dispatch(setRootData({ loading: true }))
 
-      console.log('parseEther(price)', parseEther(price_raw))
-      console.log('parseEther(price)', parseUnits(price_raw, 'wei'))
-      // parseUnits("4.5", "gwei")
       const tx = await contract.buyMiner(miner_id, {
-        value: parseUnits(price_raw, 'wei')
+        value: price_raw
       })
 
       message({

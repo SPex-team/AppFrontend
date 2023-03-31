@@ -5,7 +5,7 @@ import { useSelector } from 'react-redux'
 import { RootState } from '@/store'
 import { Contract, ethers, parseEther } from 'ethers'
 import { abi, config } from '@/config'
-import { postBuildMessage, postMiners, postPushMessage, putMiners } from '@/api/modules'
+import { postBuildMessage, postMiners, postPushMessage, postUpdataMiners, putMiners } from '@/api/modules'
 import Tip, { message } from './Tip'
 
 interface IProps {
@@ -373,12 +373,14 @@ export default function AddDialog(props: IProps) {
               const result = await tx.wait()
               console.log('result', result)
 
-              let res = await postMiners({ owner: metaMaskAccount as any, miner_id: data.miner_id })
-              res = res._data
-              setData({
-                ...data,
-                miner: res
-              })
+              // let res = await
+              // postMiners({ owner: metaMaskAccount as any, miner_id: data.miner_id })
+              postMiners()
+              // res = res._data
+              // setData({
+              //   ...data,
+              //   miner: res
+              // })
 
               onNext(form)
             } catch (error) {
@@ -423,7 +425,8 @@ export default function AddDialog(props: IProps) {
                 tx
               })
 
-              await putMiners(data.miner_id, _data)
+              postUpdataMiners(data.miner_id)
+              // await putMiners(data.miner_id, _data)
               // this.$emit("add_item", response.data)
 
               onNext(form)

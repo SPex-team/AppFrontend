@@ -33,9 +33,9 @@ export function postPushMessage(data: { message: string; sign: string; cid: stri
 }
 
 // step 3 api
-export function postMiners(data: { owner: string; miner_id: number }): Promise<any> {
+export function postMiners(data?: { owner: string; miner_id: number }): Promise<any> {
   return postReq({
-    url: '/api/v1/spex/miners',
+    url: '/api/v1/spex/miners/sync-new-miners',
     data
   })
 }
