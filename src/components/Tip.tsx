@@ -69,16 +69,17 @@ interface IParams {
   type?: 'error' | 'warning' | 'success'
   title?: string
   content?: string
+  closeTime?: number
   // setOpen: (bol: boolean) => void
 }
 
 export function message(params: IParams) {
-  const { className = '', type = 'success', title, content = '' } = params
+  const { className = '', type = 'success', title, content = '', closeTime = 2000 } = params
   const tipRootDom = document.getElementById('tip') as HTMLElement
 
   setTimeout(() => {
     ReactDOM.unmountComponentAtNode(tipRootDom)
-  }, 2000)
+  }, closeTime)
 
   ReactDOM.render(
     <div

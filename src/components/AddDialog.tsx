@@ -366,7 +366,8 @@ export default function AddDialog(props: IProps) {
               message({
                 title: 'TIP',
                 type: 'success',
-                content: tx.hash
+                content: tx.hash,
+                closeTime: 4000
               })
 
               const result = await tx.wait()
@@ -404,7 +405,8 @@ export default function AddDialog(props: IProps) {
               message({
                 title: 'TIP',
                 type: 'success',
-                content: tx.hash
+                content: tx.hash,
+                closeTime: 4000
               })
 
               const result = await tx.wait()

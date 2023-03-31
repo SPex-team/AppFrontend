@@ -7,7 +7,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from '@/store'
 import AddDialog, { handleError } from '@/components/AddDialog'
 import { formatTime } from '@/plugins/dayjs'
-import { Contract, parseEther } from 'ethers'
+import { Contract, parseEther, parseUnits } from 'ethers'
 import { abi, config } from '@/config'
 import { postUpdataMiners } from '@/api/modules'
 import { setRootData } from '@/store/modules/root'
@@ -32,15 +32,17 @@ const Maket = (props) => {
       dispatch(setRootData({ loading: true }))
 
       console.log('parseEther(price)', parseEther(price_raw))
-
+      console.log('parseEther(price)', parseUnits(price_raw, 'wei'))
+      // parseUnits("4.5", "gwei")
       const tx = await contract.buyMiner(miner_id, {
-        value: parseEther(price_raw)
+        value: parseUnits(price_raw, 'wei')
       })
 
       message({
         title: 'TIP',
         type: 'success',
-        content: tx.hash
+        content: tx.hash,
+        closeTime: 4000
       })
 
       const result = await tx.wait()

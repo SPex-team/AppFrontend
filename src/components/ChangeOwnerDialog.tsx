@@ -174,7 +174,8 @@ export default function ChangeOwnerDialog(props: IProps) {
               message({
                 title: 'TIP',
                 type: 'success',
-                content: tx.hash
+                content: tx.hash,
+                closeTime: 4000
               })
               console.log('tx: ', tx)
 

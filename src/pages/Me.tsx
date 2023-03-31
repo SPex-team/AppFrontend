@@ -48,7 +48,8 @@ const Me = (props) => {
       message({
         title: 'TIP',
         type: 'success',
-        content: tx.hash
+        content: tx.hash,
+        closeTime: 4000
       })
 
       const result = await tx.wait()
@@ -87,7 +88,8 @@ const Me = (props) => {
       message({
         title: 'TIP',
         type: 'success',
-        content: tx.hash
+        content: tx.hash,
+        closeTime: 4000
       })
       console.log('tx: ', tx)
 
@@ -118,7 +120,8 @@ const Me = (props) => {
       message({
         title: 'TIP',
         type: 'success',
-        content: tx.hash
+        content: tx.hash,
+        closeTime: 4000
       })
 
       const result = await tx.wait()
