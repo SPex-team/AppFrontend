@@ -519,7 +519,7 @@ export default function AddDialog(props: IProps) {
                               data-active={step.key <= stepNum}
                               className='group flex rounded-[10px] border-[#0077FE] p-[17px] data-[active=true]:border'
                             >
-                              <span className='mr-[10px] box-border inline-block h-10 w-10 rounded-full border-[6px] border-[#EEEEF0] bg-[#57596c] text-center text-xl font-semibold leading-[28px] text-white group-data-[active=true]:border-[#EFF3FC] group-data-[active=true]:bg-[#0077FE]'>
+                              <span className='mr-[10px] box-border inline-block h-10 w-10 rounded-full border-[6px] border-[#EEEEF0] bg-[#57596c] text-center text-xl font-medium leading-[28px] text-white group-data-[active=true]:border-[#EFF3FC] group-data-[active=true]:bg-[#0077FE]'>
                                 {step.key}
                               </span>
                               <div>

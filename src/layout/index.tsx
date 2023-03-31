@@ -1,8 +1,18 @@
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
-import { Outlet } from 'react-router-dom'
+import { Outlet, useNavigate, useOutlet } from 'react-router-dom'
+import { useEffect } from 'react'
 
 const Layout = (props) => {
+  const outlet = useOutlet()
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    if (!outlet) {
+      navigate('/maket', { replace: true })
+    }
+  })
+
   return (
     <>
       <Header />
