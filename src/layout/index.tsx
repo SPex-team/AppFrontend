@@ -1,14 +1,14 @@
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
-import { Outlet, useNavigate, useOutlet } from 'react-router-dom'
+import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { useEffect } from 'react'
 
 const Layout = (props) => {
-  const outlet = useOutlet()
   const navigate = useNavigate()
+  const location = useLocation()
 
   useEffect(() => {
-    if (!outlet) {
+    if (location.pathname === '/') {
       navigate('/market', { replace: true })
     }
   })
