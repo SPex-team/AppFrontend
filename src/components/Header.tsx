@@ -11,8 +11,8 @@ const links = [
     href: 'https://www.spex.website/'
   },
   {
-    name: 'Maket',
-    href: '/maket'
+    name: 'Market',
+    href: '/market'
   },
   // {
   //   name: 'History',
@@ -24,9 +24,16 @@ const links = [
   }
 ]
 
-const networks = [
+const ChainCfg = [
   {
-    name: 'HyperSpace'
+    chainId: '0x1',
+    chainName: 'HyperSpace',
+    nativeCurrency: {
+      name: 'ETH',
+      symbol: 'ETH',
+      decimals: 18
+    },
+    rpcUrls: ['https://mainnet.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161']
   }
 ]
 
@@ -121,7 +128,7 @@ export default function Header() {
             <Menu as='div' className='relative inline-block text-left'>
               <div>
                 <Menu.Button className='inline-flex w-full items-center justify-center rounded-md px-4 py-2 text-sm font-medium text-gray-900'>
-                  {networks[0].name}
+                  {ChainCfg[0].chainName}
                   <svg
                     xmlns='http://www.w3.org/2000/svg'
                     fill='none'
@@ -144,8 +151,8 @@ export default function Header() {
                 leaveTo='transform opacity-0 scale-95'
               >
                 <Menu.Items className='absolute right-0 mt-2 w-40 origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none'>
-                  {networks.map((network) => (
-                    <div className='p-1' key={network.name}>
+                  {ChainCfg.map((network) => (
+                    <div className='p-1' key={network.chainName}>
                       <Menu.Item>
                         {({ active }) => (
                           <button
@@ -153,7 +160,7 @@ export default function Header() {
                               active ? 'bg-[#0077FE] text-white' : 'text-gray-900'
                             } group flex w-full items-center rounded-md px-2 py-2 text-sm`}
                           >
-                            {network.name}
+                            {network.chainName}
                           </button>
                         )}
                       </Menu.Item>

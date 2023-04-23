@@ -2,7 +2,7 @@ import { ReactComponent as BuyIcon } from '@/assets/images/buy.svg'
 import { ReactComponent as DetailIcon } from '@/assets/images/detail.svg'
 import Pagination from '@/components/Pagination'
 import { useEffect, useMemo, useState } from 'react'
-import MaketClass from '@/models/maket-class'
+import MarketClass from '@/models/market-class'
 import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from '@/store'
 import AddDialog, { handleError } from '@/components/AddDialog'
@@ -13,15 +13,15 @@ import { postUpdataMiners } from '@/api/modules'
 import { setRootData } from '@/store/modules/root'
 import { message } from '@/components/Tip'
 
-const Maket = (props) => {
+const Market = (props) => {
   const dispatch = useDispatch()
-  const maketClass = useMemo(() => new MaketClass(), [])
+  const marketClass = useMemo(() => new MarketClass(), [])
 
   const [open, setOpen] = useState(false)
   const data = useSelector((state: RootState) => ({
-    maketCount: state.root.maketCount,
-    maketPage: state.root.maketPage,
-    maketList: state.root.maketList,
+    marketCount: state.root.marketCount,
+    marketPage: state.root.marketPage,
+    marketList: state.root.marketList,
     signer: state.root.signer,
     metaMaskAccount: state.root.metaMaskAccount
   }))
@@ -47,7 +47,7 @@ const Maket = (props) => {
       // TODO: 全局 metaMaskAccount 判断
       await postUpdataMiners({ miner_id })
 
-      maketClass.removeDataOfList(miner_id)
+      marketClass.removeDataOfList(miner_id)
       dispatch(setRootData({ loading: false }))
     } catch (error) {
       handleError(error)
@@ -56,7 +56,7 @@ const Maket = (props) => {
   }
 
   useEffect(() => {
-    maketClass.init()
+    marketClass.init()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -96,7 +96,7 @@ const Maket = (props) => {
             <span className='inline-block w-[20%] min-w-[140px] px-2'>List Time</span>
           </div>
           <div className='space-y-[18px]'>
-            {data.maketList.map((item) => (
+            {data.marketList.map((item) => (
               <div
                 key={item.miner_id}
                 className='box-border flex h-[74px] rounded-[10px] border border-[#eaeaef] bg-white px-12 text-lg leading-[74px] text-[#57596c] hover:border-0 hover:shadow-[0_0_10px_0_rgba(17,16,41,0.15)]'
@@ -129,15 +129,15 @@ const Maket = (props) => {
             ))}
           </div>
           <Pagination
-            pageNum={Math.ceil(data.maketCount / maketClass.page_size)}
-            currentPage={data.maketPage}
-            onChange={(page) => maketClass.selectPage(page)}
+            pageNum={Math.ceil(data.marketCount / marketClass.page_size)}
+            currentPage={data.marketPage}
+            onChange={(page) => marketClass.selectPage(page)}
           />
         </div>
       </section>
-      <AddDialog open={open} setOpen={setOpen} updataList={() => maketClass.removeDataOfList(1)} />
+      <AddDialog open={open} setOpen={setOpen} updataList={() => marketClass.removeDataOfList(1)} />
     </>
   )
 }
 
-export default Maket
+export default Market

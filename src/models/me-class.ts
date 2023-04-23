@@ -1,4 +1,4 @@
-import { getMaketList, getMeList } from '@/api/modules'
+import { getMarketList, getMeList } from '@/api/modules'
 import { setRootData } from '@/store/modules/root'
 import Table from './table-class'
 

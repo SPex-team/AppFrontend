@@ -1,8 +1,8 @@
-import { getMaketList } from '@/api/modules'
+import { getMarketList } from '@/api/modules'
 import { setRootData } from '@/store/modules/root'
 import Table from './table-class'
 
-export default class Maket extends Table {
+export default class Market extends Table {
   static current_page_size?: number
 
   public init() {
@@ -10,7 +10,7 @@ export default class Maket extends Table {
   }
 
   private getList(page) {
-    getMaketList({
+    getMarketList({
       ordering: '-list_time',
       is_list: true,
       page,
@@ -19,12 +19,12 @@ export default class Maket extends Table {
       res = res._data
 
       this.page = page
-      this.dispatch(setRootData({ maketList: res.results ?? [], maketPage: page ?? 1, maketCount: res.count ?? 0 }))
+      this.dispatch(setRootData({ marketList: res.results ?? [], marketPage: page ?? 1, marketCount: res.count ?? 0 }))
     })
   }
 
   get page_size() {
-    return Maket.current_page_size || this.default_page_size
+    return Market.current_page_size || this.default_page_size
   }
 
   public selectPage(page: number) {
@@ -33,8 +33,8 @@ export default class Maket extends Table {
 
   public removeDataOfList(miner_id: number) {
     this.getList(this.page)
-    // const updataData = this.rootState.root.maketList.filter((item) => item.miner_id !== miner_id)
+    // const updataData = this.rootState.root.marketList.filter((item) => item.miner_id !== miner_id)
 
-    // this.dispatch(setRootData({ maketList: updataData, maketPage: page ?? 1, maketCount: res.count ?? 0 }))
+    // this.dispatch(setRootData({ marketList: updataData, marketPage: page ?? 1, marketCount: res.count ?? 0 }))
   }
 }

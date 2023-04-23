@@ -1,4 +1,4 @@
-import Maket from '@/pages/Maket'
+import Market from '@/pages/Market'
 import History from '@/pages/History'
 import Me from '@/pages/Me'
 // import { lazy, ReactNode, Suspense } from 'react'
@@ -18,8 +18,8 @@ const router = createBrowserRouter([
     element: <Layout />,
     children: [
       {
-        path: '/maket',
-        element: lazyLoad(<Maket />)
+        path: '/market',
+        element: lazyLoad(<Market />)
       },
       {
         path: '/history',

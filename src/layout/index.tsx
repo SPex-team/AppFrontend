@@ -9,7 +9,7 @@ const Layout = (props) => {
 
   useEffect(() => {
     if (!outlet) {
-      navigate('/maket', { replace: true })
+      navigate('/market', { replace: true })
     }
   })
 

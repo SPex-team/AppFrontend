@@ -1,14 +1,14 @@
 import { postReq, putReq, getReq } from '../abstract'
 
-// get list maket page api
-export function getMaketList(params?: {}): Promise<any> {
+// get list market page api
+export function getMarketList(params?: {}): Promise<any> {
   return getReq({
     url: '/api/v1/spex/miners',
     params
   })
 }
 
-// post buy maket page api
+// post buy market page api
 export function postBuyMessages(miner_id: number, data: { buyer: string }): Promise<any> {
   return postReq({
     url: `/api/v1/spex/list-miners/${miner_id}/buy`,

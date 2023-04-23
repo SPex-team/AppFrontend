@@ -7,9 +7,9 @@ interface IState {
   provider?: ethers.BrowserProvider
   signer?: any
 
-  maketList: any[]
-  maketPage: number
-  maketCount: number
+  marketList: any[]
+  marketPage: number
+  marketCount: number
 
   meList: any[]
   mePage: number
@@ -19,9 +19,9 @@ interface IState {
 }
 
 const initialState: IState = {
-  maketList: [],
-  maketPage: 1,
-  maketCount: 0,
+  marketList: [],
+  marketPage: 1,
+  marketCount: 0,
 
   meList: [],
   mePage: 1,
