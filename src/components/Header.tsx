@@ -26,20 +26,28 @@ const links = [
 
 const ChainCfg = [
   {
-    chainId: '0x1',
+    chainId: '0xc45',
     chainName: 'HyperSpace',
     nativeCurrency: {
-      name: 'ETH',
-      symbol: 'ETH',
+      name: 'tFIL',
+      symbol: 'tFIL',
       decimals: 18
     },
-    rpcUrls: ['https://mainnet.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161']
+    rpcUrls: ['https://filecoin-hyperspace.chainup.net/rpc/v1'],
+    blockExplorerUrls: ['https://hyperspace.filfox.info/en']
   }
 ]
 
 export default function Header() {
   const metaMaskAccount = useSelector((state: RootState) => state.root.metaMaskAccount)
   const dispatch = useDispatch()
+
+  const addChain = (params) => {
+    window.ethereum.request({
+      method: 'wallet_addEthereumChain', // Metamask的api名称
+      params: params
+    })
+  }
 
   const fetchSetAccount = () => {
     window.ethereum.request({ method: 'eth_accounts' }).then((accounts) => {
@@ -159,6 +167,9 @@ export default function Header() {
                             className={`${
                               active ? 'bg-[#0077FE] text-white' : 'text-gray-900'
                             } group flex w-full items-center rounded-md px-2 py-2 text-sm`}
+                            onClick={() => {
+                              addChain([network])
+                            }}
                           >
                             {network.chainName}
                           </button>
