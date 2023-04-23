@@ -319,6 +319,7 @@ const Me = (props) => {
                 </span>
               </div>
             </div>
+            <input type='text' value='' className='hidden' readOnly />
           </form>
         </Modal>
       )}

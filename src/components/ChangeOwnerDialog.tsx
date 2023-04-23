@@ -75,6 +75,7 @@ export default function ChangeOwnerDialog(props: IProps) {
             autoComplete='off'
           />
         </div>
+        <input type='text' value='' className='hidden' readOnly />
       </form>
     )
   }
@@ -103,6 +104,7 @@ export default function ChangeOwnerDialog(props: IProps) {
             autoComplete='off'
           />
         </div>
+        <input type='text' value='' className='hidden' readOnly />
       </form>
     )
   }

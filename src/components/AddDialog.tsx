@@ -133,6 +133,7 @@ export default function AddDialog(props: IProps) {
             autoComplete='off'
             placeholder='t0xxxxxx'
           />
+          <input type='text' value='' className='hidden' readOnly />
         </div>
       </form>
     )
@@ -164,6 +165,7 @@ export default function AddDialog(props: IProps) {
             </span>
           </div>
         </div>
+        <input type='text' value='' className='hidden' readOnly />
       </form>
     )
   }
@@ -196,6 +198,7 @@ export default function AddDialog(props: IProps) {
             </span>
           </div>
         </div>
+        <input type='text' value='' className='hidden' readOnly />
       </form>
     )
   }
@@ -221,6 +224,7 @@ export default function AddDialog(props: IProps) {
             </span>
           </div>
         </div>
+        <input type='text' value='' className='hidden' readOnly />
       </form>
     )
   }
