@@ -460,3 +460,5 @@ export const abi = [
     type: 'function'
   }
 ]
+
+export const LAST_WALLET = 'LAST_WALLET'

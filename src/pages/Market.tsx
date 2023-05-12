@@ -113,9 +113,13 @@ const Market = (props) => {
                 <div className='inline-block text-black'>
                   <button
                     className='hover:text-[#0077FE]'
-                    onClick={() =>
-                      window.open(`https://hyperspace.filscan.io/address/miner?address=f0${item.miner_id}`)
-                    }
+                    onClick={() => {
+                      if (window.location.href.includes('hyperspace')) {
+                        window.open(`https://hyperspace.filscan.io/address/miner?address=f0${item.miner_id}`)
+                      } else {
+                        window.open(`https://filscan.io/address/miner?address=f0${item.miner_id}`)
+                      }
+                    }}
                   >
                     Detail
                     <DetailIcon className='ml-2 inline-block w-[14px]' />

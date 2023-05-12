@@ -45,19 +45,21 @@ service.interceptors.request.use(
       })
     })
     request.baseURL = process.env['REACT_APP_BASE_URL']
-    return request
+    return Promise.resolve(request)
   },
-  (error) => {}
+  (error) => {
+    return Promise.reject(error)
+  }
 )
 
 service.interceptors.response.use(
   (response) => {
     removePending(response.config)
     // response.data.data = JSON.parse(response.data.data)
-    return response
+    return Promise.resolve(response)
   },
   (error) => {
-    return error
+    return Promise.reject(error)
   }
 )
 

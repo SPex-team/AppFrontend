@@ -133,6 +133,8 @@ export default function AddDialog(props: IProps) {
             autoComplete='off'
             placeholder='t0xxxxxx'
           />
+          <span className='text-xs'>Commision fee 1% For Platform</span>
+
           <input type='text' value='' className='hidden' readOnly />
         </div>
       </form>
@@ -224,6 +226,8 @@ export default function AddDialog(props: IProps) {
             </span>
           </div>
         </div>
+        <span className='text-xs'>Commision fee 1% For Platform</span>
+
         <input type='text' value='' className='hidden' readOnly />
       </form>
     )

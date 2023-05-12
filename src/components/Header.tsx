@@ -1,9 +1,11 @@
 import { RootState } from '@/store'
 import { setRootData } from '@/store/modules/root'
 import { Menu, Popover, Transition } from '@headlessui/react'
-import { Fragment, useEffect } from 'react'
+import { Fragment, useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { ethers } from 'ethers'
+import { useLocation } from 'react-router-dom'
+import { LAST_WALLET } from '@/config'
 
 const links = [
   {
@@ -24,8 +26,19 @@ const links = [
   }
 ]
 
-const ChainCfg = [
-  {
+const ChainCfg = {
+  MainNet: {
+    chainId: '0x13a',
+    chainName: 'Filecoin',
+    nativeCurrency: {
+      name: 'FIL',
+      symbol: 'FIL',
+      decimals: 18
+    },
+    rpcUrls: ['https://api.node.glif.io'],
+    blockExplorerUrls: ['https://filfox.info/en']
+  },
+  HyperSpace: {
     chainId: '0xc45',
     chainName: 'HyperSpace',
     nativeCurrency: {
@@ -36,11 +49,14 @@ const ChainCfg = [
     rpcUrls: ['https://filecoin-hyperspace.chainup.net/rpc/v1'],
     blockExplorerUrls: ['https://hyperspace.filfox.info/en']
   }
-]
+}
 
 export default function Header() {
+  const location = useLocation()
   const metaMaskAccount = useSelector((state: RootState) => state.root.metaMaskAccount)
   const dispatch = useDispatch()
+  const [currentChain, setCurrentChain] = useState()
+  const net = window.location.href.includes('hyperspace') ? 'HyperSpace' : 'MainNet'
 
   const addChain = (params) => {
     window.ethereum.request({
@@ -49,50 +65,49 @@ export default function Header() {
     })
   }
 
-  const fetchSetAccount = () => {
-    window.ethereum.request({ method: 'eth_accounts' }).then((accounts) => {
-      console.log(accounts)
-      initEthers(accounts[0])
+  const fetchSetAccount = async () => {
+    const accounts = await window.ethereum.request({ method: 'eth_accounts' })
+    console.log(accounts)
 
-      dispatch(setRootData({ metaMaskAccount: accounts[0] }))
-    })
+    initEthers(accounts)
   }
 
-  const initEthers = async (account: string) => {
-    const provider = new ethers.BrowserProvider(window.ethereum)
-    const signer = await provider.getSigner()
+  const initEthers = async (accounts: string[]) => {
+    console.log('accountsChanged', accounts)
+    const account = accounts[0]
 
-    // FIXME: contract cannot exist redux
-    // const contract = new Contract(config.contractAddress, abi, signer)
+    if (accounts.length === 0) {
+      console.log('Please connect to MetaMask.')
+      localStorage.removeItem(LAST_WALLET)
+      dispatch(setRootData({ metaMaskAccount: '' }))
+    } else {
+      const chainId = await window.ethereum.request({ method: 'eth_chainId' })
+      localStorage.setItem(LAST_WALLET, 'MetaMask')
 
-    dispatch(setRootData({ metaMaskAccount: account, provider, signer }))
+      setCurrentChain(chainId)
+      // const contract = useMemo(() => new Contract(config.contractAddress, abi, signer), [signer])
+
+      const provider = new ethers.BrowserProvider(window.ethereum)
+      const signer = await provider.getSigner()
+
+      // FIXME: contract cannot exist redux
+      // const contract = new Contract(config.contractAddress, abi, signer)
+
+      dispatch(setRootData({ metaMaskAccount: account, provider, signer }))
+    }
   }
 
   useEffect(() => {
-    if (window.ethereum.isConnected()) {
-      fetchSetAccount()
-    }
-
-    window.ethereum.on('connect', (connectInfo) => {
-      console.log('connect')
-
-      if (window.ethereum.isConnected()) {
-        fetchSetAccount()
+    window.ethereum?.on('accountsChanged', initEthers)
+    window.ethereum?.on('chainChanged', (chainId) => {
+      setCurrentChain(chainId)
+    })
+    ;(async () => {
+      const wallet_type = localStorage.getItem(LAST_WALLET)
+      if (wallet_type === 'MetaMask') {
+        await fetchSetAccount()
       }
-    })
-
-    window.ethereum.on('accountsChanged', function (accounts) {
-      console.log('accountsChanged')
-      // Time to reload your interface with accounts[0]!
-      fetchSetAccount()
-    })
-
-    window.ethereum.on('disconnect', (error) => {
-      console.log('disconnect')
-      if (!window.ethereum.isConnected()) {
-        fetchSetAccount()
-      }
-    })
+    })()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -101,17 +116,12 @@ export default function Header() {
       console.log('MetaMask is installed!')
     } else {
       console.log('MetaMask not installed; using read-only defaults')
+      window.open('https://chrome.google.com/webstore/detail/metamask/nkbihfbeogaeaoehlefnkodbefgpgknn?hl=en')
+      return
     }
 
     const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' })
-    const account = accounts[0]
-
-    initEthers(account)
-    // const provider = new ethers.BrowserProvider(window.ethereum)
-    // const signer = await provider.getSigner()
-    // const contract = new Contract(config.contractAddress, abi, signer)
-
-    // dispatch(setRootData({ metaMaskAccount: account, provider, contract }))
+    initEthers(accounts)
   }
 
   return (
@@ -125,18 +135,25 @@ export default function Header() {
             {links.map((item) => (
               <a key={item.name} href={item.href}>
                 <div className='ml-[33px]'>
-                  <p className='text-sm font-medium text-gray-900'>{item.name}</p>
+                  <p
+                    className={
+                      (location.pathname === item.href ? 'font-semibold' : 'font-medium') + ' text-sm text-gray-900'
+                    }
+                  >
+                    {item.name}
+                  </p>
                 </div>
               </a>
             ))}
           </div>
         </div>
         <div className='flex items-center'>
-          <div className='text-right'>
+          <div className='cursor-pointer text-right'>
             <Menu as='div' className='relative inline-block text-left'>
               <div>
                 <Menu.Button className='inline-flex w-full items-center justify-center rounded-md px-4 py-2 text-sm font-medium text-gray-900'>
-                  {ChainCfg[0].chainName}
+                  {net}
+
                   <svg
                     xmlns='http://www.w3.org/2000/svg'
                     fill='none'
@@ -159,28 +176,48 @@ export default function Header() {
                 leaveTo='transform opacity-0 scale-95'
               >
                 <Menu.Items className='absolute right-0 mt-2 w-40 origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none'>
-                  {ChainCfg.map((network) => (
-                    <div className='p-1' key={network.chainName}>
-                      <Menu.Item>
-                        {({ active }) => (
-                          <button
-                            className={`${
-                              active ? 'bg-[#0077FE] text-white' : 'text-gray-900'
-                            } group flex w-full items-center rounded-md px-2 py-2 text-sm`}
-                            onClick={() => {
-                              addChain([network])
-                            }}
-                          >
-                            {network.chainName}
-                          </button>
-                        )}
-                      </Menu.Item>
-                    </div>
-                  ))}
+                  <div className='p-1'>
+                    <Menu.Item>
+                      {({ active }) => (
+                        <a
+                          className={`${
+                            active ? 'bg-[#0077FE] text-white' : 'text-gray-900'
+                          } group flex w-full items-center rounded-md p-2 text-sm`}
+                          href='https://app.spex.website'
+                        >
+                          MainNet
+                        </a>
+                      )}
+                    </Menu.Item>
+                  </div>
+                  <div className='p-1'>
+                    <Menu.Item>
+                      {({ active }) => (
+                        <a
+                          className={`${
+                            active ? 'bg-[#0077FE] text-white' : 'text-gray-900'
+                          } group flex w-full items-center rounded-md p-2 text-sm`}
+                          href='https://hyperspace.app.spex.website'
+                        >
+                          HyperSpace
+                        </a>
+                      )}
+                    </Menu.Item>
+                  </div>
                 </Menu.Items>
               </Transition>
             </Menu>
           </div>
+          {currentChain !== ChainCfg[net].chainId && (
+            <span
+              className=' cursor-pointer'
+              onClick={() => {
+                addChain([ChainCfg[net]])
+              }}
+            >
+              Wrong Network
+            </span>
+          )}
 
           <button
             className='ml-8 hidden h-11 w-40 rounded-full bg-gradient-to-r from-[#0077FE] to-[#3BF4BB] text-white md:block'
