@@ -45,7 +45,7 @@ const Market = (props) => {
       const result = await tx.wait()
       console.log('result', result)
       // TODO: 全局 metaMaskAccount 判断
-      await postUpdataMiners({ miner_id })
+      await postUpdataMiners(miner_id)
 
       marketClass.removeDataOfList(miner_id)
       dispatch(setRootData({ loading: false }))
@@ -62,7 +62,7 @@ const Market = (props) => {
 
   return (
     <>
-      <section className='container mx-auto pt-[190px] pb-[60px]'>
+      <section className='container mx-auto pb-[60px] pt-[190px]'>
         <div className='flex justify-between'>
           <div className='mb-20'>
             <h2 className='mb-[13px] text-[56px] font-semibold leading-[61px]'>Native Exchange Market</h2>
@@ -71,7 +71,17 @@ const Market = (props) => {
             </p>
           </div>
           <button
-            onClick={() => setOpen(true)}
+            onClick={() => {
+              if (data.metaMaskAccount) {
+                setOpen(true)
+              } else {
+                message({
+                  title: 'TIP',
+                  type: 'warning',
+                  content: 'Please connect you wallet first'
+                })
+              }
+            }}
             className='ml-8 flex h-11 w-[119px] items-center justify-center rounded-full bg-gradient-to-r from-[#0077FE] to-[#3BF4BB] text-white'
           >
             Add
@@ -101,7 +111,9 @@ const Market = (props) => {
                 key={item.miner_id}
                 className='box-border flex h-[74px] rounded-[10px] border border-[#eaeaef] bg-white px-12 text-lg leading-[74px] text-[#57596c] hover:border-0 hover:shadow-[0_0_10px_0_rgba(17,16,41,0.15)]'
               >
-                <span className='inline-block w-[13%] min-w-[100px] truncate px-2'>{item.miner_id ?? '-'}</span>
+                <span className='inline-block w-[13%] min-w-[100px] truncate px-2'>
+                  {config.address_zero_prefix}0{item.miner_id ?? '-'}
+                </span>
                 <span className='inline-block w-[13%] min-w-[90px] truncate px-2'>
                   {(item.balance_human ?? '0') + ' FIL'}
                 </span>

@@ -1,17 +1,59 @@
 export const dev_config = {
-  // contractAddress: '0x6e67b6D8a990341D3F4624C639e767Ccc66eD52D',
-  contractAddress: '0xD20E95A0Cfa1F3263e46a8d79f3e4B995Bf7c709',
-  contractT4Address: 't410f2ihjligpuhzsmpsgvdlz6psltfn7pryj3vf2ivq'
+  contractAddress: '0xb781cEFe4eA389f8927866E71311287770BE8027',
+  address_zero_prefix: 't',
+  net: 'HyperSpace'
 }
 
-export const prod_config = {
+export const hyperspace_config = {
   contractAddress: '0xD20E95A0Cfa1F3263e46a8d79f3e4B995Bf7c709',
-  contractT4Address: 't410f2ihjligpuhzsmpsgvdlz6psltfn7pryj3vf2ivq'
+  address_zero_prefix: 't',
+  net: 'HyperSpace'
 }
 
-export const config = Object.assign({}, process.env.NODE_ENV === 'production' ? prod_config : dev_config)
+export const mainnet_config = {
+  contractAddress: '0xD20E95A0Cfa1F3263e46a8d79f3e4B995Bf7c709',
+  address_zero_prefix: 'f',
+  net: 'MainNet'
+}
+
+// export const address_zero_prefix = 't'
+
+// export const config = Object.assign({}, process.env.NODE_ENV === 'production' ? prod_config : dev_config)
+export const config = mainnet_config
 
 export const abi = [
+  {
+    inputs: [
+      {
+        internalType: 'address',
+        name: 'manager',
+        type: 'address'
+      },
+      {
+        internalType: 'uint256',
+        name: 'feeRate',
+        type: 'uint256'
+      }
+    ],
+    stateMutability: 'nonpayable',
+    type: 'constructor'
+  },
+  {
+    inputs: [
+      {
+        internalType: 'int256',
+        name: 'errorCode',
+        type: 'int256'
+      }
+    ],
+    name: 'ActorError',
+    type: 'error'
+  },
+  {
+    inputs: [],
+    name: 'ActorNotFound',
+    type: 'error'
+  },
   {
     inputs: [
       {
@@ -54,12 +96,12 @@ export const abi = [
   {
     inputs: [
       {
-        internalType: 'address payable',
-        name: 'newFeeTo',
+        internalType: 'address',
+        name: 'manager',
         type: 'address'
       }
     ],
-    name: 'changeFeeTo',
+    name: 'changeManager',
     outputs: [],
     stateMutability: 'nonpayable',
     type: 'function'
@@ -106,25 +148,75 @@ export const abi = [
     type: 'function'
   },
   {
+    inputs: [],
+    name: 'FailToCallActor',
+    type: 'error'
+  },
+  {
+    inputs: [],
+    name: 'FailToCallActor',
+    type: 'error'
+  },
+  {
     inputs: [
       {
-        internalType: 'address',
-        name: 'manager',
-        type: 'address'
-      },
+        internalType: 'CommonTypes.FilActorId',
+        name: 'actorId',
+        type: 'uint64'
+      }
+    ],
+    name: 'InvalidActorID',
+    type: 'error'
+  },
+  {
+    inputs: [
       {
-        internalType: 'address payable',
-        name: 'feeTo',
-        type: 'address'
+        internalType: 'uint64',
+        name: '',
+        type: 'uint64'
+      }
+    ],
+    name: 'InvalidCodec',
+    type: 'error'
+  },
+  {
+    inputs: [],
+    name: 'InvalidResponseLength',
+    type: 'error'
+  },
+  {
+    inputs: [
+      {
+        internalType: 'CommonTypes.FilActorId',
+        name: 'minerId',
+        type: 'uint64'
       },
       {
         internalType: 'uint256',
-        name: 'feeRate',
+        name: 'price',
         type: 'uint256'
       }
     ],
+    name: 'listMiner',
+    outputs: [],
     stateMutability: 'nonpayable',
-    type: 'constructor'
+    type: 'function'
+  },
+  {
+    inputs: [
+      {
+        internalType: 'uint256',
+        name: 'balance',
+        type: 'uint256'
+      },
+      {
+        internalType: 'uint256',
+        name: 'value',
+        type: 'uint256'
+      }
+    ],
+    name: 'NotEnoughBalance',
+    type: 'error'
   },
   {
     anonymous: false,
@@ -267,44 +359,6 @@ export const abi = [
         type: 'uint64'
       },
       {
-        internalType: 'uint256',
-        name: 'price',
-        type: 'uint256'
-      }
-    ],
-    name: 'listMiner',
-    outputs: [],
-    stateMutability: 'nonpayable',
-    type: 'function'
-  },
-  {
-    inputs: [
-      {
-        components: [
-          {
-            internalType: 'bytes',
-            name: 'data',
-            type: 'bytes'
-          }
-        ],
-        internalType: 'struct CommonTypes.FilAddress',
-        name: 'contractFilecoinAddress',
-        type: 'tuple'
-      }
-    ],
-    name: 'setContractFilecoinAddress',
-    outputs: [],
-    stateMutability: 'nonpayable',
-    type: 'function'
-  },
-  {
-    inputs: [
-      {
-        internalType: 'CommonTypes.FilActorId',
-        name: 'minerId',
-        type: 'uint64'
-      },
-      {
         components: [
           {
             internalType: 'bytes',
@@ -341,20 +395,32 @@ export const abi = [
     type: 'function'
   },
   {
-    inputs: [],
-    name: 'getContractFilecoinAddress',
+    inputs: [
+      {
+        internalType: 'address',
+        name: '',
+        type: 'address'
+      }
+    ],
+    name: '_lastTimestampMap',
     outputs: [
       {
-        components: [
-          {
-            internalType: 'bytes',
-            name: 'data',
-            type: 'bytes'
-          }
-        ],
-        internalType: 'struct CommonTypes.FilAddress',
+        internalType: 'uint256',
         name: '',
-        type: 'tuple'
+        type: 'uint256'
+      }
+    ],
+    stateMutability: 'view',
+    type: 'function'
+  },
+  {
+    inputs: [],
+    name: 'FEE_RATE_UNIT',
+    outputs: [
+      {
+        internalType: 'uint256',
+        name: '',
+        type: 'uint256'
       }
     ],
     stateMutability: 'view',
@@ -368,19 +434,6 @@ export const abi = [
         internalType: 'uint256',
         name: '',
         type: 'uint256'
-      }
-    ],
-    stateMutability: 'view',
-    type: 'function'
-  },
-  {
-    inputs: [],
-    name: 'getFeeTo',
-    outputs: [
-      {
-        internalType: 'address',
-        name: '',
-        type: 'address'
       }
     ],
     stateMutability: 'view',
@@ -422,6 +475,19 @@ export const abi = [
         internalType: 'struct SPex.ListMiner',
         name: '',
         type: 'tuple'
+      }
+    ],
+    stateMutability: 'view',
+    type: 'function'
+  },
+  {
+    inputs: [],
+    name: 'getManager',
+    outputs: [
+      {
+        internalType: 'address',
+        name: '',
+        type: 'address'
       }
     ],
     stateMutability: 'view',

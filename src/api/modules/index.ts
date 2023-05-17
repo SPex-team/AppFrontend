@@ -76,6 +76,7 @@ export function postTransferOut(data?: { miner_id: number; new_owner_address: st
 // }
 
 export function postUpdataMiners(miner_id, data?: { miner_id: number; new_owner_address: string }): Promise<any> {
+  console.log('miner_id: ', miner_id)
   return postReq({
     url: `api/v1/spex/miners/${miner_id}/update`,
     data

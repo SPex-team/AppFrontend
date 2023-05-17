@@ -5,7 +5,7 @@ import { Fragment, useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { ethers } from 'ethers'
 import { NavLink, useLocation } from 'react-router-dom'
-import { LAST_WALLET } from '@/config'
+import { LAST_WALLET, config } from '@/config'
 
 const links = [
   {
@@ -56,7 +56,8 @@ export default function Header() {
   const metaMaskAccount = useSelector((state: RootState) => state.root.metaMaskAccount)
   const dispatch = useDispatch()
   const [currentChain, setCurrentChain] = useState()
-  const net = window.location.href.includes('hyperspace') ? 'HyperSpace' : 'MainNet'
+  // const net = window.location.href.includes('hyperspace') ? 'HyperSpace' : 'MainNet'
+  const net = config.net
 
   const addChain = (params) => {
     window.ethereum.request({
@@ -126,7 +127,7 @@ export default function Header() {
 
   return (
     <header className='fixed top-0 z-20 w-screen bg-transparent backdrop-blur-lg [font-family:GeneralSansVariable]'>
-      <div className='container mx-auto flex items-center justify-between py-6 px-2'>
+      <div className='container mx-auto flex items-center justify-between px-2 py-6'>
         <div className='flex'>
           <a href='/'>
             <img width={104} height={38} src='/logo.svg' alt='SPex' />
@@ -184,6 +185,8 @@ export default function Header() {
                             active ? 'bg-[#0077FE] text-white' : 'text-gray-900'
                           } group flex w-full items-center rounded-md p-2 text-sm`}
                           href='https://app.spex.website'
+                          target='_blank'
+                          rel='noreferrer'
                         >
                           MainNet
                         </a>
@@ -198,6 +201,8 @@ export default function Header() {
                             active ? 'bg-[#0077FE] text-white' : 'text-gray-900'
                           } group flex w-full items-center rounded-md p-2 text-sm`}
                           href='https://hyperspace.app.spex.website'
+                          target='_blank'
+                          rel='noreferrer'
                         >
                           HyperSpace
                         </a>
@@ -210,7 +215,7 @@ export default function Header() {
           </div>
           {currentChain !== ChainCfg[net].chainId && (
             <span
-              className=' cursor-pointer'
+              className='cursor-pointer'
               onClick={() => {
                 addChain([ChainCfg[net]])
               }}

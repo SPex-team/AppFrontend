@@ -155,7 +155,7 @@ const Me = (props) => {
   return (
     <>
       {metaMaskAccount ? (
-        <section className='container mx-auto pt-[190px] pb-[60px]'>
+        <section className='container mx-auto pb-[60px] pt-[190px]'>
           <div className='flex justify-between'>
             <div className='mb-20'>
               <h2 className='mb-[13px] text-[56px] font-semibold leading-[61px]'>Sold</h2>
@@ -193,7 +193,9 @@ const Me = (props) => {
                   key={item.miner_id}
                   className='box-border flex h-[74px] rounded-[10px] border border-[#eaeaef] bg-white px-12 text-lg leading-[74px] text-[#57596c] hover:border-0 hover:shadow-[0_0_10px_0_rgba(17,16,41,0.15)]'
                 >
-                  <span className='inline-block w-[13%] min-w-[100px] truncate'>{item.miner_id ?? '-'}</span>
+                  <span className='inline-block w-[13%] min-w-[100px] truncate'>
+                    {config.address_zero_prefix}0{item.miner_id ?? '-'}
+                  </span>
                   <span className='inline-block w-[16%] min-w-[90px] truncate'>
                     <span
                       className={clsx([
@@ -209,7 +211,10 @@ const Me = (props) => {
                     {item.list_time ? formatTime(item.list_time * 1000) : '-'}
                   </span>
                   <div className='inline-block text-black' onClick={() => setMinerId(item.miner_id)}>
-                    <button className='hover:text-[#0077FE]' onClick={() => setOpenDialog('price')}>
+                    <button
+                      className={clsx(['ml-7', item.is_list ? 'hover:text-[#0077FE' : 'text-gray-400'])}
+                      onClick={() => setOpenDialog('price')}
+                    >
                       Change Price
                       <PriceIcon className='ml-2 inline-block w-[14px]' />
                     </button>
