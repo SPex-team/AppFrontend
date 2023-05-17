@@ -4,7 +4,7 @@ import { Menu, Popover, Transition } from '@headlessui/react'
 import { Fragment, useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { ethers } from 'ethers'
-import { useLocation } from 'react-router-dom'
+import { NavLink, useLocation } from 'react-router-dom'
 import { LAST_WALLET } from '@/config'
 
 const links = [
@@ -133,7 +133,7 @@ export default function Header() {
           </a>
           <div className='hidden items-center text-base md:flex'>
             {links.map((item) => (
-              <a key={item.name} href={item.href}>
+              <NavLink key={item.name} to={item.href}>
                 <div className='ml-[33px]'>
                   <p
                     className={
@@ -143,7 +143,7 @@ export default function Header() {
                     {item.name}
                   </p>
                 </div>
-              </a>
+              </NavLink>
             ))}
           </div>
         </div>
