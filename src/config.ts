@@ -1,25 +1,28 @@
 export const dev_config = {
   contractAddress: '0xb781cEFe4eA389f8927866E71311287770BE8027',
   address_zero_prefix: 't',
-  net: 'HyperSpace'
+  net: 'HyperSpace',
+  filescanOrigin: 'https://hyperspace.filscan.io'
 }
 
 export const hyperspace_config = {
-  contractAddress: '0xD20E95A0Cfa1F3263e46a8d79f3e4B995Bf7c709',
+  contractAddress: '0xb781cEFe4eA389f8927866E71311287770BE8027',
   address_zero_prefix: 't',
-  net: 'HyperSpace'
+  net: 'HyperSpace',
+  filescanOrigin: 'https://hyperspace.filscan.io'
 }
 
 export const mainnet_config = {
   contractAddress: '0xD20E95A0Cfa1F3263e46a8d79f3e4B995Bf7c709',
   address_zero_prefix: 'f',
-  net: 'MainNet'
+  net: 'MainNet',
+  filescanOrigin: 'https://filscan.io'
 }
 
 // export const address_zero_prefix = 't'
 
 // export const config = Object.assign({}, process.env.NODE_ENV === 'production' ? prod_config : dev_config)
-export const config = mainnet_config
+export const config = dev_config
 
 export const abi = [
   {

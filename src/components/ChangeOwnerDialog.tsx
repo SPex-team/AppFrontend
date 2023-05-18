@@ -71,7 +71,7 @@ export default function ChangeOwnerDialog(props: IProps) {
             name='new_owner_address'
             className='h-[49px] w-full rounded-[10px] border border-[#EAEAEF] px-5'
             required
-            placeholder='t0xxxxxx'
+            placeholder={`${config.address_zero_prefix}0xxxxxx`}
             autoComplete='off'
           />
         </div>
@@ -84,7 +84,7 @@ export default function ChangeOwnerDialog(props: IProps) {
     return (
       <form className='text-[#57596C]' id='form_sign'>
         <div className=''>
-          <span className='mt-[10px] mb-4 inline-block text-sm font-light'>
+          <span className='mb-4 mt-[10px] inline-block text-sm font-light'>
             {'Sign '}
             <span className='font-medium'>
               {data?.msg_cid_hex} with {data?.owner}
@@ -163,10 +163,15 @@ export default function ChangeOwnerDialog(props: IProps) {
                 throw new Error('Please input Address')
               }
 
-              const reg = /^t0.{1,}/
+              // const reg = /^t0.{1,}/
+              var reg = /^t0.{1,}/
+              if (config.address_zero_prefix == 'f') {
+                reg = /^f0.{1,}/
+              }
 
               if (!reg.test(new_owner_address)) {
-                throw new Error('Please output t0xxxxxx format')
+                // throw new Error('Please output t0xxxxxx format')
+                throw new Error(`Please output ${config.address_zero_prefix}0xxxxxx format`)
               }
 
               const filAddress = fa.newFromString(new_owner_address)
@@ -310,7 +315,7 @@ export default function ChangeOwnerDialog(props: IProps) {
                     </svg>
                   </Dialog.Title>
                   <hr />
-                  <div className='mt-[30px] mb-[22px] flex'>
+                  <div className='mb-[22px] mt-[30px] flex'>
                     {steps.map((step) => (
                       <Fragment key={step.key}>
                         <div

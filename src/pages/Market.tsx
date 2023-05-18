@@ -126,11 +126,13 @@ const Market = (props) => {
                   <button
                     className='hover:text-[#0077FE]'
                     onClick={() => {
-                      if (window.location.href.includes('hyperspace')) {
-                        window.open(`https://hyperspace.filscan.io/address/miner?address=f0${item.miner_id}`)
-                      } else {
-                        window.open(`https://filscan.io/address/miner?address=f0${item.miner_id}`)
-                      }
+                      const url = `${config.filescanOrigin}/address/miner?address=${config.address_zero_prefix}0${item.miner_id}`
+                      window.open(url)
+                      // if (window.location.href.includes('hyperspace')) {
+                      //   window.open(`https://hyperspace.filscan.io/address/miner?address=f0${item.miner_id}`)
+                      // } else {
+                      //   window.open(`https://filscan.io/address/miner?address=f0${item.miner_id}`)
+                      // }
                     }}
                   >
                     Detail
