@@ -9,14 +9,16 @@ export const dev_config = {
   chainIdBinary: '0x4cb2f'
 }
 
-// export const hyperspace_config = {
-//   baseUrl: window.location.protocol + "//" + window.location.host,
-//   contractAddress: '0xb781cEFe4eA389f8927866E71311287770BE8027',
-//   contractFilecoinAddress: 'xxxxxxxxxxxxxxxxxxxxxx',
-//   address_zero_prefix: 't',
-//   net: 'HyperSpace',
-//   filescanOrigin: 'https://hyperspace.filscan.io'
-// }
+export const calibration_config = {
+  baseUrl: window.location.protocol + '//' + window.location.host,
+  contractAddress: '0x24f3B0cCDbc1A6fd742065D540214Bc786dde42F',
+  contractFilecoinAddress: 't410fetz3btg3ygtp25bamxkuaikly6dn3zbp2frm6ta',
+  address_zero_prefix: 't',
+  net: 'Calibration',
+  filescanOrigin: 'https://canibration.filscan.io',
+  chainId: 314159,
+  chainIdBinary: '0x4cb2f'
+}
 
 export const mainnet_config = {
   baseUrl: window.location.protocol + '//' + window.location.host,
@@ -32,7 +34,7 @@ export const mainnet_config = {
 // export const address_zero_prefix = 't'
 
 // export const config = Object.assign({}, process.env.NODE_ENV === 'production' ? prod_config : dev_config)
-export const config = dev_config
+export const config = calibration_config
 
 export const abi = [
   {

@@ -56,7 +56,6 @@ export default function Header() {
   const metaMaskAccount = useSelector((state: RootState) => state.root.metaMaskAccount)
   const dispatch = useDispatch()
   const [currentChain, setCurrentChain] = useState()
-  // const net = window.location.href.includes('hyperspace') ? 'HyperSpace' : 'MainNet'
   const net = config.net
 
   const addChain = (params) => {
