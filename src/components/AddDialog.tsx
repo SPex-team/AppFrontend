@@ -436,9 +436,9 @@ export default function AddDialog(props: IProps) {
               const result = await tx.wait()
               console.log('result', result)
 
-              // setTimeout(syncAndUpdateNewMiner, 5000)
-              await postMiners()
-              await postUpdataMiners(data.miner_id)
+              setTimeout(syncAndUpdateNewMiner, 5000)
+              // await postMiners()
+              // await postUpdataMiners(data.miner_id)
 
               onNext(form)
             } catch (error) {
@@ -514,10 +514,10 @@ export default function AddDialog(props: IProps) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const btnData = useMemo(() => btnEvent(stepNum), [stepNum])
 
-  // const syncAndUpdateNewMiner = async () => {
-  //   await postMiners()
-  //   await postUpdataMiners(data.miner_id)
-  // }
+  const syncAndUpdateNewMiner = async () => {
+    await postMiners()
+    await postUpdataMiners(data.miner_id)
+  }
 
   return (
     <>
