@@ -31,7 +31,7 @@ export default function Tip(props: IProps) {
   return open ? (
     <div
       className={clsx([
-        'bg fixed top-[8%] left-1/2 -translate-x-1/2 rounded-[10px] border-l-[6px] px-[18px] py-5',
+        'bg fixed left-1/2 top-[8%] -translate-x-1/2 rounded-[10px] border-l-[6px] px-[18px] py-5',
         className
       ])}
       style={{
@@ -74,7 +74,7 @@ interface IParams {
 }
 
 export function message(params: IParams) {
-  const { className = '', type = 'success', title, content = '', closeTime = 2000 } = params
+  const { className = '', type = 'success', title, content = '', closeTime = 4000 } = params
   const tipRootDom = document.getElementById('tip') as HTMLElement
 
   setTimeout(() => {
@@ -84,7 +84,7 @@ export function message(params: IParams) {
   ReactDOM.render(
     <div
       className={clsx([
-        'bg fixed top-[8%] left-1/2 z-40 -translate-x-1/2 rounded-[10px] border-l-[6px] px-[18px] py-5',
+        'bg fixed left-1/2 top-[8%] z-40 -translate-x-1/2 rounded-[10px] border-l-[6px] px-[18px] py-5',
         className
       ])}
       style={{

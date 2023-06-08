@@ -2,6 +2,10 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { ethers } from 'ethers'
 
 interface IState {
+  commentList: any[]
+  commentPage: number
+  commentCount: number
+  commentMinerOwner: string
   metaMaskAccount?: string
 
   provider?: ethers.BrowserProvider
@@ -26,6 +30,11 @@ const initialState: IState = {
   meList: [],
   mePage: 1,
   meCount: 0,
+
+  commentList: [],
+  commentPage: 1,
+  commentCount: 0,
+  commentMinerOwner: '',
 
   loading: false
 }

@@ -2,9 +2,13 @@ import { AxiosRequest } from './types'
 import service from './service'
 import Response from '@/api/response'
 
+import { config } from '@/config'
+
 function _axios(_axiosRequest: AxiosRequest) {
   return new Promise((resolve, reject) => {
+    console.log('config.baseUrl: ', config.baseUrl)
     service({
+      baseURL: config.baseUrl,
       url: _axiosRequest.url,
       method: _axiosRequest.method,
       headers: _axiosRequest.headers,
@@ -13,6 +17,7 @@ function _axios(_axiosRequest: AxiosRequest) {
       responseType: _axiosRequest.responseType
     })
       .then((response) => {
+        // console.log("response: ", response)
         if (response.status === 200) {
           resolve(new Response(response.data))
         } else {
@@ -21,7 +26,8 @@ function _axios(_axiosRequest: AxiosRequest) {
         }
       })
       .catch((error) => {
-        const message = error?.data?.errorMessage || error?.message || '请求失败'
+        // console.log("error.response: ", error.response)
+        const message = error?.response?.data?.detail || 'Request failed'
         reject({
           message: message,
           data: null

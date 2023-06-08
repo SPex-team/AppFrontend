@@ -1,5 +1,6 @@
 import { ReactComponent as BuyIcon } from '@/assets/images/buy.svg'
 import { ReactComponent as DetailIcon } from '@/assets/images/detail.svg'
+import { ReactComponent as CommentIcon } from '@/assets/images/comment.svg'
 import Pagination from '@/components/Pagination'
 import { useEffect, useMemo, useState } from 'react'
 import MarketClass from '@/models/market-class'
@@ -12,6 +13,8 @@ import { abi, config } from '@/config'
 import { postUpdataMiners } from '@/api/modules'
 import { setRootData } from '@/store/modules/root'
 import { message } from '@/components/Tip'
+import { NavLink, useLocation } from 'react-router-dom'
+import Comment from '@/pages/Comment'
 
 const Market = (props) => {
   const dispatch = useDispatch()
@@ -101,7 +104,7 @@ const Market = (props) => {
           <div className='mb-[11px] flex px-12 text-2xl font-medium'>
             <span className='inline-block w-[13%] min-w-[100px] px-2'>Miner ID</span>
             <span className='inline-block w-[13%] min-w-[90px] px-2'>Balance</span>
-            {/* <span className='inline-block w-[10%] min-w-[75px] px-2'>Power</span> */}
+            <span className='inline-block w-[10%] min-w-[75px] px-2'>Power</span>
             <span className='inline-block w-[10%] min-w-[105px] px-2'>Price</span>
             <span className='inline-block w-[20%] min-w-[140px] px-2'>List Time</span>
           </div>
@@ -117,7 +120,9 @@ const Market = (props) => {
                 <span className='inline-block w-[13%] min-w-[90px] truncate px-2'>
                   {(item.balance_human ?? '0') + ' FIL'}
                 </span>
-                {/* <span className='inline-block w-[10%] min-w-[75px] truncate px-2'>{item.power ?? '-'}</span> */}
+                <span className='inline-block w-[10%] min-w-[75px] truncate px-2'>
+                  {(item.power_human ?? '0') + ' TiB'}
+                </span>
                 <span className='inline-block w-[10%] min-w-[105px] truncate px-2'>{(item.price ?? '0') + ' FIL'}</span>
                 <span className='inline-block w-[20%] min-w-[140px] truncate px-2'>
                   {item.list_time ? formatTime(item.list_time * 1000) : '-'}
@@ -142,6 +147,14 @@ const Market = (props) => {
                     Buy
                     <BuyIcon className='ml-2 inline-block w-[14px]' />
                   </button>
+                  <NavLink to={'/comment/' + item.miner_id.toString()}>
+                    <button className='ml-7 hover:text-[#0077FE]'>
+                      Comments
+                      {/*<CommentIcon className='ml-2 inline-block w-[14px]' />*/}
+                      {/*<BuyIcon className='ml-2 inline-block w-[14px]' />*/}
+                      <img className='ml-2 inline-block' width={14} height={14} src='/comment.svg' alt='user' />
+                    </button>
+                  </NavLink>
                 </div>
               </div>
             ))}

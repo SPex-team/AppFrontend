@@ -89,7 +89,7 @@ export default function ChangeOwnerDialog(props: IProps) {
             <span className='font-medium'>
               {data?.msg_cid_hex} with {data?.owner}
             </span>
-            {' with owner address to transfer owner to SPex contract'}
+            {' to accept change owner'}
           </span>
           <label htmlFor='sign' className='mb-[10px] block text-base'>
             Sign:
@@ -126,7 +126,7 @@ export default function ChangeOwnerDialog(props: IProps) {
             />
           </svg>
         </span>
-        <span className='mt-2 inline-block font-medium capitalize'>succeed</span>
+        <span className='mt-2 inline-block font-medium capitalize'>Succeeded</span>
       </div>
     )
   }
@@ -254,7 +254,7 @@ export default function ChangeOwnerDialog(props: IProps) {
         }
       case 3:
         return {
-          text: 'succeed',
+          text: 'Done',
           onClick: () => {
             onClose()
             updataList()

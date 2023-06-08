@@ -38,16 +38,16 @@ const ChainCfg = {
     rpcUrls: ['https://api.node.glif.io'],
     blockExplorerUrls: ['https://filfox.info/en']
   },
-  HyperSpace: {
-    chainId: '0xc45',
-    chainName: 'HyperSpace',
+  Calibration: {
+    chainId: '0x4cb2f',
+    chainName: 'Calibration',
     nativeCurrency: {
       name: 'tFIL',
       symbol: 'tFIL',
       decimals: 18
     },
-    rpcUrls: ['https://filecoin-hyperspace.chainup.net/rpc/v1'],
-    blockExplorerUrls: ['https://hyperspace.filfox.info/en']
+    rpcUrls: ['https://filecoin-calibration.chainup.net/rpc/v1'],
+    blockExplorerUrls: ['https://calibration.filfox.info/en']
   }
 }
 
@@ -85,6 +85,7 @@ export default function Header() {
       const chainId = await window.ethereum.request({ method: 'eth_chainId' })
       localStorage.setItem(LAST_WALLET, 'MetaMask')
 
+      console.log('chainId: ', chainId)
       setCurrentChain(chainId)
       // const contract = useMemo(() => new Contract(config.contractAddress, abi, signer), [signer])
 
@@ -99,6 +100,8 @@ export default function Header() {
   }
 
   useEffect(() => {
+    console.log('currentChain: ', currentChain)
+
     window.ethereum?.on('accountsChanged', initEthers)
     window.ethereum?.on('chainChanged', (chainId) => {
       setCurrentChain(chainId)
@@ -200,11 +203,11 @@ export default function Header() {
                           className={`${
                             active ? 'bg-[#0077FE] text-white' : 'text-gray-900'
                           } group flex w-full items-center rounded-md p-2 text-sm`}
-                          href='https://hyperspace.app.spex.website'
+                          href='https://calibration.app.spex.website'
                           target='_blank'
                           rel='noreferrer'
                         >
-                          HyperSpace
+                          Calibration
                         </a>
                       )}
                     </Menu.Item>
@@ -213,9 +216,9 @@ export default function Header() {
               </Transition>
             </Menu>
           </div>
-          {currentChain !== ChainCfg[net].chainId && (
+          {currentChain !== undefined && currentChain !== config.chainIdBinary && (
             <span
-              className='cursor-pointer'
+              className='cursor-pointer text-[#E6A23C]'
               onClick={() => {
                 addChain([ChainCfg[net]])
               }}

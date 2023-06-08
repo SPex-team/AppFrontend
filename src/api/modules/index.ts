@@ -16,6 +16,13 @@ export function postBuyMessages(miner_id: number, data: { buyer: string }): Prom
   })
 }
 
+export function transferInCheck(params: { miner_id: number }): Promise<any> {
+  return getReq({
+    url: '/api/v1/spex/miners/transfer-in-check',
+    params
+  })
+}
+
 // step 1 api
 export function postBuildMessage(data: { miner_id: number }): Promise<any> {
   return postReq({
@@ -59,6 +66,13 @@ export function getMeList(params?: {}): Promise<any> {
   })
 }
 
+export function getCommentList(params?: {}): Promise<any> {
+  return getReq({
+    url: '/api/v1/spex/comments',
+    params
+  })
+}
+
 // Transfer Out   me page api
 export function postTransferOut(data?: { miner_id: number; new_owner_address: string }): Promise<any> {
   return postReq({
@@ -80,5 +94,18 @@ export function postUpdataMiners(miner_id, data?: { miner_id: number; new_owner_
   return postReq({
     url: `api/v1/spex/miners/${miner_id}/update`,
     data
+  })
+}
+
+export function postComment(sign, data?: { user: string; content: string; miner: number }): Promise<any> {
+  return postReq({
+    url: `api/v1/spex/comments?sign=${sign}`,
+    data
+  })
+}
+
+export function getMiner(minerId): Promise<any> {
+  return getReq({
+    url: `api/v1/spex/miners/${minerId}`
   })
 }

@@ -9,7 +9,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from '@/store'
 import Modal from '@/components/Modal'
 import ChangeOwnerDialog from '@/components/ChangeOwnerDialog'
-import { Contract, parseEther } from 'ethers'
+import { Contract, parseEther, ZeroAddress } from 'ethers'
 import { abi, config } from '@/config'
 import { postUpdataMiners } from '@/api/modules'
 import { setRootData } from '@/store/modules/root'
@@ -117,12 +117,12 @@ const Me = (props) => {
       console.log('minerId: ', minerId)
       console.log('data: ', data)
 
-      const tx = await contract.listMiner(minerId, '1230000000000000000')
+      const tx = await contract.listMiner(minerId, '1230000000000000000', ZeroAddress)
       message({
         title: 'TIP',
         type: 'success',
         content: tx.hash,
-        closeTime: 4000
+        closeTime: 10000
       })
 
       const result = await tx.wait()

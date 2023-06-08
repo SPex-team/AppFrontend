@@ -1,6 +1,8 @@
 import Market from '@/pages/Market'
 import History from '@/pages/History'
 import Me from '@/pages/Me'
+import Comment from '@/pages/Comment'
+
 // import { lazy, ReactNode, Suspense } from 'react'
 import { createBrowserRouter } from 'react-router-dom'
 import { ReactNode, Suspense } from 'react'
@@ -28,6 +30,10 @@ const router = createBrowserRouter([
       {
         path: '/me',
         element: lazyLoad(<Me />)
+      },
+      {
+        path: '/comment/:minerId',
+        element: lazyLoad(<Comment />)
       }
     ]
   }

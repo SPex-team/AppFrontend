@@ -1,4 +1,5 @@
 import axios, { AxiosRequestConfig, Method } from 'axios'
+import { config } from '@/config'
 
 interface PendingType {
   url: string | undefined
@@ -12,6 +13,7 @@ const pending: Array<PendingType> = []
 const CancelToken = axios.CancelToken
 
 const service = axios.create({
+  baseURL: config.baseUrl,
   withCredentials: false,
   timeout: 350000
 })
@@ -44,7 +46,7 @@ service.interceptors.request.use(
         cancel: c
       })
     })
-    request.baseURL = process.env['REACT_APP_BASE_URL']
+    // request.baseURL = process.env['REACT_APP_BASE_URL']
     return Promise.resolve(request)
   },
   (error) => {

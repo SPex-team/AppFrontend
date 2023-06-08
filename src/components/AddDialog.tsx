@@ -3,9 +3,16 @@ import { Fragment, useMemo, useState } from 'react'
 import clsx from 'clsx'
 import { useSelector } from 'react-redux'
 import { RootState } from '@/store'
-import { Contract, ethers, parseEther } from 'ethers'
+import { Contract, ethers, parseEther, ZeroAddress } from 'ethers'
 import { abi, config } from '@/config'
-import { postBuildMessage, postMiners, postPushMessage, postUpdataMiners, putMiners } from '@/api/modules'
+import {
+  postBuildMessage,
+  postMiners,
+  postPushMessage,
+  postUpdataMiners,
+  putMiners,
+  transferInCheck
+} from '@/api/modules'
 import Tip, { message } from './Tip'
 
 interface IProps {
@@ -84,7 +91,7 @@ export default function AddDialog(props: IProps) {
           parseInt(data.miner_id),
           data.miner_info['Owner'].slice(2),
           metaMaskAccount,
-          3141,
+          config.chainId,
           timestamp
         ]
       )
@@ -107,12 +114,12 @@ export default function AddDialog(props: IProps) {
       key: 3,
       name: 'Confirm'
     },
+    // {
+    //   key: 4,
+    //   name: 'Set Price'
+    // },
     {
       key: 4,
-      name: 'Set Price'
-    },
-    {
-      key: 5,
       name: 'Completed'
     }
   ]
@@ -133,7 +140,7 @@ export default function AddDialog(props: IProps) {
             autoComplete='off'
             placeholder={`${config.address_zero_prefix}0xxxxxx`}
           />
-          <span className='text-xs'>Commision fee 1% For Platform</span>
+          <span className='text-xs'>Commission fee 3% For Platform</span>
 
           <input type='text' value='' className='hidden' readOnly />
         </div>
@@ -147,7 +154,7 @@ export default function AddDialog(props: IProps) {
         <span className='mb-4 mt-[10px] inline-block text-sm font-light'>
           {'Sign '}
           <span className='inline-block w-full break-words font-medium'>{data.msg_cid_hex}</span>
-          {' with owner address to transfer owner to SPex contract'}
+          {' with owner address to propose transfer owner to SPex contract'}
         </span>
         <div className=''>
           <label htmlFor='sign' className='mb-[10px] block text-base'>
@@ -167,6 +174,14 @@ export default function AddDialog(props: IProps) {
             </span>
           </div>
         </div>
+        <span className='mb-4 mt-[20px] inline-block text-sm font-light'>
+          {
+            'You can also propose by other tools, e.g. Lotus,Venus, please do not input anything if you are already use other tools'
+          }
+          <span className='inline-block w-full break-words font-medium'>
+            SPex contract address: {config.contractFilecoinAddress}
+          </span>
+        </span>
         <input type='text' value='' className='hidden' readOnly />
       </form>
     )
@@ -200,15 +215,7 @@ export default function AddDialog(props: IProps) {
             </span>
           </div>
         </div>
-        <input type='text' value='' className='hidden' readOnly />
-      </form>
-    )
-  }
-
-  const step4 = () => {
-    return (
-      <form className='text-[#57596C]' id='form_price'>
-        <div className=''>
+        <div className='mt-3'>
           <label htmlFor='price' className='mb-[10px] block text-base'>
             Price:
           </label>
@@ -226,14 +233,41 @@ export default function AddDialog(props: IProps) {
             </span>
           </div>
         </div>
-        <span className='text-xs'>Commision fee 1% For Platform</span>
-
+        <span className='text-xs'>Commission fee 3% For Platform</span>
         <input type='text' value='' className='hidden' readOnly />
       </form>
     )
   }
 
-  const step5 = () => {
+  // const step4 = () => {
+  //   return (
+  //     <form className='text-[#57596C]' id='form_price'>
+  //       <div className=''>
+  //         <label htmlFor='price' className='mb-[10px] block text-base'>
+  //           Price:
+  //         </label>
+  //
+  //         <div className='relative flex h-[49px] w-full flex-row overflow-clip rounded-lg'>
+  //           <input
+  //             type='text'
+  //             name='price'
+  //             className='peer w-full rounded-l-[10px] px-5 transition-colors duration-300'
+  //             required
+  //             autoComplete='off'
+  //           />
+  //           <span className='flex items-center rounded-r-[10px] border border-l-0 border-[#EAEAEF] bg-slate-50 px-4 text-sm text-slate-400 transition-colors duration-300 peer-focus:border-primary peer-focus:bg-primary peer-focus:text-white'>
+  //             FIL
+  //           </span>
+  //         </div>
+  //       </div>
+  //       <span className='text-xs'>Commision fee 3% For Platform</span>
+  //
+  //       <input type='text' value='' className='hidden' readOnly />
+  //     </form>
+  //   )
+  // }
+
+  const step4 = () => {
     return (
       <div className='flex w-full flex-col items-center pt-10'>
         <span className='flex h-14 w-14 items-center justify-center rounded-full bg-green-400'>
@@ -265,8 +299,8 @@ export default function AddDialog(props: IProps) {
         return step3()
       case 4:
         return step4()
-      case 5:
-        return step5()
+      // case 5:
+      //   return step5()
       default:
         return <></>
     }
@@ -302,6 +336,10 @@ export default function AddDialog(props: IProps) {
               }
 
               miner_id = parseInt(miner_id.slice(2))
+              let checkRes = await transferInCheck({ miner_id })
+              if (checkRes['in_spex'] === true) {
+                throw new Error(`Miner alredy in SPex, Please go to 'Me' page to view`)
+              }
               let res = await postBuildMessage({ miner_id })
 
               setData({
@@ -328,7 +366,10 @@ export default function AddDialog(props: IProps) {
 
               const sign = formData.get('sign')?.toString()
               if (!sign) {
-                throw new Error('Please input Sign')
+                onNext(form)
+                setLoading(false)
+                return
+                // throw new Error('Please input Sign')
               }
 
               const post_data = {
@@ -358,9 +399,6 @@ export default function AddDialog(props: IProps) {
           onClick: async () => {
             try {
               setLoading(true)
-              setLoading(true)
-
-              setLoading(true)
 
               const form = document.getElementById('form_confirm') as HTMLFormElement
 
@@ -370,87 +408,96 @@ export default function AddDialog(props: IProps) {
               if (!sign) {
                 throw new Error('Please input Sign')
               }
-              sign = '0x' + sign.slice(2)
-
-              const tx = await contract?.confirmTransferMinerIntoSPex(data.miner_id, sign, data.timestamp)
-
-              message({
-                title: 'TIP',
-                type: 'success',
-                content: tx.hash,
-                closeTime: 4000
-              })
-
-              const result = await tx.wait()
-              console.log('result', result)
-
-              // let res = await
-              // postMiners({ owner: metaMaskAccount as any, miner_id: data.miner_id })
-              postMiners()
-              // res = res._data
-              // setData({
-              //   ...data,
-              //   miner: res
-              // })
-
-              onNext(form)
-            } catch (error) {
-              handleError(error)
-              setLoading(false)
-            }
-          }
-        }
-      case 4:
-        return {
-          text: 'List Order',
-          onClick: async () => {
-            try {
-              setLoading(true)
-              const form = document.getElementById('form_price') as HTMLFormElement
-              const formData = new FormData(form)
-
               const price = formData.get('price')?.toString()
               if (!price) {
                 throw new Error('Please input Price')
               }
+              sign = '0x' + sign.slice(2)
 
-              const tx = await contract?.listMiner(data.miner_id, parseEther(price))
+              console.log('ZeroAddress: ', ZeroAddress)
+              console.log('parseEther(price): ', parseEther(price))
+              console.log('sign: ', sign)
+              console.log('data: ', data)
+              const tx = await contract?.confirmTransferMinerIntoSPexAndList(
+                data.miner_id,
+                sign,
+                data.timestamp,
+                parseEther(price),
+                ZeroAddress
+              )
+
               message({
                 title: 'TIP',
                 type: 'success',
                 content: tx.hash,
-                closeTime: 4000
+                closeTime: 10000
               })
 
               const result = await tx.wait()
               console.log('result', result)
 
-              const _data = {
-                is_list: true,
-                owner: metaMaskAccount as any,
-                miner_id: data.miner_id
-              }
-
-              setData({
-                ...data,
-                tx
-              })
-
-              postUpdataMiners(data.miner_id)
-              // await putMiners(data.miner_id, _data)
-              // this.$emit("add_item", response.data)
+              // setTimeout(syncAndUpdateNewMiner, 5000)
+              await postMiners()
+              await postUpdataMiners(data.miner_id)
 
               onNext(form)
             } catch (error) {
               handleError(error)
-
               setLoading(false)
             }
           }
         }
-      case 5:
+      // case 4:
+      //   return {
+      //     text: 'List Order',
+      //     onClick: async () => {
+      //       try {
+      //         setLoading(true)
+      //         const form = document.getElementById('form_price') as HTMLFormElement
+      //         const formData = new FormData(form)
+      //
+      //         const price = formData.get('price')?.toString()
+      //         if (!price) {
+      //           throw new Error('Please input Price')
+      //         }
+      //
+      //         const tx = await contract?.listMiner(data.miner_id, parseEther(price))
+      //         message({
+      //           title: 'TIP',
+      //           type: 'success',
+      //           content: tx.hash,
+      //           closeTime: 4000
+      //         })
+      //
+      //         const result = await tx.wait()
+      //         console.log('result', result)
+      //
+      //         const _data = {
+      //           is_list: true,
+      //           owner: metaMaskAccount as any,
+      //           miner_id: data.miner_id
+      //         }
+      //
+      //         setData({
+      //           ...data,
+      //           tx
+      //         })
+      //
+      //         postUpdataMiners(data.miner_id)
+      //         // await putMiners(data.miner_id, _data)
+      //         // this.$emit("add_item", response.data)
+      //
+      //         onNext(form)
+      //       } catch (error) {
+      //         handleError(error)
+      //
+      //         setLoading(false)
+      //       }
+      //     }
+      //   }
+      case 4:
         return {
-          text: 'succeed',
+          text: 'Done',
           onClick: () => {
             onClose()
             updataList()
@@ -466,6 +513,11 @@ export default function AddDialog(props: IProps) {
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const btnData = useMemo(() => btnEvent(stepNum), [stepNum])
+
+  // const syncAndUpdateNewMiner = async () => {
+  //   await postMiners()
+  //   await postUpdataMiners(data.miner_id)
+  // }
 
   return (
     <>
