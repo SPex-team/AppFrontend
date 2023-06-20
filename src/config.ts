@@ -4,7 +4,7 @@ export const dev_config = {
   contractFilecoinAddress: 't410fetz3btg3ygtp25bamxkuaikly6dn3zbp2frm6ta',
   address_zero_prefix: 't',
   net: 'Calibration',
-  filescanOrigin: 'https://canibration.filscan.io',
+  filescanOrigin: 'https://calibration.filscan.io/',
   chainId: 314159,
   chainIdBinary: '0x4cb2f'
 }
@@ -15,7 +15,7 @@ export const calibration_config = {
   contractFilecoinAddress: 't410fetz3btg3ygtp25bamxkuaikly6dn3zbp2frm6ta',
   address_zero_prefix: 't',
   net: 'Calibration',
-  filescanOrigin: 'https://canibration.filscan.io',
+  filescanOrigin: 'https://calibration.filscan.io/',
   chainId: 314159,
   chainIdBinary: '0x4cb2f'
 }
