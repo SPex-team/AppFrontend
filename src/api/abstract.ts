@@ -26,6 +26,7 @@ function _axios(_axiosRequest: AxiosRequest) {
         }
       })
       .catch((error) => {
+        console.error(error)
         // console.log("error.response: ", error.response)
         const message = error?.response?.data?.detail || 'Request failed'
         reject({
@@ -60,6 +61,26 @@ export const putReq = (_axiosRequest: AxiosRequest) => {
     url: _axiosRequest.url,
     headers: _axiosRequest.headers,
     method: 'PUT',
+    data: _axiosRequest.data,
+    params: _axiosRequest.params
+  })
+}
+
+export const patchReq = (_axiosRequest: AxiosRequest) => {
+  return _axios({
+    url: _axiosRequest.url,
+    headers: _axiosRequest.headers,
+    method: 'PATCH',
+    data: _axiosRequest.data,
+    params: _axiosRequest.params
+  })
+}
+
+export const delReq = (_axiosRequest: AxiosRequest) => {
+  return _axios({
+    url: _axiosRequest.url,
+    headers: _axiosRequest.headers,
+    method: 'DELETE',
     data: _axiosRequest.data,
     params: _axiosRequest.params
   })

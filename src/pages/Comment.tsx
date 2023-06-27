@@ -222,8 +222,11 @@ const Comment = (props) => {
               placeholder=' Write a comment here'
             />
             {/*</form>*/}
-            <span className='flex items-center rounded-r-[10px] bg-slate-50 px-4 text-sm text-slate-400 transition-colors duration-300 '>
-              <button onClick={onSend} disabled={loading}>
+            <span
+              onClick={onSend}
+              className='flex items-center rounded-r-[10px] bg-slate-50 px-4 text-sm text-slate-400 transition-colors duration-300 '
+            >
+              <button disabled={loading}>
                 <SendIcon></SendIcon>
               </button>
             </span>

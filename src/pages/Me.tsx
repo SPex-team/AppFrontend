@@ -11,7 +11,7 @@ import Modal from '@/components/Modal'
 import ChangeOwnerDialog from '@/components/ChangeOwnerDialog'
 import { Contract, parseEther, ZeroAddress } from 'ethers'
 import { abi, config } from '@/config'
-import { postUpdataMiners } from '@/api/modules'
+import { postUpdataMiners, putMiner, patchMiner } from '@/api/modules'
 import { setRootData } from '@/store/modules/root'
 import { message } from '@/components/Tip'
 import clsx from 'clsx'
@@ -45,6 +45,8 @@ const Me = (props) => {
       console.log('parseEther(data.price, wei)', parseEther(data.price))
       const tx = await contract.changePrice(minerId, parseEther(data.price))
 
+      console.log('tx: ', tx)
+
       message({
         title: 'TIP',
         type: 'success',
@@ -61,8 +63,14 @@ const Me = (props) => {
       // console.log('row', row, data)
       // row.price = data.price
 
-      await postUpdataMiners(row.miner_id)
-
+      // await postUpdataMiners(row.miner_id)
+      await putMiner(row.miner_id, {
+        miner_id: row.miner_id,
+        owner: metaMaskAccount,
+        price: data.price,
+        price_raw: data.price * 1e18,
+        is_list: true
+      })
       meClass.removeDataOfList(minerId)
 
       message({
@@ -95,7 +103,10 @@ const Me = (props) => {
       const result = await tx.wait()
       console.log('result', result)
 
-      await postUpdataMiners(data.miner_id)
+      await patchMiner(minerId, { price: 0, price_raw: 0, is_list: false })
+
+      // await postUpdataMiners(data.miner_id)
+
       dispatch(setRootData({ loading: false }))
       meClass.removeDataOfList(minerId)
 
@@ -117,7 +128,7 @@ const Me = (props) => {
       console.log('minerId: ', minerId)
       console.log('data: ', data)
 
-      const tx = await contract.listMiner(minerId, '1230000000000000000', ZeroAddress)
+      const tx = await contract.listMiner(minerId, parseEther(data.price), ZeroAddress)
       message({
         title: 'TIP',
         type: 'success',
@@ -130,8 +141,14 @@ const Me = (props) => {
 
       let row = meList.find((item) => item.miner_id === minerId)
 
-      await postUpdataMiners(row.miner_id)
-
+      // await postUpdataMiners(row.miner_id)
+      await putMiner(row.miner_id, {
+        miner_id: row.miner_id,
+        owner: metaMaskAccount,
+        price: data.price,
+        price_raw: data.price * 1e18,
+        is_list: true
+      })
       meClass.removeDataOfList(minerId)
 
       message({

@@ -1,4 +1,4 @@
-import { postReq, putReq, getReq } from '../abstract'
+import { postReq, putReq, getReq, delReq, patchReq } from '../abstract'
 
 // get list market page api
 export function getMarketList(params?: {}): Promise<any> {
@@ -107,5 +107,46 @@ export function postComment(sign, data?: { user: string; content: string; miner:
 export function getMiner(minerId): Promise<any> {
   return getReq({
     url: `api/v1/spex/miners/${minerId}`
+  })
+}
+
+// step 3 api
+export function postMiner(data?: {
+  owner: string | undefined
+  miner_id: number
+  price: number
+  price_raw: number
+  is_list: boolean
+}): Promise<any> {
+  return postReq({
+    url: '/api/v1/spex/miners',
+    data
+  })
+}
+
+// step 4 api
+export function putMiner(
+  miner_id: number,
+  data: { miner_id: number; owner?: string; price?: number; price_raw?: number; is_list?: boolean }
+): Promise<any> {
+  return putReq({
+    url: `/api/v1/spex/miners/${miner_id}`,
+    data
+  })
+}
+
+export function deleteMiner(miner_id: number): Promise<any> {
+  return delReq({
+    url: `/api/v1/spex/miners/${miner_id}`
+  })
+}
+
+export function patchMiner(
+  miner_id: number,
+  data: { miner_id?: number; owner?: string; price?: number; price_raw?: number; is_list?: boolean }
+): Promise<any> {
+  return patchReq({
+    url: `/api/v1/spex/miners/${miner_id}`,
+    data
   })
 }

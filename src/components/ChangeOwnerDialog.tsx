@@ -3,9 +3,9 @@ import { Fragment, useMemo, useState } from 'react'
 import clsx from 'clsx'
 import { useSelector } from 'react-redux'
 import { RootState } from '@/store'
-import { Contract } from 'ethers'
+import { Contract, parseEther } from 'ethers'
 import { abi, config } from '@/config'
-import { postPushMessage, postTransferOut } from '@/api/modules'
+import { deleteMiner, postPushMessage, postTransferOut, putMiner } from '@/api/modules'
 import Tip, { message } from './Tip'
 import { handleError } from './AddDialog'
 import fa from '@glif/filecoin-address'
@@ -195,6 +195,8 @@ export default function ChangeOwnerDialog(props: IProps) {
               }
 
               let res = await postTransferOut(data)
+              // await putMiner(minerId, {miner_id: minerId, owner: metaMaskAccount, price: data.price,
+              //   price_raw:parseEther(data.price), is_list: true})
               res = res._data
 
               setData({
@@ -234,6 +236,8 @@ export default function ChangeOwnerDialog(props: IProps) {
 
               let res = await postPushMessage(post_data)
               res = res._data
+
+              await deleteMiner(minerId)
 
               setData({
                 ...data,

@@ -7,6 +7,7 @@ import { Contract, ethers, parseEther, ZeroAddress } from 'ethers'
 import { abi, config } from '@/config'
 import {
   postBuildMessage,
+  postMiner,
   postMiners,
   postPushMessage,
   postUpdataMiners,
@@ -322,6 +323,7 @@ export default function AddDialog(props: IProps) {
               const formData = new FormData(form)
 
               let miner_id: any = formData.get('miner_id')
+              miner_id = miner_id.trim()
 
               if (!miner_id) {
                 throw new Error('Please input Miner Address')
@@ -436,9 +438,13 @@ export default function AddDialog(props: IProps) {
               const result = await tx.wait()
               console.log('result', result)
 
-              setTimeout(syncAndUpdateNewMiner, 5000)
-              // await postMiners()
-              // await postUpdataMiners(data.miner_id)
+              await postMiner({
+                owner: metaMaskAccount,
+                miner_id: data.miner_id,
+                price: parseFloat(price),
+                price_raw: parseFloat(price) * 1e18,
+                is_list: true
+              })
 
               onNext(form)
             } catch (error) {

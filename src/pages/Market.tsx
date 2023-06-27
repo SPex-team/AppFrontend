@@ -10,7 +10,7 @@ import AddDialog, { handleError } from '@/components/AddDialog'
 import { formatTime } from '@/plugins/dayjs'
 import { Contract, parseEther, parseUnits } from 'ethers'
 import { abi, config } from '@/config'
-import { postUpdataMiners } from '@/api/modules'
+import { postUpdataMiners, putMiner } from '@/api/modules'
 import { setRootData } from '@/store/modules/root'
 import { message } from '@/components/Tip'
 import { NavLink, useLocation } from 'react-router-dom'
@@ -31,6 +31,14 @@ const Market = (props) => {
   const contract = useMemo(() => new Contract(config.contractAddress, abi, data.signer), [data.signer])
 
   const onBuy = async (miner_id: number, price_raw: string) => {
+    if (!data.metaMaskAccount) {
+      message({
+        title: 'TIP',
+        type: 'warning',
+        content: 'Please connect you wallet first'
+      })
+      return
+    }
     try {
       dispatch(setRootData({ loading: true }))
 
@@ -48,7 +56,9 @@ const Market = (props) => {
       const result = await tx.wait()
       console.log('result', result)
       // TODO: 全局 metaMaskAccount 判断
-      await postUpdataMiners(miner_id)
+      // await postUpdataMiners(miner_id)
+
+      await putMiner(miner_id, { miner_id, owner: data.metaMaskAccount, price: 0, price_raw: 0, is_list: false })
 
       marketClass.removeDataOfList(miner_id)
       dispatch(setRootData({ loading: false }))
