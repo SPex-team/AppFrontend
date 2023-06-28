@@ -21,9 +21,10 @@ export const calibration_config = {
 }
 
 export const mainnet_config = {
-  baseUrl: window.location.protocol + '//' + window.location.host,
-  contractAddress: '0xD20E95A0Cfa1F3263e46a8d79f3e4B995Bf7c709',
-  contractFilecoinAddress: 'xxxxxxxxxxxxxxxxxxxxxx',
+  // baseUrl: window.location.protocol + '//' + window.location.host,
+  baseUrl: 'http://47.88.25.203:8000',
+  contractAddress: '0x2Ff106d9814887611e444a7D73D7c2aC448d9895',
+  contractFilecoinAddress: 'f410ff7yqnwmbjcdwchsejj6xhv6cvrci3gevgk76jly',
   address_zero_prefix: 'f',
   net: 'MainNet',
   filescanOrigin: 'https://filscan.io',
@@ -34,7 +35,7 @@ export const mainnet_config = {
 // export const address_zero_prefix = 't'
 
 // export const config = Object.assign({}, process.env.NODE_ENV === 'production' ? prod_config : dev_config)
-export const config = calibration_config
+export const config = mainnet_config
 
 export const abi = [
   {
