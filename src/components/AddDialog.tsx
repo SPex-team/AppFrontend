@@ -31,6 +31,12 @@ export const handleError = (error: any) => {
       type: 'warning',
       content: 'User denied transaction signature.'
     })
+  } else if (error?.info?.error?.data?.message) {
+    message({
+      title: 'TIP',
+      type: 'error',
+      content: error.info.error.data.message
+    })
   } else if (error?.info?.error?.message) {
     message({
       title: 'TIP',
