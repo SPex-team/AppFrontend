@@ -231,14 +231,14 @@ const Me = (props) => {
                   </span>
                   <div className='inline-block text-black' onClick={() => setMinerId(item.miner_id)}>
                     <button
-                      className={clsx(['ml-7', item.is_list ? 'hover:text-[#0077FE' : 'text-gray-400'])}
+                      className={clsx(['ml-7', item.is_list ? 'hover:text-[#0077FE]' : 'text-gray-400'])}
                       onClick={() => setOpenDialog('price')}
                     >
                       Change Price
                       <PriceIcon className='ml-2 inline-block w-[14px]' />
                     </button>
                     <button
-                      className={clsx(['ml-7', item.is_list ? 'text-gray-400' : 'hover:text-[#0077FE'])}
+                      className={clsx(['ml-7', item.is_list ? 'text-gray-400' : 'hover:text-[#0077FE]'])}
                       onClick={() => {
                         if (item.is_list) {
                           message({

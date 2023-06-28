@@ -205,5 +205,6 @@
     "src/**/*.+(less|css|sass|scss)": [
       "prettier --config ./prettier.config.js --write"
     ]
-  }
+  },
+  "proxy": "http://192.168.19.66:8000"
 }
