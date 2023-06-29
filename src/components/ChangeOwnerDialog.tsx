@@ -104,6 +104,14 @@ export default function ChangeOwnerDialog(props: IProps) {
             autoComplete='off'
           />
         </div>
+        <span className='mb-4 mt-[20px] inline-block text-sm font-light'>
+          {
+            'You can also accept by other tools, e.g. Lotus,Venus, please do not input anything if you are already use other tools'
+          }
+          <span className='inline-block w-full break-words font-medium'>
+            SPex contract address: {config.contractFilecoinAddress} (old owner)
+          </span>
+        </span>
         <input type='text' value='' className='hidden' readOnly />
       </form>
     )
@@ -177,17 +185,45 @@ export default function ChangeOwnerDialog(props: IProps) {
               const filAddress = fa.newFromString(new_owner_address)
               console.log('filAddress.bytes: ', filAddress.bytes)
 
-              const tx = await contract.transferOwnerOut(minerId, [filAddress.bytes])
-              message({
-                title: 'TIP',
-                type: 'success',
-                content: tx.hash,
-                closeTime: 4000
-              })
-              console.log('tx: ', tx)
+              const delegator = await contract.getMinerDelegator(minerId)
+              const transferOutDelegator = await contract.getTransferOutMinerDelegator(minerId)
 
-              const result = await tx.wait()
-              console.log('result: ', result)
+              console.log('delegator: ', delegator)
+              console.log('transferOutDelegator: ', transferOutDelegator)
+
+              // @ts-ignore
+              if (delegator.toLowerCase() === metaMaskAccount.toLowerCase()) {
+                const tx = await contract.transferOwnerOut(minerId, [filAddress.bytes])
+                message({
+                  title: 'TIP',
+                  type: 'success',
+                  content: tx.hash
+                })
+                console.log('tx: ', tx)
+
+                const result = await tx.wait()
+                console.log('result: ', result)
+                // @ts-ignore
+              } else if (transferOutDelegator.toLowerCase() === metaMaskAccount.toLowerCase()) {
+                const tx = await contract.transferOwnerOutAgain(minerId, [filAddress.bytes])
+                message({
+                  title: 'TIP',
+                  type: 'success',
+                  content: tx.hash
+                })
+                console.log('tx: ', tx)
+
+                const result = await tx.wait()
+                console.log('result: ', result)
+              } else {
+                message({
+                  title: 'TIP',
+                  type: 'warning',
+                  content: 'You are not the delegator of the miner'
+                })
+                setLoading(false)
+                return
+              }
 
               const data = {
                 miner_id: minerId,
@@ -206,6 +242,11 @@ export default function ChangeOwnerDialog(props: IProps) {
 
               onNext(form)
             } catch (error) {
+              // @ts-ignore
+              // if (error?.info?.error?.code === 404) {
+              //   onNext()
+              //   return
+              // }
               handleError(error)
 
               setLoading(false)
@@ -224,7 +265,8 @@ export default function ChangeOwnerDialog(props: IProps) {
               const formData = new FormData(form)
               const sign = formData.get('sign')?.toString()
               if (!sign) {
-                throw new Error('Please input Sign')
+                onNext(form)
+                return
               }
 
               const post_data = {
@@ -237,7 +279,7 @@ export default function ChangeOwnerDialog(props: IProps) {
               let res = await postPushMessage(post_data)
               res = res._data
 
-              await deleteMiner(minerId)
+              // await deleteMiner(minerId)
 
               setData({
                 ...data,
@@ -259,7 +301,11 @@ export default function ChangeOwnerDialog(props: IProps) {
       case 3:
         return {
           text: 'Done',
-          onClick: () => {
+          onClick: async () => {
+            try {
+              await deleteMiner(minerId)
+            } catch (error) {}
+
             onClose()
             updataList()
           }

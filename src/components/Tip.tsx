@@ -74,7 +74,7 @@ interface IParams {
 }
 
 export function message(params: IParams) {
-  const { className = '', type = 'success', title, content = '', closeTime = 4000 } = params
+  const { className = '', type = 'success', title, content = '', closeTime = 8000 } = params
   const tipRootDom = document.getElementById('tip') as HTMLElement
 
   setTimeout(() => {

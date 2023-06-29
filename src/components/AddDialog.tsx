@@ -186,7 +186,7 @@ export default function AddDialog(props: IProps) {
             'You can also propose by other tools, e.g. Lotus,Venus, please do not input anything if you are already use other tools'
           }
           <span className='inline-block w-full break-words font-medium'>
-            SPex contract address: {config.contractFilecoinAddress}
+            SPex contract address: {config.contractFilecoinAddress} (new owner)
           </span>
         </span>
         <input type='text' value='' className='hidden' readOnly />
