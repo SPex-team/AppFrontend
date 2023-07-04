@@ -44,6 +44,7 @@ const Market = (props) => {
 
       const tx = await contract.buyMiner(miner_id, {
         value: price_raw
+        // gasLimit: 100000
       })
 
       message({

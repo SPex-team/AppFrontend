@@ -232,7 +232,10 @@ const Me = (props) => {
                   <div className='inline-block text-black' onClick={() => setMinerId(item.miner_id)}>
                     <button
                       className={clsx(['ml-7', item.is_list ? 'hover:text-[#0077FE]' : 'text-gray-400'])}
-                      onClick={() => setOpenDialog('price')}
+                      onClick={() => {
+                        if (!item.is_list) return
+                        setOpenDialog('price')
+                      }}
                     >
                       Change Price
                       <PriceIcon className='ml-2 inline-block w-[14px]' />

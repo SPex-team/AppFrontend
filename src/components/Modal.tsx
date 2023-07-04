@@ -25,7 +25,9 @@ export default function Modal(props: IProps) {
 
     const form = form_wrap.children[0] as HTMLFormElement | undefined
 
+    debugger
     if (form) {
+      debugger
       if (
         Object.prototype.toString.call(onOk) === '[object AsyncFunction]' ||
         Object.prototype.toString.call(onOk) === '[object Promise]'
