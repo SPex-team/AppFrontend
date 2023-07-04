@@ -8,13 +8,13 @@ interface IProps {
   maskClosable?: boolean
   title?: string
   children: JSX.Element
-  onOk: (data?: IObject) => void | Promise<any>
+  onOk: (data?: IObject) => void
+  loading?: boolean
   okText?: string
 }
 
 export default function Modal(props: IProps) {
-  const { maskClosable = true, title = '', children, onClose, open, onOk, okText = 'Confirm' } = props
-  const [loading, setLoading] = useState<any>(false)
+  const { maskClosable = true, title = '', loading, children, onClose, open, onOk, okText = 'Confirm' } = props
 
   const _onOk = async () => {
     //   setLoading(true)
@@ -25,16 +25,7 @@ export default function Modal(props: IProps) {
 
     const form = form_wrap.children[0] as HTMLFormElement | undefined
 
-    debugger
     if (form) {
-      debugger
-      if (
-        Object.prototype.toString.call(onOk) === '[object AsyncFunction]' ||
-        Object.prototype.toString.call(onOk) === '[object Promise]'
-      ) {
-        setLoading(true)
-      }
-
       const formData = new FormData(form)
 
       const jsondata = {}
@@ -45,16 +36,7 @@ export default function Modal(props: IProps) {
         }
       })
 
-      if (Object.prototype.toString.call(onOk) === '[object Promise]') {
-        ;(onOk(jsondata) as Promise<any>).finally(() => {
-          setLoading(false)
-        })
-      } else if (Object.prototype.toString.call(onOk) === '[object AsyncFunction]') {
-        await onOk(jsondata)
-        setLoading(false)
-      } else {
-        onOk(jsondata)
-      }
+      onOk(jsondata)
     } else {
       onOk()
     }

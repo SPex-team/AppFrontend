@@ -11,7 +11,7 @@ import Modal from '@/components/Modal'
 import ChangeOwnerDialog from '@/components/ChangeOwnerDialog'
 import { Contract, parseEther, ZeroAddress } from 'ethers'
 import { abi, config } from '@/config'
-import { postUpdataMiners, putMiner, patchMiner } from '@/api/modules'
+import { putMiner, patchMiner } from '@/api/modules'
 import { setRootData } from '@/store/modules/root'
 import { message } from '@/components/Tip'
 import clsx from 'clsx'
@@ -22,6 +22,7 @@ const Me = (props) => {
   const meClass = useMemo(() => new MeClass(), [])
   const [openDialog, setOpenDialog] = useState<any>(false)
   const [minerId, setMinerId] = useState<any>()
+  const [loading, setLoading] = useState<any>()
 
   const { meCount, mePage, meList, signer, metaMaskAccount } = useSelector((state: RootState) => ({
     meCount: state.root.meCount,
@@ -128,7 +129,10 @@ const Me = (props) => {
       console.log('minerId: ', minerId)
       console.log('data: ', data)
 
-      const tx = await contract.listMiner(minerId, parseEther(data.price), ZeroAddress)
+      const tx = await contract.listMiner(minerId, parseEther(data.price), ZeroAddress, {
+        gasLimit: 100_000
+      })
+
       message({
         title: 'TIP',
         type: 'success',
@@ -318,12 +322,15 @@ const Me = (props) => {
           maskClosable={false}
           open={openDialog === 'price' || openDialog === 'list'}
           onClose={closeMoadl}
+          loading={loading}
           onOk={async (data) => {
+            setLoading(true)
             if (openDialog === 'price') {
               await onSetPrice(data)
             } else {
               await onList(data)
             }
+            setLoading(false)
           }}
           title={openDialog === 'price' ? 'Change Price' : `List t0${minerId}`}
         >
