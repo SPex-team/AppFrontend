@@ -1,7 +1,7 @@
 export const dev_config = {
   baseUrl: 'http://localhost:8000',
-  contractAddress: '0xdAb20bB8cf6CB42A3019610D83429031D26897fC',
-  contractFilecoinAddress: 't410f3kzaxogpns2cumazmegygquqghjgrf74qfpohyy',
+  contractAddress: '0xBC0Df3Ad50Fba6d82254cC99cBA78F1a977828Fe',
+  contractFilecoinAddress: 't410fxqg7hlkq7otnqisuzsm4xj4pdklxqkh6hw7bsqa',
   address_zero_prefix: 't',
   net: 'Calibration',
   filescanOrigin: 'https://calibration.filscan.io',
@@ -11,8 +11,8 @@ export const dev_config = {
 
 export const calibration_config = {
   baseUrl: window.location.protocol + '//' + window.location.host,
-  contractAddress: '0xdAb20bB8cf6CB42A3019610D83429031D26897fC',
-  contractFilecoinAddress: 't410f3kzaxogpns2cumazmegygquqghjgrf74qfpohyy',
+  contractAddress: '0xBC0Df3Ad50Fba6d82254cC99cBA78F1a977828Fe',
+  contractFilecoinAddress: 't410fxqg7hlkq7otnqisuzsm4xj4pdklxqkh6hw7bsqa',
   address_zero_prefix: 't',
   net: 'Calibration',
   filescanOrigin: 'https://calibration.filscan.io',
@@ -34,7 +34,7 @@ export const mainnet_config = {
 // export const address_zero_prefix = 't'
 
 // export const config = Object.assign({}, process.env.NODE_ENV === 'production' ? prod_config : dev_config)
-export const config = mainnet_config
+export const config = calibration_config
 
 export const abi = [
   {
