@@ -91,14 +91,14 @@ const Me = (props) => {
       data = { ...data }
       data.is_list = false
       data.price = 0
-
-      const tx = await contract.cancelList(minerId)
+      const tx = await contract.cancelList(data.miner_id)
       message({
         title: 'TIP',
         type: 'success',
         content: tx.hash,
         closeTime: 4000
       })
+      console.log('x')
       console.log('tx: ', tx)
 
       const result = await tx.wait()
@@ -129,9 +129,7 @@ const Me = (props) => {
       console.log('minerId: ', minerId)
       console.log('data: ', data)
 
-      const tx = await contract.listMiner(minerId, parseEther(data.price), ZeroAddress, {
-        gasLimit: 100_000
-      })
+      const tx = await contract.listMiner(minerId, parseEther(data.price), ZeroAddress)
 
       message({
         title: 'TIP',
@@ -265,6 +263,8 @@ const Me = (props) => {
                       className='ml-7 hover:text-[#0077FE]'
                       onClick={() => {
                         if (item.is_list) {
+                          // console.log("item.miner_id: ", item.miner_id)
+                          // setMinerId(item.miner_id)
                           onCancal(item)
                         } else {
                           setOpenDialog('list')
