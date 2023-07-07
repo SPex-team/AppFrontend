@@ -64,7 +64,7 @@ export default function Pagination(props: IProps) {
             key={index}
             data-active={item === currentPage}
             onClick={() => onChange(item)}
-            className='box-border h-8 w-8 cursor-pointer rounded-sm border border-[#EAEAEF] from-[#0077FE] to-[#3BF4BB] text-center text-sm leading-8 text-[#111029] hover:border-0 hover:bg-[#0077FE] hover:text-white data-[active=true]:border-0 data-[active=true]:bg-gradient-to-r data-[active=true]:text-white'
+            className='box-border h-8 w-8 cursor-pointer rounded-sm border border-[#EAEAEF] from-[#0077FE] from-0% to-[#3BF4BB] to-100% text-center text-sm leading-8 text-[#111029] hover:border-0 hover:bg-[#0077FE] hover:text-white data-[active=true]:border-0 data-[active=true]:bg-gradient-to-r data-[active=true]:text-white'
           >
             {item}
           </div>

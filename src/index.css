@@ -12,6 +12,12 @@
   }
 }
 
+@layer components {
+  .bg-gradient-common {
+    @apply bg-gradient-to-r from-[#0077FE] from-0% to-[#3BF4BB] to-100%;
+  }
+}
+
 /* ------------------------------------- font --------------------------------------- */
 /**
  * @license

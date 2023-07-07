@@ -227,7 +227,7 @@ export default function Header() {
           )}
 
           <button
-            className='ml-8 hidden h-11 w-40 rounded-full bg-gradient-to-r from-[#0077FE] to-[#3BF4BB] text-white md:block'
+            className='bg-gradient-common ml-8 hidden h-11 w-40 rounded-full text-white md:block'
             onClick={onConnectWallet}
             disabled={!!metaMaskAccount}
           >

@@ -188,7 +188,7 @@ const Me = (props) => {
             </div>
             <button
               onClick={() => setOpenDialog('add')}
-              className='ml-8 flex h-11 w-[119px] items-center justify-center rounded-full bg-gradient-to-r from-[#0077FE] to-[#3BF4BB] text-white'
+              className='bg-gradient-common ml-8 flex h-11 w-[119px] items-center justify-center rounded-full text-white'
             >
               Add
               <svg

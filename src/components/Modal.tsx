@@ -93,7 +93,7 @@ export default function Modal(props: IProps) {
                     </svg>
                   </Dialog.Title>
                   <hr />
-                  <div id='form_wrap' className='mt-[30px] mb-[22px] flex justify-between'>
+                  <div id='form_wrap' className='mb-[22px] mt-[30px] flex justify-between'>
                     {children}
                   </div>
                 </div>
@@ -102,7 +102,7 @@ export default function Modal(props: IProps) {
                   <button
                     type='button'
                     className={clsx([
-                      'inline-flex h-[44px] w-[256px] items-center justify-center rounded-full bg-gradient-to-r from-[#0077FE] to-[#3BF4BB] text-white focus-visible:ring-0'
+                      'bg-gradient-common inline-flex h-[44px] w-[256px] items-center justify-center rounded-full text-white focus-visible:ring-0'
                       //   { 'cursor-not-allowed': loading }
                     ])}
                     onClick={_onOk}

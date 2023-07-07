@@ -625,7 +625,7 @@ export default function AddDialog(props: IProps) {
                       <button
                         type='button'
                         className={clsx([
-                          'mt-5 inline-flex h-[44px] w-[256px] items-center justify-center rounded-full bg-gradient-to-r from-[#0077FE] to-[#3BF4BB] text-white focus-visible:ring-0',
+                          'bg-gradient-common mt-5 inline-flex h-[44px] w-[256px] items-center justify-center rounded-full text-white focus-visible:ring-0',
                           { 'cursor-not-allowed': loading }
                         ])}
                         onClick={btnData.onClick}
