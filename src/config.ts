@@ -1,5 +1,5 @@
 export const dev_config = {
-  baseUrl: 'http://localhost:8000',
+  baseUrl: 'http://192.168.19.66:8000',
   contractAddress: '0xBC0Df3Ad50Fba6d82254cC99cBA78F1a977828Fe',
   contractFilecoinAddress: 't410fxqg7hlkq7otnqisuzsm4xj4pdklxqkh6hw7bsqa',
   address_zero_prefix: 't',

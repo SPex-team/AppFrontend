@@ -147,7 +147,7 @@ export default function AddDialog(props: IProps) {
             autoComplete='off'
             placeholder={`${config.address_zero_prefix}0xxxxxx`}
           />
-          <span className='text-xs'>Commission fee 3% For Platform</span>
+          <span className='text-xs'>Commission fee 1% For Platform</span>
 
           <input type='text' value='' className='hidden' readOnly />
         </div>
@@ -240,7 +240,7 @@ export default function AddDialog(props: IProps) {
             </span>
           </div>
         </div>
-        <span className='text-xs'>Commission fee 3% For Platform</span>
+        <span className='text-xs'>Commission fee 1% For Platform</span>
         <input type='text' value='' className='hidden' readOnly />
       </form>
     )
