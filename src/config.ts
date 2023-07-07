@@ -1,7 +1,7 @@
 export const dev_config = {
   baseUrl: 'http://192.168.19.66:8000',
-  contractAddress: '0xBC0Df3Ad50Fba6d82254cC99cBA78F1a977828Fe',
-  contractFilecoinAddress: 't410fxqg7hlkq7otnqisuzsm4xj4pdklxqkh6hw7bsqa',
+  contractAddress: '0x10E7a66332CD2FF07fb7251C305FB4C343c95c95',
+  contractFilecoinAddress: 't410fcdt2myzszux7a75xeuodax5uynb4sxevodwk7oa',
   address_zero_prefix: 't',
   net: 'Calibration',
   filescanOrigin: 'https://calibration.filscan.io',
@@ -11,8 +11,8 @@ export const dev_config = {
 
 export const calibration_config = {
   baseUrl: window.location.protocol + '//' + window.location.host,
-  contractAddress: '0xBC0Df3Ad50Fba6d82254cC99cBA78F1a977828Fe',
-  contractFilecoinAddress: 't410fxqg7hlkq7otnqisuzsm4xj4pdklxqkh6hw7bsqa',
+  contractAddress: '0x10E7a66332CD2FF07fb7251C305FB4C343c95c95',
+  contractFilecoinAddress: 't410fcdt2myzszux7a75xeuodax5uynb4sxevodwk7oa',
   address_zero_prefix: 't',
   net: 'Calibration',
   filescanOrigin: 'https://calibration.filscan.io',

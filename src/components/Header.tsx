@@ -36,7 +36,7 @@ const ChainCfg = {
       decimals: 18
     },
     rpcUrls: ['https://api.node.glif.io'],
-    blockExplorerUrls: ['https://filfox.info/en']
+    blockExplorerUrls: ['https://filscan.io']
   },
   Calibration: {
     chainId: '0x4cb2f',

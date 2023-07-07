@@ -144,12 +144,14 @@ const Me = (props) => {
       let row = meList.find((item) => item.miner_id === minerId)
 
       // await postUpdataMiners(row.miner_id)
+      const timestamp = Math.floor(Date.now() / 1000)
       await putMiner(row.miner_id, {
         miner_id: row.miner_id,
         owner: metaMaskAccount,
         price: data.price,
         price_raw: data.price * 1e18,
-        is_list: true
+        is_list: true,
+        timestamp
       })
       meClass.removeDataOfList(minerId)
 

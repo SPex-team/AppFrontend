@@ -127,7 +127,7 @@ export function postMiner(data?: {
 // step 4 api
 export function putMiner(
   miner_id: number,
-  data: { miner_id: number; owner?: string; price?: number; price_raw?: number; is_list?: boolean }
+  data: { miner_id: number; owner?: string; price?: number; price_raw?: number; is_list?: boolean; timestamp?: number }
 ): Promise<any> {
   return putReq({
     url: `/api/v1/spex/miners/${miner_id}`,
@@ -143,7 +143,7 @@ export function deleteMiner(miner_id: number): Promise<any> {
 
 export function patchMiner(
   miner_id: number,
-  data: { miner_id?: number; owner?: string; price?: number; price_raw?: number; is_list?: boolean }
+  data: { miner_id?: number; owner?: string; price?: number; price_raw?: number; is_list?: boolean; timestamp?: number }
 ): Promise<any> {
   return patchReq({
     url: `/api/v1/spex/miners/${miner_id}`,
