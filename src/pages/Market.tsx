@@ -79,9 +79,10 @@ const Market = (props) => {
       <section className='container mx-auto pb-[60px] pt-[190px]'>
         <div className='flex justify-between'>
           <div className='mb-20'>
-            <h2 className='mb-[13px] text-[56px] font-semibold leading-[61px]'>Native Exchange Market</h2>
+            <h2 className='mb-[13px] text-[56px] font-semibold leading-[61px]'>Miner Account Market </h2>
             <p className='w-[462px] text-lg text-[#57596C]'>
-              Allowing Storage Providers to trade their account belongings such as ID address, Beneficiary, etc.
+              Allowing Storage Providers to implement securely trustless account trading, optimize capital efficiency,
+              select special ID numbers, etc.
             </p>
           </div>
           <button

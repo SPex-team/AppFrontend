@@ -183,7 +183,7 @@ const Me = (props) => {
             <div className='mb-20'>
               <h2 className='mb-[13px] text-[56px] font-semibold leading-[61px]'>My Miners</h2>
               <p className='w-[462px] text-lg text-[#57596C]'>
-                Allowing Storage Providers to trade their account belongings such as ID address, Beneficiary, etc.
+                Here you can find the miners you possess and their details.
               </p>
             </div>
             <button
