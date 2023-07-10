@@ -21,7 +21,7 @@ const links = [
   //   href: '/history'
   // },
   {
-    name: 'Me',
+    name: 'Profile',
     href: '/me'
   }
 ]

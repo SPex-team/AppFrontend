@@ -63,7 +63,7 @@ export default function ChangeOwnerDialog(props: IProps) {
       <form className='text-[#57596C]' id='form_change_price_address'>
         <div className=''>
           <label htmlFor='new_owner_address' className='mb-[10px] block text-base'>
-            Address:
+            New Owner ID:
           </label>
 
           <input
