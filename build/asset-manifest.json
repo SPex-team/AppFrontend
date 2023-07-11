@@ -1,7 +1,7 @@
 {
   "files": {
-    "main.css": "/static/css/main.52eb8a5f.css",
-    "main.js": "/static/js/main.fd94078b.js",
+    "main.css": "/static/css/main.1f271f6f.css",
+    "main.js": "/static/js/main.82324d81.js",
     "static/media/bg.png": "/static/media/bg.96e0da52ab840946f578.png",
     "static/media/GeneralSans-VariableItalic.ttf": "/static/media/GeneralSans-VariableItalic.37a2c9e4ec944dec5059.ttf",
     "static/media/GeneralSans-Variable.ttf": "/static/media/GeneralSans-Variable.d7facbbe2ed9ae4aae49.ttf",
@@ -46,8 +46,10 @@
     "static/media/GeneralSans-ExtralightItalic.woff2": "/static/media/GeneralSans-ExtralightItalic.3d55e7e4573d13e89567.woff2",
     "static/media/GeneralSans-Extralight.woff2": "/static/media/GeneralSans-Extralight.d6a4332df60f058537bf.woff2",
     "static/media/out.svg": "/static/media/out.1f7fc91ca141b614fb11c3c938ef6c96.svg",
+    "static/media/discord.svg": "/static/media/discord.90265e5214ac7dce63fc7dfbcc40700b.svg",
     "static/media/emoji.svg": "/static/media/emoji.7611868caebe115ada8e39eac6cedb68.svg",
     "static/media/price.svg": "/static/media/price.61d7144e4b94d1eaa8a87d68b41a499d.svg",
+    "static/media/gitbook.svg": "/static/media/gitbook.b100ee536a7acfdbf6ecfa1e1e0b6fe4.svg",
     "static/media/detail.svg": "/static/media/detail.3cf149586ba221f9f1f47a3e0b164505.svg",
     "static/media/buy.svg": "/static/media/buy.3641f69e2f7acd321d8c7238cf9b85d8.svg",
     "static/media/github.svg": "/static/media/github.5cfda373d5e0469cd0ff117ac0ce1848.svg",
@@ -58,7 +60,7 @@
     "static/media/medium.svg": "/static/media/medium.253e84ea3a41d2e76de1cee73a336783.svg"
   },
   "entrypoints": [
-    "static/css/main.52eb8a5f.css",
-    "static/js/main.fd94078b.js"
+    "static/css/main.1f271f6f.css",
+    "static/js/main.82324d81.js"
   ]
 }
