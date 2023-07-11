@@ -1,5 +1,3 @@
-'use strict'
-
 const fs = require('fs')
 const path = require('path')
 const webpack = require('webpack')
@@ -271,7 +269,17 @@ module.exports = function (webpackEnv) {
           }
         }),
         // This is only used in production mode
-        new CssMinimizerPlugin()
+        new CssMinimizerPlugin({
+          minimizerOptions: {
+            preset: [
+              'default',
+              {
+                // let minimizer not discard empyty variables from tailwind.css
+                discardEmpty: false
+              }
+            ]
+          }
+        })
       ]
     },
     resolve: {

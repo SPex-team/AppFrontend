@@ -77,10 +77,10 @@ const Market = (props) => {
   return (
     <>
       <section className='container mx-auto pb-[60px] pt-[190px]'>
-        <div className='flex justify-between'>
+        <div className='flex flex-col justify-between sm:flex-row'>
           <div className='mb-20'>
-            <h2 className='mb-[13px] text-[56px] font-semibold leading-[61px]'>Miner Account Market </h2>
-            <p className='w-[462px] text-lg text-[#57596C]'>
+            <h2 className='mb-[13px] text-[30px] font-semibold leading-[61px] sm:text-[56px]'>Miner Account Market </h2>
+            <p className='w-[420px] text-lg text-[#57596C] sm:w-[620px]'>
               Allowing Storage Providers to implement securely trustless account trading, optimize capital efficiency,
               select special ID numbers, etc.
             </p>
@@ -112,7 +112,7 @@ const Market = (props) => {
             </svg>
           </button>
         </div>
-        <div>
+        <div className='overflow-auto'>
           <div className='mb-[11px] flex px-12 text-2xl font-medium'>
             <span className='inline-block w-[13%] min-w-[100px] px-2'>Miner ID</span>
             <span className='inline-block w-[13%] min-w-[90px] px-2'>Balance</span>
@@ -124,7 +124,7 @@ const Market = (props) => {
             {data.marketList.map((item) => (
               <div
                 key={item.miner_id}
-                className='box-border flex h-[74px] rounded-[10px] border border-[#eaeaef] bg-white px-12 text-lg leading-[74px] text-[#57596c] hover:border-0 hover:shadow-[0_0_10px_0_rgba(17,16,41,0.15)]'
+                className='box-border flex min-h-[74px] rounded-[10px] border border-[#eaeaef] bg-white px-12 text-lg leading-[74px] text-[#57596c] hover:border-0 hover:shadow-[0_0_10px_0_rgba(17,16,41,0.15)]'
               >
                 <span className='inline-block w-[13%] min-w-[100px] truncate px-2'>
                   {config.address_zero_prefix}0{item.miner_id ?? '-'}

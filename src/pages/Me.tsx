@@ -182,7 +182,7 @@ const Me = (props) => {
           <div className='flex justify-between'>
             <div className='mb-20'>
               <h2 className='mb-[13px] text-[56px] font-semibold leading-[61px]'>My Miners</h2>
-              <p className='w-[462px] text-lg text-[#57596C]'>
+              <p className='w-[480px] text-lg text-[#57596C]'>
                 Here you can find the miners you possess and their details.
               </p>
             </div>

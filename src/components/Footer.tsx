@@ -33,7 +33,7 @@ export default function Footer() {
       <div className='container mx-auto px-2'>
         <div className='flex justify-between pb-24 pt-20'>
           <img width={104} height={38} src='/logo.svg' alt='SPex' />
-          <div className='space-x-6'>
+          <div className='space-x-6 pr-10'>
             {Informations.map((item, index) => (
               <a key={index} href={item.link} className='inline-block h-[30px] w-[30px] hover:text-[#545368]'>
                 {item.icon}
