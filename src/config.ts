@@ -1,7 +1,7 @@
 export const dev_config = {
   baseUrl: 'http://192.168.19.66:8000',
-  contractAddress: '0xFf013054037B6B139184150e9651E31c7B8aA6B5',
-  contractFilecoinAddress: 't410f74atavadpnvrhemecuhjmupddr5yvjvvqm2dkaa',
+  contractAddress: '0x36e323004b6b2071571a3128529d4d64032cace6',
+  contractFilecoinAddress: 't410fg3rsgaclnmqhcvy2geuffhknmqbszlhg4dzfauq',
   address_zero_prefix: 't',
   net: 'Calibration',
   filescanOrigin: 'https://calibration.filscan.io',
@@ -11,8 +11,8 @@ export const dev_config = {
 
 export const calibration_config = {
   baseUrl: window.location.protocol + '//' + window.location.host,
-  contractAddress: '0xFf013054037B6B139184150e9651E31c7B8aA6B5',
-  contractFilecoinAddress: 't410f74atavadpnvrhemecuhjmupddr5yvjvvqm2dkaa',
+  contractAddress: '0x36e323004b6b2071571a3128529d4d64032cace6',
+  contractFilecoinAddress: 't410fg3rsgaclnmqhcvy2geuffhknmqbszlhg4dzfauq',
   address_zero_prefix: 't',
   net: 'Calibration',
   filescanOrigin: 'https://calibration.filscan.io',
@@ -22,8 +22,8 @@ export const calibration_config = {
 
 export const mainnet_config = {
   baseUrl: window.location.protocol + '//' + window.location.host,
-  contractAddress: '0x77D9C635b7Bd6C93313c9A3fD82635899837CfaA',
-  contractFilecoinAddress: 'f410fo7m4mnnxxvwjgmj4ti75qjrvrgmdpt5khvn57hi',
+  contractAddress: '0xc284ff2a0bed6A72143423482739C9345c254924',
+  contractFilecoinAddress: 'f410fykcp6kql5vvhefbuenecooojgrocksje3cvi7ta',
   address_zero_prefix: 'f',
   net: 'MainNet',
   filescanOrigin: 'https://filscan.io',
@@ -65,6 +65,119 @@ export const abi = [
     type: 'error'
   },
   {
+    inputs: [
+      {
+        internalType: 'CommonTypes.FilActorId',
+        name: 'minerId',
+        type: 'uint64'
+      }
+    ],
+    name: 'buyMiner',
+    outputs: [],
+    stateMutability: 'payable',
+    type: 'function'
+  },
+  {
+    inputs: [
+      {
+        internalType: 'CommonTypes.FilActorId',
+        name: 'minerId',
+        type: 'uint64'
+      }
+    ],
+    name: 'cancelList',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function'
+  },
+  {
+    inputs: [
+      {
+        internalType: 'address',
+        name: 'foundation',
+        type: 'address'
+      }
+    ],
+    name: 'changeFoundation',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function'
+  },
+  {
+    inputs: [
+      {
+        internalType: 'CommonTypes.FilActorId',
+        name: 'minerId',
+        type: 'uint64'
+      },
+      {
+        internalType: 'uint256',
+        name: 'newPrice',
+        type: 'uint256'
+      }
+    ],
+    name: 'changePrice',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function'
+  },
+  {
+    inputs: [
+      {
+        internalType: 'CommonTypes.FilActorId',
+        name: 'minerId',
+        type: 'uint64'
+      },
+      {
+        internalType: 'bytes',
+        name: 'sign',
+        type: 'bytes'
+      },
+      {
+        internalType: 'uint256',
+        name: 'timestamp',
+        type: 'uint256'
+      }
+    ],
+    name: 'confirmTransferMinerIntoSPex',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function'
+  },
+  {
+    inputs: [
+      {
+        internalType: 'CommonTypes.FilActorId',
+        name: 'minerId',
+        type: 'uint64'
+      },
+      {
+        internalType: 'bytes',
+        name: 'sign',
+        type: 'bytes'
+      },
+      {
+        internalType: 'uint256',
+        name: 'timestamp',
+        type: 'uint256'
+      },
+      {
+        internalType: 'uint256',
+        name: 'price',
+        type: 'uint256'
+      },
+      {
+        internalType: 'address',
+        name: 'targetBuyer',
+        type: 'address'
+      }
+    ],
+    name: 'confirmTransferMinerIntoSPexAndList',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function'
+  },
+  {
     inputs: [],
     name: 'FailToCallActor',
     type: 'error'
@@ -100,6 +213,29 @@ export const abi = [
     inputs: [],
     name: 'InvalidResponseLength',
     type: 'error'
+  },
+  {
+    inputs: [
+      {
+        internalType: 'CommonTypes.FilActorId',
+        name: 'minerId',
+        type: 'uint64'
+      },
+      {
+        internalType: 'uint256',
+        name: 'price',
+        type: 'uint256'
+      },
+      {
+        internalType: 'address',
+        name: 'targetBuyer',
+        type: 'address'
+      }
+    ],
+    name: 'listMiner',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function'
   },
   {
     inputs: [
@@ -251,6 +387,93 @@ export const abi = [
     type: 'event'
   },
   {
+    inputs: [
+      {
+        internalType: 'CommonTypes.FilActorId',
+        name: 'minerId',
+        type: 'uint64'
+      },
+      {
+        components: [
+          {
+            internalType: 'bytes',
+            name: 'data',
+            type: 'bytes'
+          }
+        ],
+        internalType: 'struct CommonTypes.FilAddress',
+        name: 'newOwner',
+        type: 'tuple'
+      }
+    ],
+    name: 'transferOwnerOut',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function'
+  },
+  {
+    inputs: [
+      {
+        internalType: 'CommonTypes.FilActorId',
+        name: 'minerId',
+        type: 'uint64'
+      },
+      {
+        components: [
+          {
+            internalType: 'bytes',
+            name: 'data',
+            type: 'bytes'
+          }
+        ],
+        internalType: 'struct CommonTypes.FilAddress',
+        name: 'newOwner',
+        type: 'tuple'
+      }
+    ],
+    name: 'transferOwnerOutAgain',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function'
+  },
+  {
+    inputs: [
+      {
+        internalType: 'address payable',
+        name: 'to',
+        type: 'address'
+      },
+      {
+        internalType: 'uint256',
+        name: 'amount',
+        type: 'uint256'
+      }
+    ],
+    name: 'withdraw',
+    outputs: [],
+    stateMutability: 'payable',
+    type: 'function'
+  },
+  {
+    inputs: [
+      {
+        internalType: 'address',
+        name: '',
+        type: 'address'
+      }
+    ],
+    name: '_lastTimestampMap',
+    outputs: [
+      {
+        internalType: 'uint256',
+        name: '',
+        type: 'uint256'
+      }
+    ],
+    stateMutability: 'view',
+    type: 'function'
+  },
+  {
     inputs: [],
     name: 'FEE_RATE',
     outputs: [
@@ -274,151 +497,6 @@ export const abi = [
       }
     ],
     stateMutability: 'view',
-    type: 'function'
-  },
-  {
-    inputs: [],
-    name: 'MAX_COMMISSION',
-    outputs: [
-      {
-        internalType: 'uint256',
-        name: '',
-        type: 'uint256'
-      }
-    ],
-    stateMutability: 'view',
-    type: 'function'
-  },
-  {
-    inputs: [
-      {
-        internalType: 'address',
-        name: '',
-        type: 'address'
-      }
-    ],
-    name: '_lastTimestampMap',
-    outputs: [
-      {
-        internalType: 'uint256',
-        name: '',
-        type: 'uint256'
-      }
-    ],
-    stateMutability: 'view',
-    type: 'function'
-  },
-  {
-    inputs: [
-      {
-        internalType: 'CommonTypes.FilActorId',
-        name: 'minerId',
-        type: 'uint64'
-      }
-    ],
-    name: 'buyMiner',
-    outputs: [],
-    stateMutability: 'payable',
-    type: 'function'
-  },
-  {
-    inputs: [
-      {
-        internalType: 'CommonTypes.FilActorId',
-        name: 'minerId',
-        type: 'uint64'
-      }
-    ],
-    name: 'cancelList',
-    outputs: [],
-    stateMutability: 'nonpayable',
-    type: 'function'
-  },
-  {
-    inputs: [
-      {
-        internalType: 'address',
-        name: 'foundation',
-        type: 'address'
-      }
-    ],
-    name: 'changeFoundation',
-    outputs: [],
-    stateMutability: 'nonpayable',
-    type: 'function'
-  },
-  {
-    inputs: [
-      {
-        internalType: 'CommonTypes.FilActorId',
-        name: 'minerId',
-        type: 'uint64'
-      },
-      {
-        internalType: 'uint256',
-        name: 'newPrice',
-        type: 'uint256'
-      }
-    ],
-    name: 'changePrice',
-    outputs: [],
-    stateMutability: 'nonpayable',
-    type: 'function'
-  },
-  {
-    inputs: [
-      {
-        internalType: 'CommonTypes.FilActorId',
-        name: 'minerId',
-        type: 'uint64'
-      },
-      {
-        internalType: 'bytes',
-        name: 'sign',
-        type: 'bytes'
-      },
-      {
-        internalType: 'uint256',
-        name: 'timestamp',
-        type: 'uint256'
-      }
-    ],
-    name: 'confirmTransferMinerIntoSPex',
-    outputs: [],
-    stateMutability: 'nonpayable',
-    type: 'function'
-  },
-  {
-    inputs: [
-      {
-        internalType: 'CommonTypes.FilActorId',
-        name: 'minerId',
-        type: 'uint64'
-      },
-      {
-        internalType: 'bytes',
-        name: 'sign',
-        type: 'bytes'
-      },
-      {
-        internalType: 'uint256',
-        name: 'timestamp',
-        type: 'uint256'
-      },
-      {
-        internalType: 'uint256',
-        name: 'price',
-        type: 'uint256'
-      },
-      {
-        internalType: 'address',
-        name: 'targetBuyer',
-        type: 'address'
-      }
-    ],
-    name: 'confirmTransferMinerIntoSPexAndList',
-    outputs: [],
-    stateMutability: 'nonpayable',
     type: 'function'
   },
   {
@@ -519,94 +597,16 @@ export const abi = [
     type: 'function'
   },
   {
-    inputs: [
-      {
-        internalType: 'CommonTypes.FilActorId',
-        name: 'minerId',
-        type: 'uint64'
-      },
+    inputs: [],
+    name: 'MAX_COMMISSION',
+    outputs: [
       {
         internalType: 'uint256',
-        name: 'price',
-        type: 'uint256'
-      },
-      {
-        internalType: 'address',
-        name: 'targetBuyer',
-        type: 'address'
-      }
-    ],
-    name: 'listMiner',
-    outputs: [],
-    stateMutability: 'nonpayable',
-    type: 'function'
-  },
-  {
-    inputs: [
-      {
-        internalType: 'CommonTypes.FilActorId',
-        name: 'minerId',
-        type: 'uint64'
-      },
-      {
-        components: [
-          {
-            internalType: 'bytes',
-            name: 'data',
-            type: 'bytes'
-          }
-        ],
-        internalType: 'struct CommonTypes.FilAddress',
-        name: 'newOwner',
-        type: 'tuple'
-      }
-    ],
-    name: 'transferOwnerOut',
-    outputs: [],
-    stateMutability: 'nonpayable',
-    type: 'function'
-  },
-  {
-    inputs: [
-      {
-        internalType: 'CommonTypes.FilActorId',
-        name: 'minerId',
-        type: 'uint64'
-      },
-      {
-        components: [
-          {
-            internalType: 'bytes',
-            name: 'data',
-            type: 'bytes'
-          }
-        ],
-        internalType: 'struct CommonTypes.FilAddress',
-        name: 'newOwner',
-        type: 'tuple'
-      }
-    ],
-    name: 'transferOwnerOutAgain',
-    outputs: [],
-    stateMutability: 'nonpayable',
-    type: 'function'
-  },
-  {
-    inputs: [
-      {
-        internalType: 'address payable',
-        name: 'to',
-        type: 'address'
-      },
-      {
-        internalType: 'uint256',
-        name: 'amount',
+        name: '',
         type: 'uint256'
       }
     ],
-    name: 'withdraw',
-    outputs: [],
-    stateMutability: 'payable',
+    stateMutability: 'view',
     type: 'function'
   }
 ]
