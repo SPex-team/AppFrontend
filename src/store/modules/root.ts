@@ -19,6 +19,10 @@ interface IState {
   mePage: number
   meCount: number
 
+  historyList: any[]
+  historyPage: number
+  historyCount: number
+
   loading: boolean
 }
 
@@ -35,6 +39,10 @@ const initialState: IState = {
   commentPage: 1,
   commentCount: 0,
   commentMinerOwner: '',
+
+  historyList: [],
+  historyPage: 1,
+  historyCount: 0,
 
   loading: false
 }

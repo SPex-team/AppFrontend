@@ -112,7 +112,7 @@ const Market = (props) => {
             </svg>
           </button>
         </div>
-        <div className='overflow-auto'>
+        <div className='-mx-2 overflow-auto px-2'>
           <div className='mb-[11px] flex px-12 text-2xl font-medium'>
             <span className='inline-block w-[13%] min-w-[100px] px-2'>Miner ID</span>
             <span className='inline-block w-[13%] min-w-[90px] px-2'>Balance</span>
