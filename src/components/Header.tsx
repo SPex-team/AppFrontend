@@ -1,11 +1,13 @@
 import { RootState } from '@/store'
 import { setRootData } from '@/store/modules/root'
-import { Menu, Popover, Transition } from '@headlessui/react'
+import { Menu, Popover, Dialog, Transition } from '@headlessui/react'
 import { Fragment, useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { ethers } from 'ethers'
 import { NavLink, useLocation } from 'react-router-dom'
 import { LAST_WALLET, config } from '@/config'
+
+import MetaMaskURL from '@/assets/images/MetaMask.png'
 
 const links = [
   {
@@ -57,6 +59,9 @@ export default function Header() {
   const dispatch = useDispatch()
   const [currentChain, setCurrentChain] = useState()
   const net = config.net
+  const ifMetaMaskNotInstalled = !window.ethereum || window.ethereum?.isMetaMask === false
+
+  let [isOpen, setIsOpen] = useState(false)
 
   const addChain = (params) => {
     window.ethereum.request({
@@ -66,10 +71,16 @@ export default function Header() {
   }
 
   const fetchSetAccount = async () => {
-    const accounts = await window.ethereum.request({ method: 'eth_accounts' })
+    const accounts = await window.ethereum?.request({ method: 'eth_accounts' })
     console.log(accounts)
 
     initEthers(accounts)
+  }
+
+  const clear = () => {
+    localStorage.removeItem(LAST_WALLET)
+    setCurrentChain(undefined)
+    dispatch(setRootData({ metaMaskAccount: '' }))
   }
 
   const initEthers = async (accounts: string[]) => {
@@ -78,8 +89,7 @@ export default function Header() {
 
     if (accounts.length === 0) {
       console.log('Please connect to MetaMask.')
-      localStorage.removeItem(LAST_WALLET)
-      dispatch(setRootData({ metaMaskAccount: '' }))
+      clear()
     } else {
       const chainId = await window.ethereum.request({ method: 'eth_chainId' })
       localStorage.setItem(LAST_WALLET, 'MetaMask')
@@ -115,16 +125,50 @@ export default function Header() {
   }, [])
 
   const onConnectWallet = async () => {
-    if (typeof window.ethereum !== 'undefined') {
-      console.log('MetaMask is installed!')
-    } else {
-      console.log('MetaMask not installed; using read-only defaults')
-      window.open('https://chrome.google.com/webstore/detail/metamask/nkbihfbeogaeaoehlefnkodbefgpgknn?hl=en')
-      return
+    if (ifMetaMaskNotInstalled) {
+      closeDialog()
+      return window.open('https://chrome.google.com/webstore/detail/metamask/nkbihfbeogaeaoehlefnkodbefgpgknn?hl=en')
     }
 
-    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' })
-    initEthers(accounts)
+    // Find MetaMask Provider
+    let providers = window.ethereum?.providers
+    const provider = providers ? providers.find((provider: any) => provider.isMetaMask) : window.ethereum
+
+    if (window.ethereum?.setSelectedProvider) {
+      window.ethereum?.setSelectedProvider(provider)
+    }
+    if (provider) {
+      provider
+        .request({ method: 'eth_requestAccounts' })
+        .then((result) => {
+          closeDialog()
+          initEthers(result)
+        })
+        .catch((error) => {
+          if (error?.code === 4001) {
+            console.log('Please connect to your wallet.')
+          }
+        })
+    }
+  }
+
+  const onConnectWalletBtnClick = () => {
+    if (metaMaskAccount) return
+    openDialog()
+  }
+
+  const openDialog = () => {
+    setIsOpen(true)
+  }
+
+  const closeDialog = () => {
+    setIsOpen(false)
+  }
+
+  window.onfocus = () => {
+    if (ifMetaMaskNotInstalled) {
+      window.location.reload()
+    }
   }
 
   return (
@@ -228,7 +272,7 @@ export default function Header() {
 
           <button
             className='bg-gradient-common ml-8 hidden h-11 w-40 rounded-full text-white md:block'
-            onClick={onConnectWallet}
+            onClick={onConnectWalletBtnClick}
             disabled={!!metaMaskAccount}
           >
             {metaMaskAccount
@@ -294,6 +338,66 @@ export default function Header() {
             </>
           )}
         </Popover>
+
+        {/* wallet connect dialog */}
+        <Transition show={isOpen} as={Fragment}>
+          <Dialog onClose={() => setIsOpen(false)} className='relative z-50'>
+            {/* The backdrop, rendered as a fixed sibling to the panel container */}
+            <Transition.Child
+              as={Fragment}
+              enter='ease-out duration-300'
+              enterFrom='opacity-0'
+              enterTo='opacity-100'
+              leave='ease-in duration-200'
+              leaveFrom='opacity-100'
+              leaveTo='opacity-0'
+            >
+              <div className='fixed inset-0 bg-black/30' aria-hidden='true' />
+            </Transition.Child>
+
+            {/* Full-screen container to center the panel */}
+            <Transition.Child
+              as={Fragment}
+              enter='ease-out duration-300'
+              enterFrom='opacity-0'
+              enterTo='opacity-100'
+              leave='ease-in duration-200'
+              leaveFrom='opacity-100'
+              leaveTo='opacity-0'
+            >
+              <div className='fixed inset-0 flex items-center justify-center p-4'>
+                {/* The actual dialog panel  */}
+                <Dialog.Panel className='relative mx-auto box-border w-[370px] rounded-[10px] bg-white bg-[url("./assets/images/bg_small.png")] bg-cover p-[54px] sm:w-[518px]'>
+                  <svg
+                    xmlns='http://www.w3.org/2000/svg'
+                    fill='none'
+                    viewBox='0 0 24 24'
+                    strokeWidth='1.5'
+                    stroke='currentColor'
+                    className='absolute right-9 top-5 h-6 w-6 cursor-pointer'
+                    onClick={(e) => {
+                      e.nativeEvent.stopImmediatePropagation()
+                      closeDialog()
+                    }}
+                  >
+                    <path strokeLinecap='round' strokeLinejoin='round' d='M6 18L18 6M6 6l12 12' />
+                  </svg>
+                  <div className='flex flex-col items-center justify-center'>
+                    <div className='mb-3 text-[36px] font-medium text-[#111029] sm:text-[45px]'>Select a Wallet</div>
+                    <div className='mb-12 text-[18px] text-[#57596C]'>Connect your wallet to sign in.</div>
+                    <div
+                      className='flex w-full cursor-pointer rounded-[10px] border border-[#eaeaef] py-4 hover:border-[#0077fe]'
+                      onClick={onConnectWallet}
+                    >
+                      <img className='mx-4 h-[32px] w-[35px]' src={MetaMaskURL} alt='MetaMask' />
+                      <span className='text-[24px] font-medium text-[#111029]'>Metamask</span>
+                    </div>
+                  </div>
+                </Dialog.Panel>
+              </div>
+            </Transition.Child>
+          </Dialog>
+        </Transition>
       </div>
     </header>
   )
