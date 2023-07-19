@@ -18,10 +18,10 @@ const links = [
     name: 'Market',
     href: '/market'
   },
-  // {
-  //   name: 'History',
-  //   href: '/history'
-  // },
+  {
+    name: 'History',
+    href: '/history'
+  },
   {
     name: 'Profile',
     href: '/me'

@@ -10,17 +10,22 @@ export default class Me extends Table {
   }
 
   private getList(page) {
+    this.dispatch(setRootData({ tableLoading: true }))
     getMeList({
       ordering: '-list_time',
       page,
       owner: this.rootState.root.metaMaskAccount,
       page_size: this.page_size
-    }).then((res) => {
-      res = res._data
-
-      this.page = page
-      this.dispatch(setRootData({ meList: res.results ?? [], mePage: page ?? 1, meCount: res.count ?? 0 }))
     })
+      .then((res) => {
+        res = res._data
+
+        this.page = page
+        this.dispatch(setRootData({ meList: res.results ?? [], mePage: page ?? 1, meCount: res.count ?? 0 }))
+      })
+      .finally(() => {
+        this.dispatch(setRootData({ tableLoading: false }))
+      })
   }
 
   get page_size() {

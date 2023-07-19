@@ -1,6 +1,6 @@
 import Market from '@/pages/Market'
 import History from '@/pages/History'
-import Me from '@/pages/Me'
+import Me from '@/pages/Me/index'
 import Comment from '@/pages/Comment'
 
 // import { lazy, ReactNode, Suspense } from 'react'

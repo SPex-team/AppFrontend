@@ -3,6 +3,9 @@
 @tailwind utilities;
 
 @layer base {
+  .text-primary {
+    color: #0077fe;
+  }
   input {
     border: 1px solid #eaeaef;
   }
@@ -25,7 +28,7 @@
   box-shadow: 4px 0 10px 0 rgba(17, 16, 41, 0.15);
 }
 .basic-table tr:hover td:last-child {
-  box-shadow: 4px 0 6px 0 rgba(17, 16, 41, 0.1);
+  box-shadow: 4px 0 6px 0 rgba(17, 16, 41, 0.15);
 }
 
 /* ------------------------------------- font --------------------------------------- */

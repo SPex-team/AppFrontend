@@ -1,7 +1,6 @@
 import { ReactComponent as CanelIcon } from '@/assets/images/canel.svg'
 import { ReactComponent as OutIcon } from '@/assets/images/out.svg'
 import { ReactComponent as PriceIcon } from '@/assets/images/price.svg'
-import Pagination from '@/components/Pagination'
 import { useEffect, useMemo, useState } from 'react'
 import AddDialog, { handleError } from '@/components/AddDialog'
 import MeClass from '@/models/me-class'
@@ -15,7 +14,9 @@ import { putMiner, patchMiner } from '@/api/modules'
 import { setRootData } from '@/store/modules/root'
 import { message } from '@/components/Tip'
 import clsx from 'clsx'
-import { formatTime } from '@/plugins/dayjs'
+import TransactionHistory from './components/TransactionHistory'
+import { formatListTime } from '@/utils/date'
+import BasicTable from '@/components/BasicTable'
 
 const Me = (props) => {
   const dispatch = useDispatch()
@@ -24,12 +25,13 @@ const Me = (props) => {
   const [minerId, setMinerId] = useState<any>()
   const [loading, setLoading] = useState<any>()
 
-  const { meCount, mePage, meList, signer, metaMaskAccount } = useSelector((state: RootState) => ({
+  const { meCount, mePage, meList, signer, metaMaskAccount, tableLoading } = useSelector((state: RootState) => ({
     meCount: state.root.meCount,
     mePage: state.root.mePage,
     meList: state.root.meList,
     signer: state.root.signer,
-    metaMaskAccount: state.root.metaMaskAccount
+    metaMaskAccount: state.root.metaMaskAccount,
+    tableLoading: state.root.tableLoading
   }))
   const contract = useMemo(() => new Contract(config.contractAddress, abi, signer), [signer])
 
@@ -123,6 +125,115 @@ const Me = (props) => {
     }
   }
 
+  const columns = [
+    {
+      title: 'Miner ID',
+      render: (val, row) => (
+        <span>
+          {config.address_zero_prefix}0{row.miner_id ?? '-'}
+        </span>
+      )
+    },
+    {
+      title: 'Order Status',
+      render: (val, row) => (
+        <span
+          className={clsx([
+            'inline-block h-[26px] w-[85px] rounded-full bg-[rgba(0,119,254,0.1)] text-center text-sm leading-[26px]',
+            row.is_list ? 'text-[#0077fe]' : 'text-[#909399]'
+          ])}
+        >
+          {row.is_list ? 'Listing' : 'Unlisted'}
+        </span>
+      )
+    },
+    {
+      title: 'Price',
+      key: 'price',
+      render: (val, row) => <span className='truncate'>{(row.price ?? '0') + ' FIL'}</span>
+    },
+    {
+      title: 'List Time',
+      key: 'list_time',
+      render: (val, row) => formatListTime(val)
+    },
+    {
+      key: 'operation',
+      render: (val, row) => (
+        <div className='inline-block' onClick={() => setMinerId(row.miner_id)}>
+          <button
+            className={clsx(['ml-7', row.is_list ? 'hover:text-[#0077FE]' : 'text-gray-400'])}
+            onClick={() => {
+              if (!row.is_list) return
+              setOpenDialog('price')
+            }}
+          >
+            Change Price
+            <PriceIcon className='ml-2 inline-block w-[14px]' />
+          </button>
+          <button
+            className={clsx(['ml-7', row.is_list ? 'text-gray-400' : 'hover:text-[#0077FE]'])}
+            onClick={() => {
+              if (row.is_list) {
+                message({
+                  title: 'TIP',
+                  type: 'warning',
+                  content: 'You must cancel list'
+                })
+              } else {
+                setOpenDialog('owner')
+              }
+            }}
+          >
+            Transfer Out
+            <OutIcon className='ml-2 inline-block w-[14px]' />
+          </button>
+          <button
+            className='ml-7 hover:text-[#0077FE]'
+            onClick={() => {
+              if (row.is_list) {
+                // console.log("item.miner_id: ", item.miner_id)
+                // setMinerId(item.miner_id)
+                onCancal(row)
+              } else {
+                setOpenDialog('list')
+              }
+            }}
+          >
+            {row.is_list ? (
+              <>
+                Cancel
+                <CanelIcon className='ml-2 inline-block w-[14px]' />
+              </>
+            ) : (
+              <>
+                List
+                <svg
+                  xmlns='http://www.w3.org/2000/svg'
+                  viewBox='0 0 20 20'
+                  fill='currentColor'
+                  className='ml-2 inline-block w-[16px]'
+                >
+                  <path
+                    fillRule='evenodd'
+                    d='M2 3.75A.75.75 0 012.75 3h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 3.75zm0 4.167a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75a.75.75 0 01-.75-.75zm0 4.166a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75a.75.75 0 01-.75-.75zm0 4.167a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75a.75.75 0 01-.75-.75z'
+                    clipRule='evenodd'
+                  />
+                </svg>
+              </>
+            )}
+          </button>
+        </div>
+      )
+    }
+  ]
+
+  const page = {
+    pageNum: Math.ceil(meCount / meClass.page_size),
+    currentPage: mePage,
+    onChange: (page) => meClass.selectPage(page)
+  }
+
   const onList = async (data) => {
     try {
       console.log('parseEther(price)', parseEther(data.price))
@@ -179,10 +290,10 @@ const Me = (props) => {
     <>
       {metaMaskAccount ? (
         <section className='container mx-auto pb-[60px] pt-[190px]'>
-          <div className='flex justify-between'>
-            <div className='mb-20'>
+          <div className='flex flex-col justify-between sm:flex-row'>
+            <div className='mb-10 sm:mb-20'>
               <h2 className='mb-[13px] text-[56px] font-semibold leading-[61px]'>My Miners</h2>
-              <p className='w-[480px] text-lg text-[#57596C]'>
+              <p className='w-[300px] text-lg text-[#57596C] sm:w-[480px]'>
                 Here you can find the miners you possess and their details.
               </p>
             </div>
@@ -203,109 +314,9 @@ const Me = (props) => {
               </svg>
             </button>
           </div>
-          <div>
-            <div className='mb-[11px] flex px-12 text-2xl font-medium'>
-              <span className='inline-block w-[13%] min-w-[100px]'>Miner ID</span>
-              <span className='inline-block w-[16%] min-w-[90px]'>Order Status</span>
-              <span className='inline-block w-[14%] min-w-[75px]'>Price</span>
-              <span className='inline-block w-[14%] min-w-[105px]'>List Time</span>
-            </div>
-            <div className='space-y-[18px]'>
-              {meList.map((item) => (
-                <div
-                  key={item.miner_id}
-                  className='box-border flex h-[74px] rounded-[10px] border border-[#eaeaef] bg-white px-12 text-lg leading-[74px] text-[#57596c] hover:border-0 hover:shadow-[0_0_10px_0_rgba(17,16,41,0.15)]'
-                >
-                  <span className='inline-block w-[13%] min-w-[100px] truncate'>
-                    {config.address_zero_prefix}0{item.miner_id ?? '-'}
-                  </span>
-                  <span className='inline-block w-[16%] min-w-[90px] truncate'>
-                    <span
-                      className={clsx([
-                        'inline-block h-[26px] w-[85px] rounded-full bg-[rgba(0,119,254,0.1)] text-center text-sm leading-[26px]',
-                        item.is_list ? 'text-[#0077fe]' : 'text-[#909399]'
-                      ])}
-                    >
-                      {item.is_list ? 'Listing' : 'Unlisted'}
-                    </span>
-                  </span>
-                  <span className='inline-block w-[14%] min-w-[75px] truncate'>{(item.price ?? '0') + ' FIL'}</span>
-                  <span className='inline-block w-[14%] min-w-[105px] truncate'>
-                    {item.list_time ? formatTime(item.list_time * 1000) : '-'}
-                  </span>
-                  <div className='inline-block text-black' onClick={() => setMinerId(item.miner_id)}>
-                    <button
-                      className={clsx(['ml-7', item.is_list ? 'hover:text-[#0077FE]' : 'text-gray-400'])}
-                      onClick={() => {
-                        if (!item.is_list) return
-                        setOpenDialog('price')
-                      }}
-                    >
-                      Change Price
-                      <PriceIcon className='ml-2 inline-block w-[14px]' />
-                    </button>
-                    <button
-                      className={clsx(['ml-7', item.is_list ? 'text-gray-400' : 'hover:text-[#0077FE]'])}
-                      onClick={() => {
-                        if (item.is_list) {
-                          message({
-                            title: 'TIP',
-                            type: 'warning',
-                            content: 'You must cancel list'
-                          })
-                        } else {
-                          setOpenDialog('owner')
-                        }
-                      }}
-                    >
-                      Transfer Out
-                      <OutIcon className='ml-2 inline-block w-[14px]' />
-                    </button>
-                    <button
-                      className='ml-7 hover:text-[#0077FE]'
-                      onClick={() => {
-                        if (item.is_list) {
-                          // console.log("item.miner_id: ", item.miner_id)
-                          // setMinerId(item.miner_id)
-                          onCancal(item)
-                        } else {
-                          setOpenDialog('list')
-                        }
-                      }}
-                    >
-                      {item.is_list ? (
-                        <>
-                          Cancel
-                          <CanelIcon className='ml-2 inline-block w-[14px]' />
-                        </>
-                      ) : (
-                        <>
-                          List
-                          <svg
-                            xmlns='http://www.w3.org/2000/svg'
-                            viewBox='0 0 20 20'
-                            fill='currentColor'
-                            className='ml-2 inline-block w-[16px]'
-                          >
-                            <path
-                              fillRule='evenodd'
-                              d='M2 3.75A.75.75 0 012.75 3h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 3.75zm0 4.167a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75a.75.75 0 01-.75-.75zm0 4.166a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75a.75.75 0 01-.75-.75zm0 4.167a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75a.75.75 0 01-.75-.75z'
-                              clipRule='evenodd'
-                            />
-                          </svg>
-                        </>
-                      )}
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-            <Pagination
-              pageNum={Math.ceil(meCount / meClass.page_size)}
-              currentPage={mePage}
-              onChange={(page) => meClass.selectPage(page)}
-            />
-          </div>
+          <BasicTable columns={columns} data={meList} page={page} loading={tableLoading} />
+          <hr className='mt-[50px]' />
+          <TransactionHistory />
         </section>
       ) : (
         <div className='container mx-auto flex items-center justify-center [min-height:calc(100vh-279px)]'>

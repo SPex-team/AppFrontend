@@ -15,6 +15,9 @@ interface IState {
   marketPage: number
   marketCount: number
 
+  minerPriceCeiling: number
+  minerPriceFloor: number
+
   meList: any[]
   mePage: number
   meCount: number
@@ -23,6 +26,12 @@ interface IState {
   historyPage: number
   historyCount: number
 
+  transactionHistoryList: any[]
+  transactionHistoryPage: number
+  transactionHistoryCount: number
+
+  tableLoading: boolean
+  tableLoading2: boolean
   loading: boolean
 }
 
@@ -30,6 +39,9 @@ const initialState: IState = {
   marketList: [],
   marketPage: 1,
   marketCount: 0,
+
+  minerPriceCeiling: 0,
+  minerPriceFloor: 0,
 
   meList: [],
   mePage: 1,
@@ -44,6 +56,12 @@ const initialState: IState = {
   historyPage: 1,
   historyCount: 0,
 
+  transactionHistoryList: [],
+  transactionHistoryPage: 1,
+  transactionHistoryCount: 0,
+
+  tableLoading: false,
+  tableLoading2: false,
   loading: false
 }
 

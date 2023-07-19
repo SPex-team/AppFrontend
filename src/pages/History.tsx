@@ -5,30 +5,45 @@ import { NavLink } from 'react-router-dom'
 import { config } from '@/config'
 import { useState, useMemo, useEffect } from 'react'
 import HistoryClass from '@/models/history'
+import { RootState } from '@/store'
+import { useSelector } from 'react-redux'
+import { formatListTime } from '@/utils/date'
+import { isEmpty } from '@/utils/index'
+
+const isDevEnv = process.env.NODE_ENV === 'development' || window.location.origin.includes('calibration')
 
 const columns = [
   {
     title: 'Sold Miner ID',
-    key: 'soldMinerID',
-    minWidth: 160
+    key: 'miner_id',
+    minWidth: 160,
+    render: (val) => (!isEmpty(val) ? `${config.address_zero_prefix}0${val}` : '-')
   },
   {
     title: 'Balance',
-    key: 'balance',
-    width: 200
+    key: 'balance_human',
+    width: 200,
+    render: (val) => (!isEmpty(val) ? `${val} FIL` : '-')
   },
   {
     title: 'Power',
-    key: 'power'
+    key: 'power_human',
+    render: (val) => (!isEmpty(val) ? `${val} TiB` : '-')
   },
   {
     title: 'Sold Price',
-    key: 'price',
-    minWidth: 100
+    key: 'price_human',
+    minWidth: 100,
+    render: (val) => (!isEmpty(val) ? `${val} FIL` : '-')
   },
   {
     title: 'Transaction time',
-    key: 'transactionTime'
+    key: 'time',
+    render: (val) => {
+      console.log(val, isEmpty(val))
+
+      return !isEmpty(val) ? formatListTime(val) : '-'
+    }
   },
   {
     key: 'operation',
@@ -38,14 +53,16 @@ const columns = [
         <button
           className='whitespace-nowrap break-words hover:text-[#0077FE]'
           onClick={() => {
-            const url = `${config.filescanOrigin}/address/miner?address=${config.address_zero_prefix}0${row.soldMinerID}`
+            const url = `${isDevEnv ? 'https://calibration.filfox.info/en' : config.filescanOrigin}/message/${
+              row.transaction_hash
+            }`
             window.open(url)
           }}
         >
           Transaction Detail
           <DetailIcon className='ml-2 inline-block w-[14px]' />
         </button>
-        <NavLink to={'/comment/' + row.soldMinerID.toString()}>
+        <NavLink to={'/comment/' + row.miner_id?.toString()}>
           <button className='whitespace-nowrap break-words hover:text-[#0077FE]'>
             Comments
             <CommentIcon className='ml-2 inline-block' width={14} height={14} />
@@ -54,7 +71,7 @@ const columns = [
         <button
           className='whitespace-nowrap break-words hover:text-[#0077FE]'
           onClick={() => {
-            const url = `${config.filescanOrigin}/address/miner?address=${config.address_zero_prefix}0${row.soldMinerID}`
+            const url = `${config.filescanOrigin}/address/miner?address=${config.address_zero_prefix}0${row.miner_id}`
             window.open(url)
           }}
         >
@@ -66,71 +83,26 @@ const columns = [
   }
 ]
 
-const data: any = [
-  {
-    soldMinerID: 'aaaa',
-    balance: '0x2ebd277c069e7ccacdde2cead2d9aab549561c2f',
-    is_list: true,
-    price: 2,
-    list_time: 1677742302277
-  },
-  {
-    soldMinerID: 'f124422',
-    balance: 'ddd',
-    is_list: true,
-    price: 3,
-    list_time: 1675307260654
-  },
-  {
-    soldMinerID: 'f0807366',
-    balance: '3233',
-    is_list: true,
-    price: 1,
-    list_time: 1675243760733
-  },
-  {
-    soldMinerID: 'f08071366',
-    balance: '3233',
-    is_list: true,
-    price: 1,
-    list_time: 1675243760733
-  },
-  {
-    soldMinerID: 'f08027366',
-    balance: '3233',
-    is_list: true,
-    price: 1,
-    list_time: 1675243760733
-  },
-  {
-    soldMinerID: 'f08307366',
-    balance: '3233',
-    is_list: true,
-    price: 1,
-    list_time: 1675243760733
-  }
-]
-
 const History = () => {
-  const [pageNum, setPageNum] = useState(1)
-  const [currentPage, setCurrentPage] = useState(1)
-  const [searchText, setSearchText] = useState('')
   const historyClass = useMemo(() => new HistoryClass(), [])
 
-  const onPageChange = () => {}
+  const { transactionHistoryList, transactionHistoryPage, transactionHistoryCount, tableLoading } = useSelector(
+    (state: RootState) => ({
+      transactionHistoryList: state.root.transactionHistoryList,
+      transactionHistoryPage: state.root.transactionHistoryPage,
+      transactionHistoryCount: state.root.transactionHistoryCount,
+      tableLoading: state.root.tableLoading2
+    })
+  )
 
   const page = {
-    pageNum: Math.ceil(data.marketCount / historyClass.page_size),
-    currentPage,
-    onChange: onPageChange
-  }
-
-  const onSearchTextChange: React.ChangeEventHandler<HTMLInputElement> = (event) => {
-    setSearchText(event.target.value)
+    pageNum: Math.ceil(transactionHistoryCount / historyClass.page_size),
+    currentPage: transactionHistoryPage,
+    onChange: (page) => historyClass.selectTransactionPage(page)
   }
 
   useEffect(() => {
-    // historyClass.init()
+    historyClass.initTransaction()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -144,21 +116,8 @@ const History = () => {
           </p>
         </div>
       </div>
-      <div className='relative w-[255px] text-gray-600'>
-        <input
-          type='search'
-          name='search'
-          placeholder='Search'
-          className='h-10 w-[250px] rounded-full bg-white px-5 pr-10 text-sm focus:outline-none'
-          onChange={onSearchTextChange}
-        />
-        <button type='submit' className='absolute right-0 top-0 mr-4 mt-3'>
-          <svg className='h-4 w-4 fill-current' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 56.966 56.966'>
-            <path d='M55.146,51.887L41.588,37.786c3.486-4.144,5.396-9.358,5.396-14.786c0-12.682-10.318-23-23-23s-23,10.318-23,23  s10.318,23,23,23c4.761,0,9.298-1.436,13.177-4.162l13.661,14.208c0.571,0.593,1.339,0.92,2.162,0.92  c0.779,0,1.518-0.297,2.079-0.837C56.255,54.982,56.293,53.08,55.146,51.887z M23.984,6c9.374,0,17,7.626,17,17s-7.626,17-17,17  s-17-7.626-17-17S14.61,6,23.984,6z' />
-          </svg>
-        </button>
-      </div>
-      <BasicTable columns={columns} data={data} page={page} />
+
+      <BasicTable columns={columns} data={transactionHistoryList} loading={tableLoading} page={page} />
     </section>
   )
 }
