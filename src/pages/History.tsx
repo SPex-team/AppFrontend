@@ -39,11 +39,7 @@ const columns = [
   {
     title: 'Transaction time',
     key: 'time',
-    render: (val) => {
-      console.log(val, isEmpty(val))
-
-      return !isEmpty(val) ? formatListTime(val) : '-'
-    }
+    render: (val) => (!isEmpty(val) ? formatListTime(val) : '-')
   },
   {
     key: 'operation',
