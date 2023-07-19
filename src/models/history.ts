@@ -17,7 +17,7 @@ export default class History extends Table {
   private getList(page) {
     this.dispatch(setRootData({ tableLoading: true }))
     getSaleHistoryList({
-      ordering: '-create_time',
+      ordering: '-time',
       page,
       page_size: this.page_size
     })
@@ -38,7 +38,7 @@ export default class History extends Table {
     this.dispatch(setRootData({ tableLoading2: true }))
     getTransactionHistory(
       {
-        ordering: '-create_time',
+        ordering: '-time',
         page,
         page_size: this.page_size
       },
