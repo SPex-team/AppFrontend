@@ -154,6 +154,6 @@ export function patchMiner(
 // miner price aggregated
 export function getMinerPriceAggregated(func: 'max' | 'min'): Promise<any> {
   return getReq({
-    url: `/api/v1/spex/miners/aggregation?_column=price&_func=${func}`
+    url: `/api/v1/spex/miners/aggregation?_column=price&_func=${func}&is_list=true`
   })
 }
