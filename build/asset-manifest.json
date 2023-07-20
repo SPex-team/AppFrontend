@@ -1,7 +1,7 @@
 {
   "files": {
     "main.css": "/static/css/main.cd0ef33b.css",
-    "main.js": "/static/js/main.2125d304.js",
+    "main.js": "/static/js/main.a4f2ef07.js",
     "static/media/bg.png": "/static/media/bg.96e0da52ab840946f578.png",
     "static/media/bg_small.png": "/static/media/bg_small.a0387aef2666a73310cb.png",
     "static/media/GeneralSans-VariableItalic.ttf": "/static/media/GeneralSans-VariableItalic.37a2c9e4ec944dec5059.ttf",
@@ -49,7 +49,6 @@
     "static/media/out.svg": "/static/media/out.1f7fc91ca141b614fb11c3c938ef6c96.svg",
     "static/media/discord.svg": "/static/media/discord.90265e5214ac7dce63fc7dfbcc40700b.svg",
     "static/media/emoji.svg": "/static/media/emoji.7611868caebe115ada8e39eac6cedb68.svg",
-    "static/media/comment.svg": "/static/media/comment.fc2b8f6727fe7d67489407e7692e4f2e.svg",
     "static/media/price.svg": "/static/media/price.61d7144e4b94d1eaa8a87d68b41a499d.svg",
     "static/media/gitbook.svg": "/static/media/gitbook.b100ee536a7acfdbf6ecfa1e1e0b6fe4.svg",
     "static/media/detail.svg": "/static/media/detail.3cf149586ba221f9f1f47a3e0b164505.svg",
@@ -63,6 +62,6 @@
   },
   "entrypoints": [
     "static/css/main.cd0ef33b.css",
-    "static/js/main.2125d304.js"
+    "static/js/main.a4f2ef07.js"
   ]
 }
