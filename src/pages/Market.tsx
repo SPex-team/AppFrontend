@@ -15,6 +15,7 @@ import { NavLink, useLocation } from 'react-router-dom'
 import SortDropdown from '@/components/Dropdown'
 import SpinWrapper from '@/components/SpinWrapper'
 import { formatListTime } from '@/utils/date'
+import debounce from 'lodash/debounce'
 
 import DigitalCoinURL from '@/assets/images/digital_coin.png'
 
@@ -33,7 +34,7 @@ const options = [
   },
   {
     key: 'list_time',
-    value: 'Anciently Listed'
+    value: 'Earliest Listed'
   },
   {
     key: 'balance_human',
@@ -116,11 +117,12 @@ const Market = (props) => {
   }
 
   const onSearchTextChange: React.ChangeEventHandler<HTMLInputElement> = (event) => {
-    setSearchText(event.target.value)
+    setSearchText(event.target.value.trim())
   }
 
   const onSearch = () => {
-    marketClass.searchList(searchText)
+    const seachTxt = searchText.replace('t0', '').replace('f0', '')
+    marketClass.searchList(seachTxt)
   }
 
   const renderFloorAndCeilingMarketPrices = () => (
@@ -154,6 +156,8 @@ const Market = (props) => {
       marketClass.sortList(sortKey)
     }
   }, [marketClass, sortKey])
+
+  useEffect(onSearch, [marketClass, searchText])
 
   return (
     <>
@@ -204,7 +208,7 @@ const Market = (props) => {
               name='search'
               placeholder='Search'
               className='h-10 w-[250px] rounded-full bg-white px-5 pr-10 text-sm focus:outline-none'
-              onChange={onSearchTextChange}
+              onChange={debounce(onSearchTextChange, 800)}
             />
             <button type='submit' className='absolute right-0 top-0 mr-4 mt-3' onClick={onSearch}>
               <svg className='h-4 w-4 fill-current' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 56.966 56.966'>

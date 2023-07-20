@@ -22,7 +22,6 @@ const columns = [
   {
     title: 'Balance',
     key: 'balance_human',
-    width: 200,
     render: (val) => (!isEmpty(val) ? `${val} FIL` : '-')
   },
   {
@@ -43,7 +42,7 @@ const columns = [
   },
   {
     key: 'operation',
-    width: '35%',
+    width: '40%',
     render: (val, row) => (
       <div className='justify-space flex flex-wrap gap-4'>
         <button
@@ -58,12 +57,12 @@ const columns = [
           Transaction Detail
           <DetailIcon className='ml-2 inline-block w-[14px]' />
         </button>
-        <NavLink to={'/comment/' + row.miner_id?.toString()}>
+        {/* <NavLink to={'/comment/' + row.miner_id?.toString()}>
           <button className='whitespace-nowrap break-words hover:text-[#0077FE]'>
             Comments
             <CommentIcon className='ml-2 inline-block' width={14} height={14} />
           </button>
-        </NavLink>
+        </NavLink> */}
         <button
           className='whitespace-nowrap break-words hover:text-[#0077FE]'
           onClick={() => {
