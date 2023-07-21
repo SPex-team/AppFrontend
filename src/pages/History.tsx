@@ -42,7 +42,7 @@ const columns = [
   },
   {
     key: 'operation',
-    width: '40%',
+    width: '35%',
     render: (val, row) => (
       <div className='justify-space flex flex-wrap gap-4'>
         <button
@@ -54,15 +54,15 @@ const columns = [
             window.open(url)
           }}
         >
-          Transaction Detail
+          Transaction
           <DetailIcon className='ml-2 inline-block w-[14px]' />
         </button>
-        {/* <NavLink to={'/comment/' + row.miner_id?.toString()}>
+        <NavLink to={'/comment/' + row.miner_id?.toString()}>
           <button className='whitespace-nowrap break-words hover:text-[#0077FE]'>
             Comments
             <CommentIcon className='ml-2 inline-block' width={14} height={14} />
           </button>
-        </NavLink> */}
+        </NavLink>
         <button
           className='whitespace-nowrap break-words hover:text-[#0077FE]'
           onClick={() => {
@@ -70,7 +70,7 @@ const columns = [
             window.open(url)
           }}
         >
-          Miner Detail
+          Miner
           <DetailIcon className='ml-2 inline-block w-[14px]' />
         </button>
       </div>
