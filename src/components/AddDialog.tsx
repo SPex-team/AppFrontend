@@ -5,15 +5,7 @@ import { useSelector } from 'react-redux'
 import { RootState } from '@/store'
 import { Contract, ethers, parseEther, ZeroAddress } from 'ethers'
 import { abi, config } from '@/config'
-import {
-  postBuildMessage,
-  postMiner,
-  postMiners,
-  postPushMessage,
-  postUpdataMiners,
-  putMiners,
-  transferInCheck
-} from '@/api/modules'
+import { postBuildMessage, postMiner, postPushMessage, transferInCheck } from '@/api/modules'
 import Tip, { message } from './Tip'
 
 interface IProps {
@@ -121,10 +113,6 @@ export default function AddDialog(props: IProps) {
       key: 3,
       name: 'Confirm'
     },
-    // {
-    //   key: 4,
-    //   name: 'Set Price'
-    // },
     {
       key: 4,
       name: 'Completed'
@@ -141,6 +129,7 @@ export default function AddDialog(props: IProps) {
 
           <input
             type='text'
+            id='miner_id'
             name='miner_id'
             className='h-[49px] w-full rounded-[10px] border border-[#EAEAEF] px-5'
             required
@@ -213,6 +202,7 @@ export default function AddDialog(props: IProps) {
             <input
               type='text'
               name='sign'
+              id='sign'
               className='peer w-full rounded-r-[10px] px-5 transition-colors duration-300'
               required
               autoComplete='off'
@@ -231,6 +221,7 @@ export default function AddDialog(props: IProps) {
             <input
               type='text'
               name='price'
+              id='price'
               className='peer w-full rounded-l-[10px] px-5 transition-colors duration-300'
               required
               autoComplete='off'
@@ -241,38 +232,27 @@ export default function AddDialog(props: IProps) {
           </div>
         </div>
         <span className='text-xs'>Commission fee 1% For Platform</span>
+
+        <div className='mt-3'>
+          <label htmlFor='targetBuyer' className='mb-[10px] block text-base'>
+            Target Buyer Address (Optional):
+          </label>
+
+          <div className='relative flex h-[49px] w-full flex-row overflow-clip rounded-lg'>
+            <input
+              type='text'
+              name='targetBuyer'
+              id='targetBuyer'
+              className='peer w-full rounded-[10px] px-5 transition-colors duration-300'
+              required
+              autoComplete='off'
+            />
+          </div>
+        </div>
         <input type='text' value='' className='hidden' readOnly />
       </form>
     )
   }
-
-  // const step4 = () => {
-  //   return (
-  //     <form className='text-[#57596C]' id='form_price'>
-  //       <div className=''>
-  //         <label htmlFor='price' className='mb-[10px] block text-base'>
-  //           Price:
-  //         </label>
-  //
-  //         <div className='relative flex h-[49px] w-full flex-row overflow-clip rounded-lg'>
-  //           <input
-  //             type='text'
-  //             name='price'
-  //             className='peer w-full rounded-l-[10px] px-5 transition-colors duration-300'
-  //             required
-  //             autoComplete='off'
-  //           />
-  //           <span className='flex items-center rounded-r-[10px] border border-l-0 border-[#EAEAEF] bg-slate-50 px-4 text-sm text-slate-400 transition-colors duration-300 peer-focus:border-primary peer-focus:bg-primary peer-focus:text-white'>
-  //             FIL
-  //           </span>
-  //         </div>
-  //       </div>
-  //       <span className='text-xs'>Commision fee 3% For Platform</span>
-  //
-  //       <input type='text' value='' className='hidden' readOnly />
-  //     </form>
-  //   )
-  // }
 
   const step4 = () => {
     return (
@@ -306,8 +286,6 @@ export default function AddDialog(props: IProps) {
         return step3()
       case 4:
         return step4()
-      // case 5:
-      //   return step5()
       default:
         return <></>
     }
@@ -420,6 +398,7 @@ export default function AddDialog(props: IProps) {
               if (!price) {
                 throw new Error('Please input Price')
               }
+              const targetBuyer = formData.get('targetBuyer')
               sign = '0x' + sign.slice(2)
 
               console.log('ZeroAddress: ', ZeroAddress)
@@ -431,7 +410,7 @@ export default function AddDialog(props: IProps) {
                 sign,
                 data.timestamp,
                 parseEther(price),
-                ZeroAddress
+                targetBuyer ?? ZeroAddress
               )
 
               message({
@@ -449,7 +428,8 @@ export default function AddDialog(props: IProps) {
                 miner_id: data.miner_id,
                 price: parseFloat(price),
                 price_raw: parseFloat(price) * 1e18,
-                is_list: true
+                is_list: true,
+                list_time: data.timestamp
               })
 
               onNext(form)
@@ -459,54 +439,6 @@ export default function AddDialog(props: IProps) {
             }
           }
         }
-      // case 4:
-      //   return {
-      //     text: 'List Order',
-      //     onClick: async () => {
-      //       try {
-      //         setLoading(true)
-      //         const form = document.getElementById('form_price') as HTMLFormElement
-      //         const formData = new FormData(form)
-      //
-      //         const price = formData.get('price')?.toString()
-      //         if (!price) {
-      //           throw new Error('Please input Price')
-      //         }
-      //
-      //         const tx = await contract?.listMiner(data.miner_id, parseEther(price))
-      //         message({
-      //           title: 'TIP',
-      //           type: 'success',
-      //           content: tx.hash,
-      //           closeTime: 4000
-      //         })
-      //
-      //         const result = await tx.wait()
-      //         console.log('result', result)
-      //
-      //         const _data = {
-      //           is_list: true,
-      //           owner: metaMaskAccount as any,
-      //           miner_id: data.miner_id
-      //         }
-      //
-      //         setData({
-      //           ...data,
-      //           tx
-      //         })
-      //
-      //         postUpdataMiners(data.miner_id)
-      //         // await putMiners(data.miner_id, _data)
-      //         // this.$emit("add_item", response.data)
-      //
-      //         onNext(form)
-      //       } catch (error) {
-      //         handleError(error)
-      //
-      //         setLoading(false)
-      //       }
-      //     }
-      //   }
       case 4:
         return {
           text: 'Done',
@@ -525,11 +457,6 @@ export default function AddDialog(props: IProps) {
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const btnData = useMemo(() => btnEvent(stepNum), [stepNum])
-
-  const syncAndUpdateNewMiner = async () => {
-    await postMiners()
-    await postUpdataMiners(data.miner_id)
-  }
 
   return (
     <>

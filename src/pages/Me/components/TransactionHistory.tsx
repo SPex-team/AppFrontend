@@ -78,7 +78,7 @@ const History = () => {
               window.open(url)
             }}
           >
-            Transaction Detail
+            Transaction
             <DetailIcon className='ml-2 inline-block w-[14px]' />
           </button>
           <button
@@ -88,7 +88,7 @@ const History = () => {
               window.open(url)
             }}
           >
-            Miner Detail
+            Miner
             <DetailIcon className='ml-2 inline-block w-[14px]' />
           </button>
         </div>

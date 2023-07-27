@@ -13,6 +13,14 @@
     outline: none;
     border-color: #0077fe;
   }
+  .basic-table button:disabled {
+    color: #57596c;
+    opacity: 0.3;
+  }
+  .basic-table button:disabled:hover {
+    color: #57596c;
+    opacity: 0.3;
+  }
 }
 
 @layer components {

@@ -9,6 +9,10 @@ export default class Market extends Table {
 
   public init() {
     this.getList(1)
+    this.updateMinerPriceInMarket()
+  }
+
+  public updateMinerPriceInMarket() {
     this.getMinerPriceInMarket('max')
     this.getMinerPriceInMarket('min')
   }
@@ -63,6 +67,7 @@ export default class Market extends Table {
 
   public removeDataOfList(miner_id: number) {
     this.getList(this.page)
+    this.updateMinerPriceInMarket()
     // const updataData = this.rootState.root.marketList.filter((item) => item.miner_id !== miner_id)
 
     // this.dispatch(setRootData({ marketList: updataData, marketPage: page ?? 1, marketCount: res.count ?? 0 }))

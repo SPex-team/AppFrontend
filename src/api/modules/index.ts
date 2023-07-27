@@ -117,6 +117,7 @@ export function postMiner(data?: {
   price: number
   price_raw: number
   is_list: boolean
+  list_time?: number
 }): Promise<any> {
   return postReq({
     url: '/api/v1/spex/miners',

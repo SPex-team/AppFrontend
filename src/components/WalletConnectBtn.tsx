@@ -33,8 +33,13 @@ const ChainCfg = {
   }
 }
 
-export default function WalletConnectBtn() {
+interface IProps {
+  title?: string
+}
+
+export default function WalletConnectBtn({ title = '' }: IProps) {
   const { ethereum } = window
+  let provider = ethereum
 
   const metaMaskAccount = useSelector((state: RootState) => state.root.metaMaskAccount)
   const dispatch = useDispatch()
@@ -42,19 +47,21 @@ export default function WalletConnectBtn() {
   const [loading, setLoading] = useState(false)
   const [errorMsg, setErrorMsg] = useState('')
   const net = config.net
+  const isMultiWallets = !!ethereum?.providers
   const ifMetaMaskNotInstalled = !ethereum || ethereum?.isMetaMask === false
 
   let [isOpen, setIsOpen] = useState(false)
+  let isMounted = true
 
   const addChain = (params) => {
-    window.ethereum.request({
+    ethereum.request({
       method: 'wallet_addEthereumChain', // Metamask的api名称
       params: params
     })
   }
 
   const fetchAccount = async () => {
-    const accounts = await window.ethereum?.request({ method: 'eth_accounts' })
+    const accounts = await ethereum?.request({ method: 'eth_accounts' })
     handleAccountsChanged(accounts)
   }
 
@@ -64,12 +71,14 @@ export default function WalletConnectBtn() {
     dispatch(setRootData({ metaMaskAccount: undefined }))
   }
 
-  const initEthers = async (provider) => {
+  const initEthers = async () => {
     localStorage.setItem(LAST_WALLET, 'MetaMask')
 
     // handle chain (network)
     const chainId = await provider.request({ method: 'eth_chainId' })
-    setCurrentChain(chainId)
+    if (isMounted) {
+      setCurrentChain(chainId)
+    }
 
     // handle provider
     const signer = await new ethers.BrowserProvider(provider).getSigner()
@@ -83,27 +92,22 @@ export default function WalletConnectBtn() {
       return window.open('https://chrome.google.com/webstore/detail/metamask/nkbihfbeogaeaoehlefnkodbefgpgknn?hl=en')
     }
 
-    let provider = ethereum
-
     // If user has multiple wallets, find MetaMask Provider
-    if (ethereum?.providers) {
+    if (isMultiWallets) {
       ethereum.providers.forEach(async (p) => {
         if (p.isMetaMask) provider = p
       })
-      window.ethereum?.setSelectedProvider(provider)
+      ethereum?.setSelectedProvider(provider)
     }
-
-    return provider
   }
 
   const onConnectWallet = async () => {
-    const provider = detectWallet()
+    detectWallet()
     if (provider) {
       provider
         .request({ method: 'eth_requestAccounts' })
         .then((accounts: string[]) => {
           handleAccountsChanged(accounts)
-          initEthers(provider)
           closeDialog()
         })
         .catch((error) => {
@@ -128,7 +132,9 @@ export default function WalletConnectBtn() {
   }
 
   const closeDialog = () => {
-    setIsOpen(false)
+    if (isOpen) {
+      setIsOpen(false)
+    }
   }
 
   const handleAccountsChanged = (accounts: string[]) => {
@@ -138,25 +144,31 @@ export default function WalletConnectBtn() {
       clear()
     } else if (account !== metaMaskAccount) {
       dispatch(setRootData({ metaMaskAccount: account }))
+      initEthers()
     }
   }
 
   const handleChainChanged = (chainId) => {
-    console.log('chainId changed', chainId)
     setCurrentChain(chainId)
-    // We recommend reloading the page, unless you must do otherwise.
-    // window.location.reload();
   }
 
   useEffect(() => {
-    window.ethereum?.on('accountsChanged', handleAccountsChanged)
-    window.ethereum?.on('chainChanged', handleChainChanged)
+    ethereum?.on('accountsChanged', handleAccountsChanged)
+    ethereum?.on('chainChanged', handleChainChanged)
     ;(async () => {
       const wallet_type = localStorage.getItem(LAST_WALLET)
       if (wallet_type === 'MetaMask') {
-        fetchAccount()
+        if (isMultiWallets) {
+          onConnectWallet()
+        } else {
+          fetchAccount()
+        }
       }
     })()
+
+    return () => {
+      isMounted = false
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -179,7 +191,7 @@ export default function WalletConnectBtn() {
         </span>
       )}
       <button
-        className='bg-gradient-common ml-8 hidden h-11 w-40 rounded-full text-white md:block'
+        className='bg-gradient-common ml-8 hidden h-11 rounded-full px-4 text-white md:block'
         onClick={onConnectWalletBtnClick}
         disabled={!!metaMaskAccount}
       >
@@ -187,7 +199,7 @@ export default function WalletConnectBtn() {
           ? metaMaskAccount.slice(0, 6) +
             '...' +
             metaMaskAccount.slice(metaMaskAccount.length - 4, metaMaskAccount.length)
-          : 'Connect Wallet'}
+          : title ?? 'Connect Wallet'}
       </button>
 
       {/* wallet connect dialog */}

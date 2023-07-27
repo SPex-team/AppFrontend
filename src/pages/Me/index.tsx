@@ -17,6 +17,7 @@ import clsx from 'clsx'
 import TransactionHistory from './components/TransactionHistory'
 import { formatListTime } from '@/utils/date'
 import BasicTable from '@/components/BasicTable'
+import WalletConnectBtn from '@/components/WalletConnectBtn'
 
 const Me = (props) => {
   const dispatch = useDispatch()
@@ -320,9 +321,7 @@ const Me = (props) => {
         </section>
       ) : (
         <div className='container mx-auto flex items-center justify-center [min-height:calc(100vh-279px)]'>
-          <button className='hidden h-11 cursor-default rounded-full bg-gradient-to-r from-[#0077FE] to-[#3BF4BB] px-6 text-white md:block'>
-            Please Connect Wallet
-          </button>
+          <WalletConnectBtn title='Please Connect Wallet' />
         </div>
       )}
       <AddDialog

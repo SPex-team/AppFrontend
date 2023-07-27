@@ -1,21 +1,22 @@
 import { ReactComponent as BuyIcon } from '@/assets/images/buy.svg'
 import { ReactComponent as DetailIcon } from '@/assets/images/detail.svg'
-import Pagination from '@/components/Pagination'
+import { ReactComponent as CommentIcon } from '@/assets/images/comment.svg'
 import { useEffect, useMemo, useState } from 'react'
 import MarketClass from '@/models/market-class'
 import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from '@/store'
 import AddDialog, { handleError } from '@/components/AddDialog'
-import { Contract, parseEther, parseUnits } from 'ethers'
+import { Contract, ZeroAddress } from 'ethers'
 import { abi, config } from '@/config'
-import { postUpdataMiners, putMiner } from '@/api/modules'
+import { putMiner } from '@/api/modules'
 import { setRootData } from '@/store/modules/root'
 import { message } from '@/components/Tip'
-import { NavLink, useLocation } from 'react-router-dom'
+import { NavLink } from 'react-router-dom'
 import SortDropdown from '@/components/Dropdown'
-import SpinWrapper from '@/components/SpinWrapper'
 import { formatListTime } from '@/utils/date'
 import debounce from 'lodash/debounce'
+import { isEmpty } from '@/utils'
+import BasicTable from '@/components/BasicTable'
 
 import DigitalCoinURL from '@/assets/images/digital_coin.png'
 
@@ -72,6 +73,72 @@ const Market = (props) => {
   }))
   const contract = useMemo(() => new Contract(config.contractAddress, abi, data.signer), [data.signer])
   const tableLoading = useSelector((state: RootState) => state.root.tableLoading)
+
+  const columns = [
+    {
+      title: 'Miner ID',
+      key: 'miner_id',
+      render: (val, row) => `${config.address_zero_prefix}0${row.miner_id ?? '-'}`
+    },
+    {
+      title: 'Balance',
+      key: 'balance_human',
+      render: (val) => `${val ?? '0'} FIL`
+    },
+    {
+      title: 'Power',
+      key: 'power_human',
+      render: (val) => (!isEmpty(val) ? `${val} TiB` : '-')
+    },
+    {
+      title: 'Price',
+      key: 'price',
+      render: (val) => `${val ?? '0'} FIL`
+    },
+    {
+      title: 'List Time',
+      key: 'list_time',
+      render: (val) => (val ? formatListTime(val) : '-')
+    },
+    {
+      key: 'operation',
+      width: '35%',
+      render: (val, row) => (
+        <div className='justify-space flex flex-wrap gap-4'>
+          <button
+            className='hover:text-[#0077FE]'
+            onClick={() => {
+              const url = `${config.filescanOrigin}/address/miner?address=${config.address_zero_prefix}0${row.miner_id}`
+              window.open(url)
+            }}
+          >
+            Detail
+            <DetailIcon className='ml-2 inline-block w-[14px]' />
+          </button>
+          <button
+            className='ml-7 hover:text-[#0077FE]'
+            disabled={!(row.buyer.toLowerCase() === data.metaMaskAccount?.toLowerCase() || row.buyer === ZeroAddress)}
+            onClick={() => onBuy(row.miner_id, row.price_raw)}
+          >
+            Buy
+            <BuyIcon className='ml-2 inline-block w-[14px]' />
+          </button>
+          <NavLink to={'/comment/' + row.miner_id.toString()}>
+            <button className='ml-7 hover:text-[#0077FE]'>
+              Comments
+              <CommentIcon className='ml-2 inline-block' width={14} height={14} />
+            </button>
+          </NavLink>
+        </div>
+      )
+    }
+  ]
+
+  const page = {
+    pageNum: Math.ceil(data.marketCount / marketClass.page_size),
+    currentPage: data.marketPage,
+    onChange: (page) => marketClass.selectPage(page)
+  }
 
   const onBuy = async (miner_id: number, price_raw: string) => {
     if (!data.metaMaskAccount) {
@@ -218,73 +285,7 @@ const Market = (props) => {
           </div>
           <SortDropdown options={options} onChange={onSortChange} />
         </div>
-        <div className='-mx-2 overflow-auto px-2'>
-          <SpinWrapper loading={tableLoading}>
-            <div className='mb-[11px] flex px-12 text-2xl font-medium'>
-              <span className='inline-block w-[13%] min-w-[100px] px-2'>Miner ID</span>
-              <span className='inline-block w-[13%] min-w-[90px] px-2'>Balance</span>
-              <span className='inline-block w-[10%] min-w-[75px] px-2'>Power</span>
-              <span className='inline-block w-[10%] min-w-[105px] px-2'>Price</span>
-              <span className='inline-block w-[20%] min-w-[140px] px-2'>List Time</span>
-            </div>
-            <div className='space-y-[18px]'>
-              {data.marketList.map((item) => (
-                <div
-                  key={item.miner_id}
-                  className='box-border flex min-h-[74px] rounded-[10px] border border-[#eaeaef] bg-white px-12 text-lg leading-[74px] text-[#57596c] hover:border-0 hover:shadow-[0_0_10px_0_rgba(17,16,41,0.15)]'
-                >
-                  <span className='inline-block w-[13%] min-w-[100px] truncate px-2'>
-                    {config.address_zero_prefix}0{item.miner_id ?? '-'}
-                  </span>
-                  <span className='inline-block w-[13%] min-w-[90px] truncate px-2'>
-                    {(item.balance_human ?? '0') + ' FIL'}
-                  </span>
-                  <span className='inline-block w-[10%] min-w-[75px] truncate px-2'>
-                    {(item.power_human ?? '0') + ' TiB'}
-                  </span>
-                  <span className='inline-block w-[10%] min-w-[105px] truncate px-2'>
-                    {(item.price ?? '0') + ' FIL'}
-                  </span>
-                  <span className='inline-block w-[20%] min-w-[140px] truncate px-2'>
-                    {formatListTime(item.list_time)}
-                  </span>
-                  <div className='inline-block text-black'>
-                    <button
-                      className='hover:text-[#0077FE]'
-                      onClick={() => {
-                        const url = `${config.filescanOrigin}/address/miner?address=${config.address_zero_prefix}0${item.miner_id}`
-                        window.open(url)
-                        // if (window.location.href.includes('hyperspace')) {
-                        //   window.open(`https://hyperspace.filscan.io/address/miner?address=f0${item.miner_id}`)
-                        // } else {
-                        //   window.open(`https://filscan.io/address/miner?address=f0${item.miner_id}`)
-                        // }
-                      }}
-                    >
-                      Detail
-                      <DetailIcon className='ml-2 inline-block w-[14px]' />
-                    </button>
-                    <button className='ml-7 hover:text-[#0077FE]' onClick={() => onBuy(item.miner_id, item.price_raw)}>
-                      Buy
-                      <BuyIcon className='ml-2 inline-block w-[14px]' />
-                    </button>
-                    <NavLink to={'/comment/' + item.miner_id.toString()}>
-                      <button className='ml-7 hover:text-[#0077FE]'>
-                        Comments
-                        <img className='ml-2 inline-block' width={14} height={14} src='/comment.svg' alt='user' />
-                      </button>
-                    </NavLink>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </SpinWrapper>
-          <Pagination
-            pageNum={Math.ceil(data.marketCount / marketClass.page_size)}
-            currentPage={data.marketPage}
-            onChange={(page) => marketClass.selectPage(page)}
-          />
-        </div>
+        <BasicTable columns={columns} data={data.marketList} page={page} loading={tableLoading} />
       </section>
       <AddDialog open={open} setOpen={setOpen} updataList={() => marketClass.removeDataOfList(1)} />
     </>
