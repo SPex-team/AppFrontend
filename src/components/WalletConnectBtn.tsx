@@ -37,7 +37,7 @@ interface IProps {
   title?: string
 }
 
-export default function WalletConnectBtn({ title = '' }: IProps) {
+export default function WalletConnectBtn({ title = 'Connect Wallet' }: IProps) {
   const { ethereum } = window
   let provider = ethereum
 
@@ -199,7 +199,7 @@ export default function WalletConnectBtn({ title = '' }: IProps) {
           ? metaMaskAccount.slice(0, 6) +
             '...' +
             metaMaskAccount.slice(metaMaskAccount.length - 4, metaMaskAccount.length)
-          : title ?? 'Connect Wallet'}
+          : title}
       </button>
 
       {/* wallet connect dialog */}

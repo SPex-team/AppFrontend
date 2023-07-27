@@ -49,7 +49,7 @@ const Comment = (props) => {
       // let content: any = formData.get('content')
       const contentElement = document.getElementById('content') as HTMLFormElement
       console.log('contentElement: ', contentElement)
-      let content = contentElement.value
+      let content = contentElement.value.trim()
 
       if (!data.metaMaskAccount) {
         // throw new Error('Please connect your wallet first')

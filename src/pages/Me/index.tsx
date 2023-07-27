@@ -240,8 +240,8 @@ const Me = (props) => {
       console.log('parseEther(price)', parseEther(data.price))
       console.log('minerId: ', minerId)
       console.log('data: ', data)
-
-      const tx = await contract.listMiner(minerId, parseEther(data.price), ZeroAddress)
+      const address = data?.targetBuyer ? data.targetBuyer : ZeroAddress
+      const tx = await contract.listMiner(minerId, parseEther(data.price), address)
 
       message({
         title: 'TIP',
@@ -356,6 +356,7 @@ const Me = (props) => {
                 <input
                   type='text'
                   name='price'
+                  id='price'
                   className='peer w-full rounded-l-[10px] px-5 transition-colors duration-300'
                   required
                   autoComplete='off'
@@ -364,6 +365,24 @@ const Me = (props) => {
                   FIL
                 </span>
               </div>
+              {openDialog === 'list' && (
+                <div className='mt-3'>
+                  <label htmlFor='targetBuyer' className='mb-[10px] block text-base'>
+                    Target Buyer Address (Optional):
+                  </label>
+
+                  <div className='relative flex h-[49px] w-full flex-row overflow-clip rounded-lg'>
+                    <input
+                      type='text'
+                      name='targetBuyer'
+                      id='targetBuyer'
+                      className='peer w-full rounded-[10px] px-5 transition-colors duration-300'
+                      required
+                      autoComplete='off'
+                    />
+                  </div>
+                </div>
+              )}
             </div>
             <input type='text' value='' className='hidden' readOnly />
           </form>

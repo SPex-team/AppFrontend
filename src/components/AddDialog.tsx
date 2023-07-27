@@ -149,7 +149,7 @@ export default function AddDialog(props: IProps) {
       <form className='text-[#57596C]' id='form_sign'>
         <span className='mb-4 mt-[10px] inline-block text-sm font-light'>
           {'Sign '}
-          <span className='inline-block w-full break-words font-medium'>{data.msg_cid_hex}</span>
+          <span className='inline-block w-full break-words font-medium'>{data?.msg_cid_hex}</span>
           {' with owner address to propose transfer owner to SPex contract'}
         </span>
         <div className=''>
@@ -519,10 +519,11 @@ export default function AddDialog(props: IProps) {
                           <Fragment key={step.key}>
                             <div
                               data-active={step.key <= stepNum}
-                              className='group flex rounded-[10px] border-[#0077FE] p-[17px] data-[active=true]:border'
+                              data-iscurrent={step.key === stepNum}
+                              className='group flex rounded-[10px] border-[#0077FE] p-[17px] data-[active=true]:border data-[iscurrent=true]:border-[2px]'
                             >
                               <span className='mr-[10px] box-border inline-block h-10 w-10 rounded-full border-[6px] border-[#EEEEF0] bg-[#57596c] text-center text-xl font-medium leading-[28px] text-white group-data-[active=true]:border-[#EFF3FC] group-data-[active=true]:bg-[#0077FE]'>
-                                {step.key}
+                                {step.key < stepNum ? '✓' : step.key}
                               </span>
                               <div>
                                 <div className='text-lg font-bold leading-none'>{step.name}</div>
