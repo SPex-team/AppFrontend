@@ -8,6 +8,7 @@ import { RootState } from '@/store'
 import { formatListTime } from '@/utils/date'
 import { isEmpty } from '@/utils/index'
 import clsx from 'clsx'
+import MinerIDRow from '@/pages/components/MinerIDRow'
 
 const isDevEnv = process.env.NODE_ENV === 'development' || window.location.origin.includes('calibration')
 
@@ -21,13 +22,12 @@ const History = () => {
       tableLoading: state.root.tableLoading2,
       metaMaskAccount: state.root.metaMaskAccount
     }))
-
   const columns = [
     {
       title: 'Miner ID',
       key: 'miner_id',
       minWidth: 160,
-      render: (val) => (!isEmpty(val) ? `${config.address_zero_prefix}0${val}` : '-')
+      render: (val) => <MinerIDRow value={val} />
     },
     {
       title: 'Balance',
@@ -68,7 +68,7 @@ const History = () => {
       key: 'operation',
       width: '35%',
       render: (val, row) => (
-        <div className='justify-space flex flex-wrap gap-4'>
+        <div className='justify-space flex flex-wrap gap-x-7'>
           <button
             className='whitespace-nowrap break-words hover:text-[#0077FE]'
             onClick={() => {

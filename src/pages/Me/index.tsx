@@ -18,6 +18,7 @@ import TransactionHistory from './components/TransactionHistory'
 import { formatListTime } from '@/utils/date'
 import BasicTable from '@/components/BasicTable'
 import WalletConnectBtn from '@/components/WalletConnectBtn'
+import MinerIDRow from '@/pages/components/MinerIDRow'
 
 const Me = (props) => {
   const dispatch = useDispatch()
@@ -129,11 +130,8 @@ const Me = (props) => {
   const columns = [
     {
       title: 'Miner ID',
-      render: (val, row) => (
-        <span>
-          {config.address_zero_prefix}0{row.miner_id ?? '-'}
-        </span>
-      )
+      key: 'miner_id',
+      render: (val, row) => <MinerIDRow value={val} />
     },
     {
       title: 'Order Status',

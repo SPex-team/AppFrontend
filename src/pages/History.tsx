@@ -9,6 +9,7 @@ import { RootState } from '@/store'
 import { useSelector } from 'react-redux'
 import { formatListTime } from '@/utils/date'
 import { isEmpty } from '@/utils/index'
+import MinerIDRow from '@/pages/components/MinerIDRow'
 
 const isDevEnv = process.env.NODE_ENV === 'development' || window.location.origin.includes('calibration')
 
@@ -17,7 +18,7 @@ const columns = [
     title: 'Sold Miner ID',
     key: 'miner_id',
     minWidth: 160,
-    render: (val) => (!isEmpty(val) ? `${config.address_zero_prefix}0${val}` : '-')
+    render: (val) => <MinerIDRow value={val} />
   },
   {
     title: 'Balance',
@@ -44,7 +45,7 @@ const columns = [
     key: 'operation',
     width: '35%',
     render: (val, row) => (
-      <div className='justify-space flex flex-wrap gap-4'>
+      <div className='justify-space flex flex-wrap gap-x-7'>
         <button
           className='whitespace-nowrap break-words hover:text-[#0077FE]'
           onClick={() => {

@@ -17,8 +17,10 @@ import { formatListTime } from '@/utils/date'
 import debounce from 'lodash/debounce'
 import { isEmpty } from '@/utils'
 import BasicTable from '@/components/BasicTable'
+import MinerIDRow from '@/pages/components/MinerIDRow'
 
 import DigitalCoinURL from '@/assets/images/digital_coin.png'
+import PrivatePoolIcon from '@/assets/images/privatePoolIcon.png'
 
 const options = [
   {
@@ -78,7 +80,7 @@ const Market = (props) => {
     {
       title: 'Miner ID',
       key: 'miner_id',
-      render: (val, row) => `${config.address_zero_prefix}0${row.miner_id ?? '-'}`
+      render: (val, row) => <MinerIDRow value={val} />
     },
     {
       title: 'Balance',
@@ -103,34 +105,45 @@ const Market = (props) => {
     {
       key: 'operation',
       width: '35%',
-      render: (val, row) => (
-        <div className='justify-space flex flex-wrap gap-4'>
-          <button
-            className='hover:text-[#0077FE]'
-            onClick={() => {
-              const url = `${config.filescanOrigin}/address/miner?address=${config.address_zero_prefix}0${row.miner_id}`
-              window.open(url)
-            }}
-          >
-            Detail
-            <DetailIcon className='ml-2 inline-block w-[14px]' />
-          </button>
-          <button
-            className='ml-7 hover:text-[#0077FE]'
-            disabled={!(row.buyer.toLowerCase() === data.metaMaskAccount?.toLowerCase() || row.buyer === ZeroAddress)}
-            onClick={() => onBuy(row.miner_id, row.price_raw)}
-          >
-            Buy
-            <BuyIcon className='ml-2 inline-block w-[14px]' />
-          </button>
-          <NavLink to={'/comment/' + row.miner_id.toString()}>
-            <button className='ml-7 hover:text-[#0077FE]'>
-              Comments
-              <CommentIcon className='ml-2 inline-block' width={14} height={14} />
-            </button>
-          </NavLink>
-        </div>
-      )
+      render: (val, row) => {
+        const isPrivate = row.buyer !== ZeroAddress
+        const cannotBuy = !(
+          row.buyer.toLowerCase() === data.metaMaskAccount?.toLowerCase() || row.buyer === ZeroAddress
+        )
+        return (
+          <div className='relative'>
+            {cannotBuy ? (
+              <span>The buyer has been designated</span>
+            ) : (
+              <div className='justify-space flex flex-wrap gap-x-7'>
+                <button
+                  className='hover:text-[#0077FE]'
+                  onClick={() => {
+                    const url = `${config.filescanOrigin}/address/miner?address=${config.address_zero_prefix}0${row.miner_id}`
+                    window.open(url)
+                  }}
+                >
+                  Detail
+                  <DetailIcon className='ml-2 inline-block w-[14px]' />
+                </button>
+                <button className='hover:text-[#0077FE]' onClick={() => onBuy(row.miner_id, row.price_raw)}>
+                  Buy
+                  <BuyIcon className='ml-2 inline-block w-[14px]' />
+                </button>
+                <NavLink to={'/comment/' + row.miner_id.toString()}>
+                  <button className='hover:text-[#0077FE]'>
+                    Comments
+                    <CommentIcon className='ml-2 inline-block' width={14} height={14} />
+                  </button>
+                </NavLink>
+              </div>
+            )}
+            {isPrivate && (
+              <img className='absolute -right-[32px] -top-[28px]' src={PrivatePoolIcon} alt='private_pool_pic' />
+            )}
+          </div>
+        )
+      }
     }
   ]
 
