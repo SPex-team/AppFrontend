@@ -1,14 +1,12 @@
 import { Dialog, Transition } from '@headlessui/react'
 import { Fragment, useMemo, useState } from 'react'
 import clsx from 'clsx'
-import { useSelector } from 'react-redux'
-import { RootState } from '@/store'
-import { Contract, parseEther } from 'ethers'
 import { abi, config } from '@/config'
 import { deleteMiner, postPushMessage, postTransferOut, putMiner } from '@/api/modules'
 import Tip, { message } from './Tip'
 import { handleError } from './AddDialog'
 import fa from '@glif/filecoin-address'
+import { useMetaMask } from '@/hooks/useMetaMask'
 
 interface IProps {
   open?: boolean
@@ -19,11 +17,7 @@ interface IProps {
 
 export default function ChangeOwnerDialog(props: IProps) {
   const { open = false, setOpen, minerId, updataList } = props
-  const { signer, metaMaskAccount } = useSelector((state: RootState) => ({
-    signer: state.root.signer,
-    metaMaskAccount: state.root.metaMaskAccount
-  }))
-  const contract = useMemo(() => new Contract(config.contractAddress, abi, signer), [signer])
+  const { currentAccount, contract } = useMetaMask()
 
   const [stepNum, setStepNum] = useState(1)
   const [loading, setLoading] = useState(false)
@@ -192,7 +186,7 @@ export default function ChangeOwnerDialog(props: IProps) {
               console.log('transferOutDelegator: ', transferOutDelegator)
 
               // @ts-ignore
-              if (delegator.toLowerCase() === metaMaskAccount.toLowerCase()) {
+              if (delegator.toLowerCase() === currentAccount.toLowerCase()) {
                 const tx = await contract.transferOwnerOut(minerId, [filAddress.bytes])
                 message({
                   title: 'TIP',
@@ -204,7 +198,7 @@ export default function ChangeOwnerDialog(props: IProps) {
                 const result = await tx.wait()
                 console.log('result: ', result)
                 // @ts-ignore
-              } else if (transferOutDelegator.toLowerCase() === metaMaskAccount.toLowerCase()) {
+              } else if (transferOutDelegator.toLowerCase() === currentAccount.toLowerCase()) {
                 const tx = await contract.transferOwnerOutAgain(minerId, [filAddress.bytes])
                 message({
                   title: 'TIP',
@@ -231,7 +225,6 @@ export default function ChangeOwnerDialog(props: IProps) {
               }
 
               let res = await postTransferOut(data)
-              // await putMiner(minerId, {miner_id: minerId, owner: metaMaskAccount, price: data.price,
               //   price_raw:parseEther(data.price), is_list: true})
               res = res._data
 

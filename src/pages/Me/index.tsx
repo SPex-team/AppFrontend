@@ -8,8 +8,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from '@/store'
 import Modal from '@/components/Modal'
 import ChangeOwnerDialog from '@/components/ChangeOwnerDialog'
-import { Contract, parseEther, ZeroAddress } from 'ethers'
-import { abi, config } from '@/config'
+import { parseEther, ZeroAddress } from 'ethers'
 import { putMiner, patchMiner } from '@/api/modules'
 import { setRootData } from '@/store/modules/root'
 import { message } from '@/components/Tip'
@@ -17,25 +16,24 @@ import clsx from 'clsx'
 import TransactionHistory from './components/TransactionHistory'
 import { formatListTime } from '@/utils/date'
 import BasicTable from '@/components/BasicTable'
-import WalletConnectBtn from '@/components/WalletConnectBtn'
+import { useMetaMask } from '@/hooks/useMetaMask'
 import MinerIDRow from '@/pages/components/MinerIDRow'
 
 const Me = (props) => {
+  const { connectButton, currentAccount, contract } = useMetaMask()
   const dispatch = useDispatch()
-  const meClass = useMemo(() => new MeClass(), [])
+  const meClass = useMemo(() => new MeClass({ currentAccount }), [currentAccount])
+
   const [openDialog, setOpenDialog] = useState<any>(false)
   const [minerId, setMinerId] = useState<any>()
   const [loading, setLoading] = useState<any>()
 
-  const { meCount, mePage, meList, signer, metaMaskAccount, tableLoading } = useSelector((state: RootState) => ({
+  const { meCount, mePage, meList, tableLoading } = useSelector((state: RootState) => ({
     meCount: state.root.meCount,
     mePage: state.root.mePage,
     meList: state.root.meList,
-    signer: state.root.signer,
-    metaMaskAccount: state.root.metaMaskAccount,
     tableLoading: state.root.tableLoading
   }))
-  const contract = useMemo(() => new Contract(config.contractAddress, abi, signer), [signer])
 
   const closeMoadl = () => {
     setOpenDialog('')
@@ -71,7 +69,7 @@ const Me = (props) => {
       // await postUpdataMiners(row.miner_id)
       await putMiner(row.miner_id, {
         miner_id: row.miner_id,
-        owner: metaMaskAccount,
+        owner: currentAccount,
         price: data.price,
         price_raw: data.price * 1e18,
         is_list: true
@@ -257,7 +255,7 @@ const Me = (props) => {
       const timestamp = Math.floor(Date.now() / 1000)
       await putMiner(row.miner_id, {
         miner_id: row.miner_id,
-        owner: metaMaskAccount,
+        owner: currentAccount,
         price: data.price,
         price_raw: data.price * 1e18,
         is_list: true,
@@ -279,15 +277,15 @@ const Me = (props) => {
   }
 
   useEffect(() => {
-    if (metaMaskAccount) {
+    if (currentAccount) {
       meClass.init()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [metaMaskAccount])
+  }, [currentAccount])
 
   return (
     <>
-      {metaMaskAccount ? (
+      {currentAccount ? (
         <section className='container mx-auto pb-[60px] pt-[190px]'>
           <div className='flex flex-col justify-between sm:flex-row'>
             <div className='mb-10 sm:mb-20'>
@@ -319,7 +317,7 @@ const Me = (props) => {
         </section>
       ) : (
         <div className='container mx-auto flex items-center justify-center [min-height:calc(100vh-279px)]'>
-          <WalletConnectBtn title='Please Connect Wallet' />
+          {connectButton('Please Connect Wallet')}
         </div>
       )}
       <AddDialog

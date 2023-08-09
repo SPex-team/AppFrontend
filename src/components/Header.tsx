@@ -2,7 +2,7 @@ import { Menu, Popover, Transition } from '@headlessui/react'
 import { Fragment } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
 import { config } from '@/config'
-import WalletConnectBtn from './WalletConnectBtn'
+import { useMetaMask } from '@/hooks/useMetaMask'
 
 const links = [
   {
@@ -25,6 +25,7 @@ const links = [
 
 export default function Header() {
   const location = useLocation()
+  const { connectButton } = useMetaMask()
   const net = config.net
 
   return (
@@ -115,7 +116,7 @@ export default function Header() {
               </Transition>
             </Menu>
           </div>
-          <WalletConnectBtn />
+          {connectButton()}
         </div>
 
         <Popover className='md:hidden'>

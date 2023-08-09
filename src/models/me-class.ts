@@ -1,9 +1,15 @@
-import { getMarketList, getMeList } from '@/api/modules'
+import { getMeList } from '@/api/modules'
 import { setRootData } from '@/store/modules/root'
 import Table from './table-class'
 
-export default class Me extends Table {
+class Me extends Table {
   static current_page_size?: number
+  currentAccount?: string
+
+  constructor(props) {
+    super()
+    this.currentAccount = props.currentAccount
+  }
 
   public init() {
     this.getList(1)
@@ -11,10 +17,11 @@ export default class Me extends Table {
 
   private getList(page) {
     this.dispatch(setRootData({ tableLoading: true }))
+
     getMeList({
       ordering: '-list_time',
       page,
-      owner: this.rootState.root.metaMaskAccount,
+      owner: this.currentAccount,
       page_size: this.page_size
     })
       .then((res) => {
@@ -40,3 +47,5 @@ export default class Me extends Table {
     this.getList(this.page)
   }
 }
+
+export default Me

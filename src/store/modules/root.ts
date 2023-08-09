@@ -6,7 +6,7 @@ interface IState {
   commentPage: number
   commentCount: number
   commentMinerOwner: string
-  metaMaskAccount?: string
+  // metaMaskAccount?: string
 
   provider?: ethers.BrowserProvider
   signer?: any

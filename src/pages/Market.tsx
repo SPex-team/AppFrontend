@@ -6,8 +6,8 @@ import MarketClass from '@/models/market-class'
 import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from '@/store'
 import AddDialog, { handleError } from '@/components/AddDialog'
-import { Contract, ZeroAddress } from 'ethers'
-import { abi, config } from '@/config'
+import { ZeroAddress } from 'ethers'
+import { config } from '@/config'
 import { putMiner } from '@/api/modules'
 import { setRootData } from '@/store/modules/root'
 import { message } from '@/components/Tip'
@@ -18,6 +18,7 @@ import debounce from 'lodash/debounce'
 import { isEmpty } from '@/utils'
 import BasicTable from '@/components/BasicTable'
 import MinerIDRow from '@/pages/components/MinerIDRow'
+import { useMetaMask } from '@/hooks/useMetaMask'
 
 import DigitalCoinURL from '@/assets/images/digital_coin.png'
 import PrivatePoolIcon from '@/assets/images/privatePoolIcon.png'
@@ -59,6 +60,7 @@ const options = [
 
 const Market = (props) => {
   const dispatch = useDispatch()
+  const { currentAccount, contract } = useMetaMask()
   const marketClass = useMemo(() => new MarketClass(), [])
 
   const [open, setOpen] = useState(false)
@@ -69,11 +71,9 @@ const Market = (props) => {
     marketPage: state.root.marketPage,
     marketList: state.root.marketList,
     signer: state.root.signer,
-    metaMaskAccount: state.root.metaMaskAccount,
     minerPriceCeiling: state.root.minerPriceCeiling,
     minerPriceFloor: state.root.minerPriceFloor
   }))
-  const contract = useMemo(() => new Contract(config.contractAddress, abi, data.signer), [data.signer])
   const tableLoading = useSelector((state: RootState) => state.root.tableLoading)
 
   const columns = [
@@ -107,9 +107,7 @@ const Market = (props) => {
       width: '35%',
       render: (val, row) => {
         const isPrivate = row.buyer !== ZeroAddress
-        const cannotBuy = !(
-          row.buyer.toLowerCase() === data.metaMaskAccount?.toLowerCase() || row.buyer === ZeroAddress
-        )
+        const cannotBuy = !(row.buyer.toLowerCase() === currentAccount?.toLowerCase() || row.buyer === ZeroAddress)
         return (
           <div className='relative'>
             {cannotBuy ? (
@@ -154,7 +152,7 @@ const Market = (props) => {
   }
 
   const onBuy = async (miner_id: number, price_raw: string) => {
-    if (!data.metaMaskAccount) {
+    if (!currentAccount) {
       message({
         title: 'TIP',
         type: 'warning',
@@ -179,10 +177,8 @@ const Market = (props) => {
 
       const result = await tx.wait()
       console.log('result', result)
-      // TODO: 全局 metaMaskAccount 判断
-      // await postUpdataMiners(miner_id)
 
-      await putMiner(miner_id, { miner_id, owner: data.metaMaskAccount, price: 0, price_raw: 0, is_list: false })
+      await putMiner(miner_id, { miner_id, owner: currentAccount, price: 0, price_raw: 0, is_list: false })
 
       marketClass.removeDataOfList(miner_id)
       dispatch(setRootData({ loading: false }))
@@ -253,7 +249,7 @@ const Market = (props) => {
           <div className='mx-5 hidden pt-5 xl:block'>{renderFloorAndCeilingMarketPrices()}</div>
           <button
             onClick={() => {
-              if (data.metaMaskAccount) {
+              if (currentAccount) {
                 setOpen(true)
               } else {
                 message({

@@ -1,12 +1,11 @@
 import { Dialog, Transition } from '@headlessui/react'
 import { Fragment, useMemo, useState } from 'react'
 import clsx from 'clsx'
-import { useSelector } from 'react-redux'
-import { RootState } from '@/store'
-import { Contract, ethers, parseEther, ZeroAddress } from 'ethers'
-import { abi, config } from '@/config'
+import { ethers, parseEther, ZeroAddress } from 'ethers'
+import { config } from '@/config'
 import { postBuildMessage, postMiner, postPushMessage, transferInCheck } from '@/api/modules'
 import Tip, { message } from './Tip'
+import { useMetaMask } from '@/hooks/useMetaMask'
 
 interface IProps {
   open?: boolean
@@ -52,11 +51,7 @@ export const handleError = (error: any) => {
 
 export default function AddDialog(props: IProps) {
   const { open = false, setOpen, updataList } = props
-  const { metaMaskAccount, signer } = useSelector((state: RootState) => ({
-    signer: state.root.signer,
-    metaMaskAccount: state.root.metaMaskAccount
-  }))
-  const contract = useMemo(() => new Contract(config.contractAddress, abi, signer), [signer])
+  const { currentAccount, contract } = useMetaMask()
 
   const [stepNum, setStepNum] = useState(1)
   const [loading, setLoading] = useState(false)
@@ -77,7 +72,7 @@ export default function AddDialog(props: IProps) {
   }
 
   const confirmSignContent = useMemo(() => {
-    if (data?.miner_id && data?.miner_info && metaMaskAccount) {
+    if (data?.miner_id && data?.miner_info && currentAccount) {
       const timestamp = Math.floor(Date.now() / 1000)
       setData({
         ...data,
@@ -89,7 +84,7 @@ export default function AddDialog(props: IProps) {
           'validateOwnerSign',
           parseInt(data.miner_id),
           data.miner_info['Owner'].slice(2),
-          metaMaskAccount,
+          currentAccount,
           config.chainId,
           timestamp
         ]
@@ -98,7 +93,7 @@ export default function AddDialog(props: IProps) {
       return undefined
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data?.miner_id, data?.miner_info, metaMaskAccount])
+  }, [data?.miner_id, data?.miner_info, currentAccount])
 
   const steps = [
     {
@@ -425,7 +420,7 @@ export default function AddDialog(props: IProps) {
               console.log('result', result)
 
               await postMiner({
-                owner: metaMaskAccount,
+                owner: currentAccount,
                 miner_id: data.miner_id,
                 price: parseFloat(price),
                 price_raw: parseFloat(price) * 1e18,

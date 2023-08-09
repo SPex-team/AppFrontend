@@ -9,7 +9,6 @@ import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from '@/store'
 import AddDialog, { handleError } from '@/components/AddDialog'
 import { formatTime } from '@/plugins/dayjs'
-import { Contract, parseEther, parseUnits } from 'ethers'
 import { abi, config } from '@/config'
 import { postComment, postUpdataMiners, getMiner } from '@/api/modules'
 import { setRootData } from '@/store/modules/root'
@@ -17,8 +16,10 @@ import { message } from '@/components/Tip'
 import { NavLink, useLocation, useParams, useNavigate } from 'react-router-dom'
 import { Buffer } from 'buffer'
 import clsx from 'clsx'
+import { useMetaMask } from '@/hooks/useMetaMask'
 
 const Comment = (props) => {
+  const { currentAccount } = useMetaMask()
   let params = useParams()
   console.log('params: ', params)
   const minerId = Number(params.minerId)
@@ -28,16 +29,12 @@ const Comment = (props) => {
   const dispatch = useDispatch()
   const commentClass = useMemo(() => new CommentClass(params.minerId), [])
 
-  const [open, setOpen] = useState(false)
   const data = useSelector((state: RootState) => ({
     commentCount: state.root.commentCount,
     commentPage: state.root.commentPage,
     commentList: state.root.commentList,
-    signer: state.root.signer,
-    metaMaskAccount: state.root.metaMaskAccount,
     commentMinerOwner: state.root.commentMinerOwner
   }))
-  const contract = useMemo(() => new Contract(config.contractAddress, abi, data.signer), [data.signer])
 
   const [loading, setLoading] = useState(false)
 
@@ -51,7 +48,7 @@ const Comment = (props) => {
       console.log('contentElement: ', contentElement)
       let content = contentElement.value.trim()
 
-      if (!data.metaMaskAccount) {
+      if (!currentAccount) {
         // throw new Error('Please connect your wallet first')
         message({
           title: 'TIP',
@@ -86,7 +83,7 @@ const Comment = (props) => {
         const msg = `0x${Buffer.from('Sign comment: ' + content, 'utf8').toString('hex')}`
         sign = await window.ethereum.request({
           method: 'personal_sign',
-          params: [msg, data.metaMaskAccount, 'Example password']
+          params: [msg, currentAccount, 'Example password']
         })
         console.log('sign: ', sign)
       } catch (err) {
@@ -104,7 +101,7 @@ const Comment = (props) => {
       }
       // postComment
       let postData = {
-        user: data.metaMaskAccount as string,
+        user: currentAccount as string,
         content: content as string,
         miner: minerId
       }
@@ -137,10 +134,6 @@ const Comment = (props) => {
   useEffect(() => {
     commentClass.init()
     initCommentMiner()
-    // getMiner()
-    // if (metaMaskAccount) {
-    //     meClass.init()
-    // }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 

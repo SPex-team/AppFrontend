@@ -9,19 +9,21 @@ import { formatListTime } from '@/utils/date'
 import { isEmpty } from '@/utils/index'
 import clsx from 'clsx'
 import MinerIDRow from '@/pages/components/MinerIDRow'
+import { useMetaMask } from '@/hooks/useMetaMask'
 
 const isDevEnv = process.env.NODE_ENV === 'development' || window.location.origin.includes('calibration')
 
 const History = () => {
+  const { currentAccount } = useMetaMask()
   const historyClass = useMemo(() => new HistoryClass(), [])
-  const { transactionHistoryList, transactionHistoryPage, transactionHistoryCount, tableLoading, metaMaskAccount } =
-    useSelector((state: RootState) => ({
+  const { transactionHistoryList, transactionHistoryPage, transactionHistoryCount, tableLoading } = useSelector(
+    (state: RootState) => ({
       transactionHistoryList: state.root.transactionHistoryList,
       transactionHistoryPage: state.root.transactionHistoryPage,
       transactionHistoryCount: state.root.transactionHistoryCount,
-      tableLoading: state.root.tableLoading2,
-      metaMaskAccount: state.root.metaMaskAccount
-    }))
+      tableLoading: state.root.tableLoading2
+    })
+  )
   const columns = [
     {
       title: 'Miner ID',
@@ -51,10 +53,10 @@ const History = () => {
         <span
           className={clsx([
             'inline-block h-[26px] w-[85px] rounded-full bg-[rgba(0,119,254,0.1)] text-center text-sm leading-[26px]',
-            row.buyer?.toLowerCase() !== metaMaskAccount?.toLowerCase() ? 'text-[#0077fe]' : 'text-[#909399]'
+            row.buyer?.toLowerCase() !== currentAccount?.toLowerCase() ? 'text-[#0077fe]' : 'text-[#909399]'
           ])}
         >
-          {row.buyer?.toLowerCase() === metaMaskAccount?.toLowerCase() ? 'Purchase' : 'Sold'}
+          {row.buyer?.toLowerCase() === currentAccount?.toLowerCase() ? 'Purchase' : 'Sold'}
         </span>
       )
     },
@@ -99,11 +101,11 @@ const History = () => {
   const page = {
     pageNum: Math.ceil(transactionHistoryCount / historyClass.page_size),
     currentPage: transactionHistoryPage,
-    onChange: (page) => historyClass.selectTransactionPage(page, metaMaskAccount)
+    onChange: (page) => historyClass.selectTransactionPage(page, currentAccount)
   }
 
   useEffect(() => {
-    historyClass.initTransaction(metaMaskAccount)
+    historyClass.initTransaction(currentAccount)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
