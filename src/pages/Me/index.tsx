@@ -368,6 +368,7 @@ const Me = (props) => {
                   <label htmlFor='targetBuyer' className='mb-[10px] block text-base'>
                     Target Buyer Address (Optional):
                   </label>
+                  <span>For private pool</span>
 
                   <div className='relative flex h-[49px] w-full flex-row overflow-clip rounded-lg'>
                     <input

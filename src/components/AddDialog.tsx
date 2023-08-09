@@ -237,6 +237,7 @@ export default function AddDialog(props: IProps) {
           <label htmlFor='targetBuyer' className='mb-[10px] block text-base'>
             Target Buyer Address (Optional):
           </label>
+          <span className='text-[12px] text-[gray-400]'>For private pool</span>
 
           <div className='relative flex h-[49px] w-full flex-row overflow-clip rounded-lg'>
             <input
