@@ -13,7 +13,7 @@ const MinerIDRow = ({ value }: Props) => {
   const idText = `${config.address_zero_prefix}0${value ?? '-'}`
 
   return (
-    <div className='relative'>
+    <div className='keep-all relative'>
       {numberType ? (
         <div className='flex flex-wrap items-center gap-x-1'>
           <span className={`${NUMBER_TYPE_CLASS_NAME[numberType]}`} style={{ color }}>

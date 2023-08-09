@@ -47,7 +47,7 @@ function BasicTable(props: IProps) {
                 )}
                 {data.length > 0 &&
                   data.map((item, itemIndex) => (
-                    <tr key={`table-body-${itemIndex}`} className='text-sm text-[#57596c] sm:text-lg'>
+                    <tr key={`table-body-${itemIndex}`} className='relative text-sm text-[#57596c] sm:text-lg'>
                       {columns.map((column, columnIndex) => {
                         const val = item[column.key]
                         return (

@@ -109,7 +109,7 @@ const Market = (props) => {
         const isPrivate = row.buyer !== ZeroAddress
         const cannotBuy = !(row.buyer.toLowerCase() === currentAccount?.toLowerCase() || row.buyer === ZeroAddress)
         return (
-          <div className='relative'>
+          <div>
             {cannotBuy ? (
               <span>The buyer has been designated</span>
             ) : (
@@ -137,7 +137,7 @@ const Market = (props) => {
               </div>
             )}
             {isPrivate && (
-              <img className='absolute -right-[32px] -top-[28px]' src={PrivatePoolIcon} alt='private_pool_pic' />
+              <img className='absolute -right-[7px] -top-[7px]' src={PrivatePoolIcon} alt='private_pool_pic' />
             )}
           </div>
         )

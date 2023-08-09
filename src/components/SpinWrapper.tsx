@@ -12,7 +12,7 @@ function SpinWrapper(props: IProps) {
     <>
       {loading ? (
         <div className='relative min-h-[300px]'>
-          <div className='z-4 absolute top-0 h-full w-full bg-gray-100 bg-opacity-30'>
+          <div className='absolute top-0 z-10 h-full w-full bg-gray-100 bg-opacity-30'>
             <div role='status' className='flex h-full items-center justify-center'>
               <svg
                 aria-hidden='true'
