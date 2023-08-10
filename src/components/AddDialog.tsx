@@ -1,5 +1,5 @@
 import { Dialog, Transition } from '@headlessui/react'
-import { Fragment, useMemo, useState } from 'react'
+import { Fragment, ReactNode, useMemo, useState } from 'react'
 import clsx from 'clsx'
 import { ethers, parseEther, ZeroAddress } from 'ethers'
 import { config } from '@/config'
@@ -95,22 +95,54 @@ export default function AddDialog(props: IProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data?.miner_id, data?.miner_info, currentAccount])
 
-  const steps = [
+  type StepType = {
+    key: number | string
+    name: string
+    desc?: string | ReactNode
+  }
+
+  const steps: StepType[] = [
     {
       key: 1,
-      name: 'Input Miner Address'
+      name: 'Input Miner Address',
+      desc: 'Input the address of the miner you want to transfer.'
     },
     {
       key: 2,
-      name: 'Transfer Miner'
+      name: 'Transfer Miner',
+      desc: (
+        <>
+          <p>You have two options to confirm the transfer :</p>
+          <ul className='list-inside list-disc'>
+            <li>Copy the provided command, sign it in your terminal, and paste the signature here;</li>
+            <li>
+              Use a third-party tool like Venus or Lotus to make the transfer. Skip this step if you use this method.
+            </li>
+          </ul>
+        </>
+      )
     },
     {
       key: 3,
-      name: 'Confirm'
+      name: 'Confirm',
+      desc: (
+        <>
+          <p>There are 3 things you would do here :</p>
+          <ul className='list-inside list-disc'>
+            <li>
+              Bind your f0 address to the f4 address. This allows you to conveniently take actions by signing with your
+              wallet;
+            </li>
+            <li>Set a price to list your miner on the market;</li>
+            <li>OR use the private pool to designate a specific buyer.</li>
+          </ul>
+        </>
+      )
     },
     {
       key: 4,
-      name: 'Completed'
+      name: 'Completed',
+      desc: 'Your miner has been successfully transferred in and listed on the market! '
     }
   ]
 
@@ -255,12 +287,12 @@ export default function AddDialog(props: IProps) {
   const step4 = () => {
     return (
       <div className='flex w-full flex-col items-center pt-10'>
-        <span className='flex h-14 w-14 items-center justify-center rounded-full bg-green-400'>
+        <span className='flex h-20 w-20 items-center justify-center rounded-full bg-green-400'>
           <svg
             xmlns='http://www.w3.org/2000/svg'
             viewBox='0 0 20 20'
             fill='currentColor'
-            className='h-12 w-12 text-white'
+            className='h-14 w-14 text-white'
           >
             <path
               fillRule='evenodd'
@@ -456,6 +488,70 @@ export default function AddDialog(props: IProps) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const btnData = useMemo(() => btnEvent(stepNum), [stepNum])
 
+  const renderStepIcon = (step, size?) => {
+    const status = () => {
+      if (step < stepNum) return 'success'
+      if (step === stepNum) return 'isCurrent'
+      return 'default'
+    }
+    const bgStyles: any = {
+      default: {
+        backgroundColor: '#ebedef',
+        color: '#40464f'
+      },
+      isCurrent: {
+        backgroundColor: '#0077FE',
+        color: '#fff'
+      },
+      success: {
+        backgroundColor: '#4ADE80',
+        color: '#fff'
+      }
+    }
+    return (
+      <li
+        data-te-stepper-step-ref
+        data-te-stepper-step-active
+        className='w-[4.5rem] flex-auto [&>div]:last:after:hidden'
+        key={step}
+      >
+        <div
+          data-te-stepper-head-ref
+          className="flex items-center pl-2 leading-[1.3rem] no-underline after:ml-2 after:h-px after:w-full after:flex-1 after:bg-[#e0e0e0] after:content-['']"
+        >
+          <span
+            data-te-stepper-head-icon-ref
+            className='my-6 mr-2 flex h-[1.3rem] w-[1.3rem] items-center justify-center rounded-full bg-[#ebedef] text-sm font-medium text-[#40464f]'
+            style={bgStyles[status()]}
+          >
+            {step < stepNum ? '✓' : step}
+          </span>
+          {step === 4 && <span className='text-sm'>Completed</span>}
+        </div>
+      </li>
+    )
+  }
+
+  const renderStepIntro = () => {
+    const target: StepType = steps.find((item) => item.key === stepNum) || { key: 0, name: '' }
+    return (
+      <div className='p-x-10' key={target.key}>
+        <div className='mb-6 flex justify-center gap-x-10'>
+          <div className='flex flex-col items-center'>
+            <div className='flex flex-col items-center'>
+              <span className='box-border inline-block h-12 w-12 rounded-full border-[6px]  border-[#EFF3FC] bg-[#0077FE] text-center text-3xl font-medium leading-[36px] text-white'>
+                {target.key}
+              </span>
+              {/* <span className='text-[14px]'>{`Step ${target?.key}`}</span> */}
+            </div>
+            <div className='text-md pt-2 font-bold leading-none'>{target.name}</div>
+          </div>
+          <div className='w-[600px] text-sm font-normal text-[#57596C]'>{target?.desc}</div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <>
       <Transition
@@ -495,10 +591,10 @@ export default function AddDialog(props: IProps) {
                   leaveFrom='opacity-100 scale-100'
                   leaveTo='opacity-0 scale-95'
                 >
-                  <Dialog.Panel className='flex min-h-[523px] w-full max-w-[1102px] transform flex-col justify-between overflow-hidden rounded-2xl bg-white p-[30px] text-left align-middle shadow-xl transition-all'>
+                  <Dialog.Panel className='flex min-h-[523px] w-full max-w-[900px] transform flex-col justify-between overflow-hidden rounded-2xl bg-white p-[30px] text-left align-middle shadow-xl transition-all'>
                     <div>
-                      <Dialog.Title as='h3' className='mb-6 flex items-center justify-between text-2xl font-medium'>
-                        Add List
+                      <Dialog.Title as='h3' className='flex items-center justify-between text-2xl font-medium'>
+                        Add Miner
                         <svg
                           xmlns='http://www.w3.org/2000/svg'
                           fill='none'
@@ -511,8 +607,7 @@ export default function AddDialog(props: IProps) {
                           <path strokeLinecap='round' strokeLinejoin='round' d='M6 18L18 6M6 6l12 12' />
                         </svg>
                       </Dialog.Title>
-                      <hr />
-                      <div className='mb-[22px] mt-[30px] flex justify-between'>
+                      {/* <div className='mb-[22px] mt-[30px] flex justify-between'>
                         {steps.map((step) => (
                           <Fragment key={step.key}>
                             <div
@@ -543,7 +638,16 @@ export default function AddDialog(props: IProps) {
                             </svg>
                           </Fragment>
                         ))}
-                      </div>
+                      </div> */}
+                      <ul
+                        data-te-stepper-init
+                        className='m-0 flex w-[70%] list-none justify-between overflow-hidden p-0 transition-[height] duration-200 ease-in-out'
+                      >
+                        {steps.map((item) => {
+                          return renderStepIcon(item.key)
+                        })}
+                      </ul>
+                      {renderStepIntro()}
                       {stepContent}
                     </div>
 

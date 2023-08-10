@@ -190,7 +190,7 @@ export const MetaMaskContextProvider = ({ children }: PropsWithChildren) => {
           </span>
         )}
         <button
-          className='bg-gradient-common hidden h-11 rounded-full px-4 text-white md:block'
+          className='bg-gradient-common jr-connect-wallet hidden h-11 rounded-full px-4 text-white md:block'
           onClick={openModal}
           disabled={Boolean(currentAccount)}
         >

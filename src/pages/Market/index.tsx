@@ -19,49 +19,20 @@ import { isEmpty } from '@/utils'
 import BasicTable from '@/components/BasicTable'
 import MinerIDRow from '@/pages/components/MinerIDRow'
 import { useMetaMask } from '@/hooks/useMetaMask'
+import useLocalStorage from '@/hooks/useLocalStorage'
+import Joyride from 'react-joyride'
+import { joyrideSteps, sortOptions } from './constants'
 
 import DigitalCoinURL from '@/assets/images/digital_coin.png'
 import PrivatePoolIcon from '@/assets/images/privatePoolIcon.png'
-
-const options = [
-  {
-    key: 'default',
-    value: 'Default'
-  },
-  {
-    key: 'price',
-    value: 'Lowest Price'
-  },
-  {
-    key: '-price',
-    value: 'Highest Price'
-  },
-  {
-    key: 'list_time',
-    value: 'Earliest Listed'
-  },
-  {
-    key: 'balance_human',
-    value: 'Lowest Balance'
-  },
-  {
-    key: '-balance_human',
-    value: 'Highest Balance'
-  },
-  {
-    key: 'power_human',
-    value: 'Lowest Power'
-  },
-  {
-    key: '-power_human',
-    value: 'Highest Power'
-  }
-]
 
 const Market = (props) => {
   const dispatch = useDispatch()
   const { currentAccount, contract } = useMetaMask()
   const marketClass = useMemo(() => new MarketClass(), [])
+
+  const [isFirstVisit, setIsFirstVisit] = useLocalStorage('isFirstVisit-spec', true)
+  const [run, setRun] = useState<boolean>(false)
 
   const [open, setOpen] = useState(false)
   const [sortKey, setSortKey] = useState<string>()
@@ -227,6 +198,13 @@ const Market = (props) => {
   }, [])
 
   useEffect(() => {
+    if (isFirstVisit) {
+      setRun(true)
+      setIsFirstVisit(false)
+    }
+  }, [isFirstVisit, setIsFirstVisit])
+
+  useEffect(() => {
     // sort by keys
     if (sortKey) {
       marketClass.sortList(sortKey)
@@ -240,7 +218,9 @@ const Market = (props) => {
       <section className='container mx-auto pb-[60px] pt-[190px]'>
         <div className='flex flex-col justify-between sm:flex-row'>
           <div className='mb-5 xl:mb-20'>
-            <h2 className='mb-[13px] text-[30px] font-semibold leading-[61px] sm:text-[56px]'>Miner Account Market </h2>
+            <h2 className='jr-market mb-[13px] text-[30px] font-semibold leading-[61px] sm:text-[56px]'>
+              Miner Account Market
+            </h2>
             <p className='w-[420px] text-lg text-[#57596C] sm:w-[620px]'>
               Allowing Storage Providers to implement securely trustless account trading, optimize capital efficiency,
               select special ID numbers, etc.
@@ -259,7 +239,7 @@ const Market = (props) => {
                 })
               }
             }}
-            className='bg-gradient-common mb-10 flex h-11 w-[119px] items-center justify-center rounded-full text-white md:mb-0'
+            className='bg-gradient-common jr-add-miner mb-10 flex h-11 w-[119px] items-center justify-center rounded-full text-white md:mb-0'
           >
             Add
             <svg
@@ -292,11 +272,38 @@ const Market = (props) => {
               </svg>
             </button>
           </div>
-          <SortDropdown options={options} onChange={onSortChange} />
+          <SortDropdown options={sortOptions} onChange={onSortChange} />
         </div>
-        <BasicTable columns={columns} data={data.marketList} page={page} loading={tableLoading} />
+        <BasicTable
+          columns={columns}
+          data={data.marketList}
+          page={page}
+          loading={tableLoading}
+          joyGuide='jr-market-list'
+        />
       </section>
       <AddDialog open={open} setOpen={setOpen} updataList={() => marketClass.removeDataOfList(1)} />
+      <Joyride
+        steps={joyrideSteps}
+        styles={{
+          options: {
+            textColor: '#57596C',
+            primaryColor: '#0077fe',
+            overlayColor: 'rgba(0, 0, 0, 0.25)'
+          }
+        }}
+        floaterProps={{
+          disableAnimation: true
+        }}
+        run={run}
+        continuous
+        hideBackButton
+        scrollOffset={200}
+        showProgress
+        locale={{
+          last: 'OK'
+        }}
+      />
     </>
   )
 }

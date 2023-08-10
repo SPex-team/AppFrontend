@@ -1,4 +1,4 @@
-import Market from '@/pages/Market'
+import Market from '@/pages/Market/index'
 import History from '@/pages/History'
 import Me from '@/pages/Me/index'
 import Comment from '@/pages/Comment'
