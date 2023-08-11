@@ -134,7 +134,7 @@ export default function AddDialog(props: IProps) {
               wallet;
             </li>
             <li>Set a price to list your miner on the market;</li>
-            <li>OR use the private pool to designate a specific buyer.</li>
+            <li>Also, if you want to designate a buyer, please enter their address in the optional text input. </li>
           </ul>
         </>
       )

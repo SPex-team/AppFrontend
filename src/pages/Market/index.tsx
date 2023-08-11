@@ -1,7 +1,7 @@
 import { ReactComponent as BuyIcon } from '@/assets/images/buy.svg'
 import { ReactComponent as DetailIcon } from '@/assets/images/detail.svg'
 import { ReactComponent as CommentIcon } from '@/assets/images/comment.svg'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, Fragment } from 'react'
 import MarketClass from '@/models/market-class'
 import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from '@/store'
@@ -22,6 +22,7 @@ import { useMetaMask } from '@/hooks/useMetaMask'
 import useLocalStorage from '@/hooks/useLocalStorage'
 import Joyride from 'react-joyride'
 import { joyrideSteps, sortOptions } from './constants'
+import { Popover, Transition } from '@headlessui/react'
 
 import DigitalCoinURL from '@/assets/images/digital_coin.png'
 import PrivatePoolIcon from '@/assets/images/privatePoolIcon.png'
@@ -33,8 +34,10 @@ const Market = (props) => {
 
   const [isFirstVisit, setIsFirstVisit] = useLocalStorage('isFirstVisit-spec', true)
   const [run, setRun] = useState<boolean>(false)
-
   const [open, setOpen] = useState(false)
+
+  const [buttonRef, setButtonRef] = useState<HTMLButtonElement | null>(null)
+
   const [sortKey, setSortKey] = useState<string>()
   const [searchText, setSearchText] = useState('')
   const data = useSelector((state: RootState) => ({
@@ -74,6 +77,58 @@ const Market = (props) => {
       render: (val) => (val ? formatListTime(val) : '-')
     },
     {
+      title: (
+        <Popover className='relative'>
+          {({ open }) => (
+            <>
+              <Popover.Button
+                className='focus:outline-none'
+                ref={setButtonRef}
+                onMouseEnter={() => buttonRef && buttonRef.click()}
+              >
+                <svg
+                  xmlns='http://www.w3.org/2000/svg'
+                  fill='none'
+                  viewBox='0 0 24 24'
+                  strokeWidth='1.5'
+                  stroke='currentColor'
+                  className='h-5 w-5'
+                >
+                  <path
+                    strokeLinecap='round'
+                    strokeLinejoin='round'
+                    d='M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z'
+                  />
+                </svg>
+              </Popover.Button>
+              <Transition
+                as={Fragment}
+                enter='transition ease-out duration-200'
+                enterFrom='opacity-0 translate-y-1'
+                enterTo='opacity-100 translate-y-0'
+                leave='transition ease-in duration-150'
+                leaveFrom='opacity-100 translate-y-0'
+                leaveTo='opacity-0 translate-y-1'
+              >
+                <Popover.Panel static className='absolute z-10 max-w-sm bg-white'>
+                  {({ close }) => (
+                    <div className='overflow-hidden rounded-lg px-4 py-2 shadow-lg' onMouseLeave={() => close()}>
+                      <div className='mb-4'>
+                        <p className='text-sm font-medium text-gray-900'>Detail</p>
+                        <p className='text-sm font-normal text-gray-500'>View full info on a miner account</p>
+                      </div>
+                      <div>
+                        <p className='text-sm font-medium text-gray-900'>Comments</p>
+                        <p className='text-sm font-normal text-gray-500'>Discuss or negotiate with the seller</p>
+                      </div>
+                    </div>
+                  )}
+                </Popover.Panel>
+              </Transition>
+            </>
+          )}
+        </Popover>
+      ),
       key: 'operation',
       width: '35%',
       render: (val, row) => {
