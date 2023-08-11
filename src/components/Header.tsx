@@ -20,6 +20,10 @@ const links = [
   {
     name: 'Profile',
     href: '/me'
+  },
+  {
+    name: 'FAQ',
+    href: '/faq'
   }
 ]
 
