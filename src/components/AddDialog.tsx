@@ -607,41 +607,9 @@ export default function AddDialog(props: IProps) {
                           <path strokeLinecap='round' strokeLinejoin='round' d='M6 18L18 6M6 6l12 12' />
                         </svg>
                       </Dialog.Title>
-                      {/* <div className='mb-[22px] mt-[30px] flex justify-between'>
-                        {steps.map((step) => (
-                          <Fragment key={step.key}>
-                            <div
-                              data-active={step.key <= stepNum}
-                              data-iscurrent={step.key === stepNum}
-                              className='group flex rounded-[10px] border-[#0077FE] p-[17px] data-[active=true]:border data-[iscurrent=true]:border-[2px]'
-                            >
-                              <span className='mr-[10px] box-border inline-block h-10 w-10 rounded-full border-[6px] border-[#EEEEF0] bg-[#57596c] text-center text-xl font-medium leading-[28px] text-white group-data-[active=true]:border-[#EFF3FC] group-data-[active=true]:bg-[#0077FE]'>
-                                {step.key < stepNum ? '✓' : step.key}
-                              </span>
-                              <div>
-                                <div className='text-lg font-bold leading-none'>{step.name}</div>
-                                <div className='font-light capitalize'>{'step ' + step.key}</div>
-                              </div>
-                            </div>
-
-                            <svg
-                              key={step.key + 'a'}
-                              xmlns='http://www.w3.org/2000/svg'
-                              fill='none'
-                              viewBox='0 0 24 24'
-                              strokeWidth={1.5}
-                              stroke='currentColor'
-                              className='w-5 data-[hidden=true]:hidden'
-                              data-hidden={step.key === steps.length}
-                            >
-                              <path strokeLinecap='round' strokeLinejoin='round' d='M8.25 4.5l7.5 7.5-7.5 7.5' />
-                            </svg>
-                          </Fragment>
-                        ))}
-                      </div> */}
                       <ul
                         data-te-stepper-init
-                        className='m-0 flex w-[70%] list-none justify-between overflow-hidden p-0 transition-[height] duration-200 ease-in-out'
+                        className='m-0 flex w-[113%] list-none justify-between overflow-hidden p-0 transition-[height] duration-200 ease-in-out'
                       >
                         {steps.map((item) => {
                           return renderStepIcon(item.key)
