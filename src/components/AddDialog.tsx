@@ -274,7 +274,6 @@ export default function AddDialog(props: IProps) {
               name='targetBuyer'
               id='targetBuyer'
               className='peer w-full rounded-[10px] px-5 transition-colors duration-300'
-              required
               autoComplete='off'
             />
           </div>
@@ -440,7 +439,7 @@ export default function AddDialog(props: IProps) {
                 sign,
                 data.timestamp,
                 parseEther(price),
-                targetBuyer ?? ZeroAddress
+                targetBuyer || ZeroAddress
               )
 
               message({
