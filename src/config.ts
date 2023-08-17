@@ -39,7 +39,7 @@ export const mainnet_config = {
 // export const address_zero_prefix = 't'
 
 // export const config = Object.assign({}, process.env.NODE_ENV === 'production' ? prod_config : dev_config)
-export const config = dev_config
+export const config = mainnet_config
 
 export const abi = [
   {
