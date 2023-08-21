@@ -11,7 +11,7 @@ const NUMBER_TYPE = {
     /^(0|\+?[1-9][0-9]{0,3})$/ // < 10000
   ],
   specialEvent: [
-    /^14888$/, // relate to special event
+    /^148888$/, // relate to special event
     /^31415$/ // relate to special event
   ],
   legendary: [
