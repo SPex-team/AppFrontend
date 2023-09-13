@@ -4,28 +4,50 @@ import { NavLink, useLocation } from 'react-router-dom'
 import { config } from '@/config'
 import { useMetaMask } from '@/hooks/useMetaMask'
 
-const links = [
-  {
-    name: 'Home',
-    href: 'https://www.spex.website/'
-  },
-  {
-    name: 'Market',
-    href: '/market'
-  },
-  {
-    name: 'History',
-    href: '/history'
-  },
-  {
-    name: 'Profile',
-    href: '/me'
-  },
-  {
-    name: 'FAQ',
-    href: '/faq'
-  }
-]
+// to do: differentiate loan market and market
+const isLoan = true
+
+const links = isLoan
+  ? [
+      {
+        name: 'Home',
+        href: 'https://www.spex.website/'
+      },
+      {
+        name: 'Loan Market',
+        href: '/loanMarket'
+      },
+      {
+        name: 'History',
+        href: '/loanHistory'
+      },
+      {
+        name: 'Profile',
+        href: '/profile'
+      }
+    ]
+  : [
+      {
+        name: 'Home',
+        href: 'https://www.spex.website/'
+      },
+      {
+        name: 'Market',
+        href: '/market'
+      },
+      {
+        name: 'History',
+        href: '/history'
+      },
+      {
+        name: 'Profile',
+        href: '/me'
+      },
+      {
+        name: 'FAQ',
+        href: '/faq'
+      }
+    ]
 
 export default function Header() {
   const location = useLocation()

@@ -6,7 +6,7 @@ import { config } from '@/config'
 
 function _axios(_axiosRequest: AxiosRequest) {
   return new Promise((resolve, reject) => {
-    console.log('config.baseUrl: ', config.baseUrl)
+    // console.log('config.baseUrl: ', config.baseUrl)
     service({
       baseURL: config.baseUrl,
       url: _axiosRequest.url,

@@ -1,7 +1,10 @@
 import Market from '@/pages/Market/index'
+import LoanMarket from '@/pages/LoanMarket'
 import History from '@/pages/History'
+import LoanHistory from '@/pages/LoanHistory'
 import Me from '@/pages/Me/index'
 import Comment from '@/pages/Comment'
+import Profile from '@/pages/LoanProfile'
 import FAQ from '@/pages/FAQ'
 
 // import { lazy, ReactNode, Suspense } from 'react'
@@ -25,12 +28,24 @@ const router = createBrowserRouter([
         element: lazyLoad(<Market />)
       },
       {
+        path: '/loanMarket',
+        element: lazyLoad(<LoanMarket />)
+      },
+      {
         path: '/history',
         element: lazyLoad(<History />)
       },
       {
+        path: '/loanHistory',
+        element: lazyLoad(<LoanHistory />)
+      },
+      {
         path: '/me',
         element: lazyLoad(<Me />)
+      },
+      {
+        path: '/profile',
+        element: lazyLoad(<Profile />)
       },
       {
         path: '/faq',

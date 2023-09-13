@@ -1,5 +1,6 @@
 import { configureStore } from '@reduxjs/toolkit'
 import rootReducer from './modules/root'
+import loanReducer from './modules/loan'
 
 const store = configureStore({
   middleware: (getDefaultMiddleware) =>
@@ -15,7 +16,8 @@ const store = configureStore({
       // serializableCheck: false
     }),
   reducer: {
-    root: rootReducer
+    root: rootReducer,
+    loan: loanReducer
   }
 })
 

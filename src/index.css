@@ -13,6 +13,10 @@
     outline: none;
     border-color: #0077fe;
   }
+  .ant-input-number-input-wrap,
+  input {
+    height: 100%;
+  }
   .basic-table button:disabled {
     color: #57596c;
     opacity: 0.3;
