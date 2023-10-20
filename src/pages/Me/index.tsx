@@ -61,12 +61,7 @@ const Me = (props) => {
       console.log('result', result)
 
       let row = meList.find((item) => item.miner_id === minerId)
-      // row = { ...row }
 
-      // console.log('row', row, data)
-      // row.price = data.price
-
-      // await postUpdataMiners(row.miner_id)
       await putMiner(row.miner_id, {
         miner_id: row.miner_id,
         owner: currentAccount,
@@ -107,8 +102,6 @@ const Me = (props) => {
       console.log('result', result)
 
       await patchMiner(data.miner_id, { price: 0, price_raw: 0, is_list: false })
-
-      // await postUpdataMiners(data.miner_id)
 
       dispatch(setRootData({ loading: false }))
       meClass.removeDataOfList(minerId)

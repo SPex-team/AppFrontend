@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from 'react'
-import MeClass from '@/models/me-class'
 import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from '@/store'
 import BorrowList from './components/BorrowList'
@@ -12,7 +11,6 @@ import DigitalCoinURL from '@/assets/images/digital_coin.png'
 
 const LoanProfile = (props) => {
   const { connectButton, currentAccount } = useMetaMask()
-  const meClass = useMemo(() => new MeClass({ currentAccount }), [currentAccount])
 
   const data = useSelector((state: RootState) => ({
     marketCount: state.root.marketCount,
@@ -47,13 +45,6 @@ const LoanProfile = (props) => {
   //   console.log(key)
   // }
 
-  useEffect(() => {
-    if (currentAccount) {
-      meClass.init()
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentAccount])
-
   return (
     <>
       {currentAccount ? (
@@ -70,6 +61,7 @@ const LoanProfile = (props) => {
           <Tabs
             type='card'
             size='large'
+            destroyInactiveTabPane
             items={['Borrow', 'Lend'].map((tab, i) => {
               return {
                 label: tab,

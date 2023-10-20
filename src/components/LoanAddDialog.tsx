@@ -1,23 +1,28 @@
 import { Dialog, Transition } from '@headlessui/react'
-import { Fragment, ReactNode, useMemo, useState } from 'react'
-import clsx from 'clsx'
-import { ethers } from 'ethers'
+import { Fragment, ReactNode, useEffect, useMemo, useState } from 'react'
 import { config } from '@/config'
-import { postBuildMessage, transferInCheck } from '@/api/modules'
+import { patchLoanMiners } from '@/api/modules/loan'
+import MarketClass from '@/models/loan-market-class'
 import Tip, { message } from '@/components/Tip'
 import { useMetaMask } from '@/hooks/useMetaMask'
 import type { RadioChangeEvent } from 'antd'
 import { Input, Radio } from 'antd'
 import NumberInput from '@/components/NumberInput'
+import Button from '@/components/Button'
 import { handleError } from './ErrorHandler'
+import { LoanMarketListItem } from '@/types'
+import { convertRateToContract, getValueMultiplied } from '@/utils'
+import { useSelector } from 'react-redux'
+import BigNumber from 'bignumber.js'
+import { RootState } from '@/store'
+import { LeftOutlined } from '@ant-design/icons'
 
 interface IProps {
   open?: boolean
+  miner?: LoanMarketListItem
   setOpen: (bol: boolean) => void
   updateList: () => void
 }
-
-const abiCoder = ethers.AbiCoder.defaultAbiCoder()
 
 interface BorrowInfoType {
   borrowFunction: string | number
@@ -40,17 +45,25 @@ const defaultBorrowInfo: BorrowInfoType = {
 }
 
 export default function LoanAddDialog(props: IProps) {
-  const { open = false, setOpen, updateList } = props
-  const { currentAccount, contract } = useMetaMask()
+  const { open = false, miner, setOpen, updateList } = props
+  const { currentAccount, loanContract } = useMetaMask()
+  const marketClass = useMemo(() => new MarketClass(), [])
+  const { minerBalance } = useSelector((state: RootState) => ({
+    minerBalance: state.loan.minerBalance
+  }))
 
   const [stepNum, setStepNum] = useState(1)
   const [loading, setLoading] = useState(false)
-  const [data, setData] = useState<any>()
   const [borrowInfo, setBorrowInfo] = useState<BorrowInfoType>(defaultBorrowInfo)
+
+  const maxBorrowAmount = useMemo(() => {
+    return BigNumber(minerBalance?.available_balance_human || 0)
+      .times(0.6)
+      .toNumber()
+  }, [minerBalance])
 
   const onClose = () => {
     setStepNum(1)
-    setData({})
     setOpen(false)
   }
 
@@ -62,29 +75,17 @@ export default function LoanAddDialog(props: IProps) {
     setStepNum(stepNum + 1)
   }
 
-  const confirmSignContent = useMemo(() => {
-    if (data?.miner_id && data?.miner_info && currentAccount) {
-      const timestamp = Math.floor(Date.now() / 1000)
-      setData({
-        ...data,
-        timestamp
-      })
-      return abiCoder.encode(
-        ['string', 'uint64', 'uint64', 'address', 'uint256', 'uint256'],
-        [
-          'validateOwnerSign',
-          parseInt(data.miner_id),
-          data.miner_info['Owner'].slice(2),
-          currentAccount,
-          config.chainId,
-          timestamp
-        ]
-      )
-    } else {
-      return undefined
+  const handleBack = () => {
+    if (stepNum === 1) return
+    setStepNum(stepNum - 1)
+  }
+
+  useEffect(() => {
+    if (miner && miner?.miner_id) {
+      marketClass.getMinerBalance(miner.miner_id)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data?.miner_id, data?.miner_info, currentAccount])
+  }, [miner?.miner_id])
 
   type StepType = {
     key: number | string
@@ -145,30 +146,38 @@ export default function LoanAddDialog(props: IProps) {
   }
 
   const handleMaxBtnClick = () => {
-    // to do
+    setBorrowInfo({
+      ...borrowInfo,
+      borrowAmount: maxBorrowAmount,
+      borrowColleteral: BigNumber(maxBorrowAmount || 0)
+        .dividedBy(minerBalance?.total_balance_human || 0)
+        .times(100)
+        .toNumber()
+    })
   }
 
   const step1 = () => {
     const BorrowAmountMap = [
       {
         title: 'Pledge amount',
-        value: '20000 FIL'
+        value: `${minerBalance?.pledge_balance_human || 0} FIL`
       },
       {
         title: 'Locked rewards',
-        value: '90000 FIL'
+        value: `${minerBalance?.locked_balance_human || 0} FIL`
       },
       {
         title: 'Available balance',
-        value: '100000 FIL'
+        value: `${minerBalance?.available_balance_human || 0} FIL`
       },
       {
         title: 'The Miner Total Current Value',
-        value: '300000 FIL'
+        value: `${minerBalance?.total_balance_human || 0} FIL`
       }
     ]
     return (
       <>
+        <div>{`Miner Id: ${config.address_zero_prefix}0${miner?.miner_id}`}</div>
         <div className='flex w-3/4 flex-wrap'>
           {BorrowAmountMap.map((item) => (
             <div key={item.title} className='w-1/2 text-sm'>
@@ -194,27 +203,38 @@ export default function LoanAddDialog(props: IProps) {
             {borrowInfo?.borrowFunction === 1 ? (
               <NumberInput
                 value={borrowInfo.borrowAmount}
+                max={maxBorrowAmount}
                 maxButton
                 onMaxButtonClick={handleMaxBtnClick}
-                onChange={(val: number) => setBorrowInfo({ ...borrowInfo, borrowAmount: val })}
+                onChange={(val: number) =>
+                  setBorrowInfo({
+                    ...borrowInfo,
+                    borrowAmount: val,
+                    borrowColleteral: BigNumber(val || 0)
+                      .dividedBy(minerBalance?.total_balance_human || 0)
+                      .times(100)
+                      .toNumber()
+                  })
+                }
                 prefix='FIL'
               />
             ) : (
               <p className='h-[49px] leading-[49px]'>{borrowInfo.borrowColleteral}</p>
             )}
-            <p className='pt-[5px] text-sm text-gray-500'>The colleteral rate cannot over 50%</p>
+            <p className='pt-[5px] text-sm text-gray-500'>The colleteral rate cannot over 60%</p>
           </div>
           <div className='w-1/2'>
             {borrowInfo?.borrowFunction === 2 ? (
               <NumberInput
                 value={borrowInfo.borrowColleteral}
                 maxButton
+                max={60}
                 onMaxButtonClick={handleMaxBtnClick}
                 onChange={(val: number) => setBorrowInfo({ ...borrowInfo, borrowColleteral: val })}
                 prefix='%'
               />
             ) : (
-              <p className='h-[49px] leading-[49px]'>{borrowInfo.borrowAmount}</p>
+              <p className='h-[49px] leading-[49px]'>{borrowInfo.borrowColleteral}</p>
             )}
             <p className='pt-[5px] text-sm text-gray-500'>Colleteral % = Borrow amount/Miner Total Current Value</p>
           </div>
@@ -270,8 +290,6 @@ export default function LoanAddDialog(props: IProps) {
             {borrowInfo?.borrowInterestFunction === 1 ? (
               <NumberInput
                 value={borrowInfo.borrowInterestRate}
-                maxButton
-                onMaxButtonClick={handleMaxBtnClick}
                 onChange={(val: number) => setBorrowInfo({ ...borrowInfo, borrowInterestRate: val })}
                 prefix='%'
               />
@@ -321,7 +339,7 @@ export default function LoanAddDialog(props: IProps) {
     const data = [
       {
         name: 'Miner ID',
-        value: 'f0123123'
+        value: `${config.address_zero_prefix}0${miner?.miner_id}`
       },
       {
         name: 'Borrow Amount / Collateral %',
@@ -387,7 +405,7 @@ export default function LoanAddDialog(props: IProps) {
   }
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const stepContent = useMemo(() => renderStep(stepNum), [stepNum, borrowInfo])
+  const stepContent = useMemo(() => renderStep(stepNum), [stepNum, borrowInfo, miner, minerBalance])
 
   const btnEvent = (key: number) => {
     switch (key) {
@@ -396,83 +414,14 @@ export default function LoanAddDialog(props: IProps) {
           text: 'Next',
           onClick: async () => {
             if (!borrowInfo.borrowAmount && !borrowInfo.borrowColleteral) return
-            try {
-              setLoading(true)
-
-              const form = document.getElementById('form_minerAddress') as HTMLFormElement
-              const formData = new FormData(form)
-
-              let miner_id: any = formData.get('miner_id')
-              miner_id = miner_id.trim()
-
-              if (!miner_id) {
-                throw new Error('Please input Miner Address')
-              }
-              var reg = /^t0.{1,}/
-              if (config.address_zero_prefix == 'f') {
-                reg = /^f0.{1,}/
-              }
-
-              if (!reg.test(miner_id)) {
-                throw new Error(`Please output ${config.address_zero_prefix}0xxxxxx format`)
-              }
-
-              miner_id = parseInt(miner_id.slice(2))
-              let checkRes = await transferInCheck({ miner_id })
-              if (checkRes['in_spex'] === true) {
-                throw new Error(`Miner alredy in SPex, Please go to 'Me' page to view`)
-              }
-              let res = await postBuildMessage({ miner_id })
-
-              setData({
-                ...res,
-                miner_id
-              })
-
-              onNext(form)
-            } catch (error: any) {
-              handleError(error)
-              setLoading(false)
-            }
+            onNext()
           }
         }
       case 2:
         return {
           text: 'Next',
           onClick: async () => {
-            // try {
-            //   setLoading(true)
-
-            //   const form = document.getElementById('form_sign') as HTMLFormElement
-            //   const formData = new FormData(form)
-
-            //   const sign = formData.get('sign')?.toString()
-            //   if (!sign) {
-            //     onNext(form)
-            //     setLoading(false)
-            //     return
-            //     // throw new Error('Please input Sign')
-            //   }
-
-            //   const post_data = {
-            //     message: data.msg_hex as string,
-            //     sign,
-            //     cid: data.msg_cid_str as string,
-            //     wait: true
-            //   }
-
-            //   let res = await postPushMessage(post_data)
-            //   res = res._data
-
-            //   setData({
-            //     ...data,
-            //     ...res
-            //   })
-            //   onNext(form)
-            // } catch (error) {
-            //   handleError(error)
-            //   setLoading(false)
-            // }
+            if (!borrowInfo.borrowInterestAmount && !borrowInfo.borrowInterestRate) return
             onNext()
           }
         }
@@ -480,71 +429,52 @@ export default function LoanAddDialog(props: IProps) {
         return {
           text: 'Confirm',
           onClick: async () => {
-            // try {
-            //   setLoading(true)
-
-            //   const form = document.getElementById('form_confirm') as HTMLFormElement
-
-            //   const formData = new FormData(form)
-
-            //   let sign = formData.get('sign')
-            //   if (!sign) {
-            //     throw new Error('Please input Sign')
-            //   }
-            //   const price = formData.get('price')?.toString()
-            //   if (!price) {
-            //     throw new Error('Please input Price')
-            //   }
-            //   const targetBuyer = formData.get('targetBuyer')
-            //   sign = '0x' + sign.slice(2)
-
-            //   console.log('ZeroAddress: ', ZeroAddress)
-            //   console.log('parseEther(price): ', parseEther(price))
-            //   console.log('sign: ', sign)
-            //   console.log('data: ', data)
-            //   const tx = await contract?.confirmTransferMinerIntoSPexAndList(
-            //     data.miner_id,
-            //     sign,
-            //     data.timestamp,
-            //     parseEther(price),
-            //     targetBuyer || ZeroAddress
-            //   )
-
-            //   message({
-            //     title: 'TIP',
-            //     type: 'success',
-            //     content: tx.hash,
-            //     closeTime: 10000
-            //   })
-
-            //   const result = await tx.wait()
-            //   console.log('result', result)
-
-            //   await postMiner({
-            //     owner: currentAccount,
-            //     miner_id: data.miner_id,
-            //     price: parseFloat(price),
-            //     price_raw: parseFloat(price) * 1e18,
-            //     is_list: true,
-            //     list_time: data.timestamp
-            //   })
-
-            //   onNext(form)
-            // } catch (error) {
-            //   handleError(error)
-            //   setLoading(false)
-            // }
-            console.log('borrowInfo', borrowInfo)
-
+            if (!borrowInfo.depositAddress) return
             onNext()
           }
         }
       case 4:
         return {
           text: 'Confirm & Publish',
-          onClick: () => {
-            onClose()
-            updateList()
+          onClick: async () => {
+            try {
+              setLoading(true)
+              const params = [
+                miner?.miner_id,
+                currentAccount,
+                getValueMultiplied(borrowInfo.borrowAmount || 0),
+                getValueMultiplied(convertRateToContract(borrowInfo.borrowInterestRate || 0), 6),
+                borrowInfo.depositAddress,
+                false
+              ]
+
+              const tx = await loanContract?.changeMinerBorrowParameters(...params)
+
+              message({
+                title: 'TIP',
+                type: 'success',
+                content: tx.hash,
+                closeTime: 10000
+              })
+
+              await tx.wait()
+
+              if (miner?.miner_id) {
+                await patchLoanMiners({
+                  delegator_address: currentAccount,
+                  miner_id: miner.miner_id,
+                  receive_address: borrowInfo.depositAddress,
+                  disabled: false,
+                  max_debt_amount_human: borrowInfo.borrowAmount,
+                  annual_interest_rate_human: borrowInfo.borrowInterestRate
+                })
+                onClose()
+                updateList()
+              }
+            } catch (error) {
+              handleError(error)
+              setLoading(false)
+            }
           }
         }
       default:
@@ -556,7 +486,7 @@ export default function LoanAddDialog(props: IProps) {
   }
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const btnData = useMemo(() => btnEvent(stepNum), [stepNum])
+  const btnData = useMemo(() => btnEvent(stepNum), [stepNum, borrowInfo])
 
   const renderStepIcon = (step, size?) => {
     const status = () => {
@@ -621,6 +551,12 @@ export default function LoanAddDialog(props: IProps) {
     )
   }
 
+  useEffect(() => {
+    if (!open) {
+      setBorrowInfo(defaultBorrowInfo)
+    }
+  }, [open])
+
   return (
     <>
       {open && (
@@ -678,39 +614,10 @@ export default function LoanAddDialog(props: IProps) {
                     </div>
 
                     <div className='text-center'>
-                      <button
-                        type='button'
-                        className={clsx([
-                          'bg-gradient-common mt-5 inline-flex h-[44px] w-[256px] items-center justify-center rounded-full text-white focus-visible:ring-0',
-                          { 'cursor-not-allowed': loading }
-                        ])}
-                        onClick={btnData.onClick}
-                        disabled={loading}
-                      >
-                        {loading && (
-                          <svg
-                            className='-ml-1 mr-3 h-5 w-5 animate-spin text-white'
-                            xmlns='http://www.w3.org/2000/svg'
-                            fill='none'
-                            viewBox='0 0 24 24'
-                          >
-                            <circle
-                              className='opacity-25'
-                              cx='12'
-                              cy='12'
-                              r='10'
-                              stroke='currentColor'
-                              strokeWidth='4'
-                            ></circle>
-                            <path
-                              className='opacity-75'
-                              fill='currentColor'
-                              d='M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z'
-                            ></path>
-                          </svg>
-                        )}
+                      {stepNum > 1 && <LeftOutlined className='mr-[60px]' onClick={handleBack} />}
+                      <Button width={256} loading={loading} onClick={btnData.onClick}>
                         {btnData.text}
-                      </button>
+                      </Button>
                     </div>
                   </Dialog.Panel>
                 </Transition.Child>

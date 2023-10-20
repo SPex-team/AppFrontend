@@ -1,6 +1,11 @@
 export default function Loading() {
   return (
-    <div className='fixed z-[60] flex h-screen w-screen items-center justify-center bg-black/10'>
+    <div
+      className='fixed z-[999] flex h-screen w-screen items-center justify-center bg-black/10'
+      // style={{
+      //   pointerEvents: 'none'
+      // }}
+    >
       <svg
         className='-ml-1 mr-3 h-10 w-10 animate-spin text-[#0077FE]'
         xmlns='http://www.w3.org/2000/svg'

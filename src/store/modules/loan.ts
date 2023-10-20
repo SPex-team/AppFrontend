@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { ethers } from 'ethers'
-import { LoanMarketListItem } from '@/types'
+import { LoanMarketListItem, LoanMinerInfo, LoanOrderInfo, MinerBalance } from '@/types'
 
 interface IState {
   provider?: ethers.BrowserProvider
@@ -10,18 +10,24 @@ interface IState {
   marketPage: number
   marketCount: number
 
+  minerInfo: LoanMinerInfo | undefined
+
   minerPriceCeiling: number
   minerPriceFloor: number
 
-  borrowList: any[]
+  minerBalance?: MinerBalance
+
+  borrowList: LoanMarketListItem[]
   borrowPage: number
   borrowCount: number
 
-  lendList: any[]
+  lendList: LoanOrderInfo[]
+  lendListByMiner: LoanOrderInfo[]
   lendPage: number
   lendCount: number
 
   tableLoading: boolean
+  tableLoading2: boolean
   loading: boolean
 }
 
@@ -30,18 +36,24 @@ const initialState: IState = {
   marketPage: 1,
   marketCount: 0,
 
+  minerInfo: undefined,
+
   minerPriceCeiling: 0,
   minerPriceFloor: 0,
+
+  minerBalance: undefined,
 
   borrowList: [],
   borrowPage: 1,
   borrowCount: 0,
 
   lendList: [],
+  lendListByMiner: [],
   lendPage: 1,
   lendCount: 0,
 
   tableLoading: false,
+  tableLoading2: false,
   loading: false
 }
 

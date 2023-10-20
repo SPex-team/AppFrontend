@@ -1,3 +1,5 @@
+import BigNumber from 'bignumber.js'
+
 const isEmpty = (val) => {
   if (val === 0 || val === '0') return false
   if (val) return false
@@ -52,4 +54,21 @@ export { isEmpty, getTypeOfRareNumbers }
 
 export function isIndent(str: string, unit: number = 6) {
   return str && unit && str.length > unit * 2 ? str?.slice(0, unit) + '...' + str?.slice(-unit) : str
+}
+
+export function numberWithCommas(x, decimal?: number) {
+  if (!x) return '0'
+  return new Intl.NumberFormat('en-US', { maximumSignificantDigits: 18 }).format(
+    BigNumber(x || 0)
+      .decimalPlaces(decimal || 6)
+      .toNumber()
+  )
+}
+
+export function getValueMultiplied(num: number | string, pow: number = 18) {
+  return new BigNumber(num).multipliedBy(Math.pow(10, pow)).toFixed(0)
+}
+
+export function convertRateToContract(num: number | string) {
+  return Math.pow(BigNumber(num).dividedBy(100).plus(1).toNumber(), 1 / 365) - 1
 }

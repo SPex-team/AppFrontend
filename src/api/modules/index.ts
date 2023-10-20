@@ -23,10 +23,24 @@ export function transferInCheck(params: { miner_id: number }): Promise<any> {
   })
 }
 
+export function transferLoanCheck(params: { miner_id: number }): Promise<any> {
+  return getReq({
+    url: '/api/v1/loan/miners/transfer-in-check',
+    params
+  })
+}
+
 // step 1 api
 export function postBuildMessage(data: { miner_id: number }): Promise<any> {
   return postReq({
     url: '/api/v1/spex/messages/build-change-owner-in',
+    data
+  })
+}
+
+export function postLoanBuildMessage(data: { miner_id: number }): Promise<any> {
+  return postReq({
+    url: '/api/v1/spex/messages/build-change-beneficiary-in',
     data
   })
 }

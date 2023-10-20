@@ -54,6 +54,10 @@ const router = createBrowserRouter([
       {
         path: '/comment/:minerId',
         element: lazyLoad(<Comment />)
+      },
+      {
+        path: '/loanComment/:minerId',
+        element: lazyLoad(<Comment />)
       }
     ]
   }

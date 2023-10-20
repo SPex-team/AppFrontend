@@ -17,10 +17,10 @@ const links = isLoan
         name: 'Loan Market',
         href: '/loanMarket'
       },
-      {
-        name: 'History',
-        href: '/loanHistory'
-      },
+      // {
+      //   name: 'History',
+      //   href: '/loanHistory'
+      // },
       {
         name: 'Profile',
         href: '/profile'

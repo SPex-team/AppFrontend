@@ -1,85 +1,135 @@
 import { Dialog, Transition } from '@headlessui/react'
 import { Fragment, useEffect, useMemo, useState } from 'react'
-import { ethers } from 'ethers'
-import { postBuildMessage, postMiner, postPushMessage, transferInCheck } from '@/api/modules'
 import Tip, { message } from '../../../components/Tip'
 import { useMetaMask } from '@/hooks/useMetaMask'
 import DetailColDesc from '@/components/DetailColDesc'
 import NumberInput from '@/components/NumberInput'
-import { LoanMarketListItem } from '@/types'
-import { isIndent } from '@/utils'
+import Button from '@/components/Button'
+import { LoanMarketListItem, LoanMinerInfo } from '@/types'
+import { isIndent, numberWithCommas, getValueMultiplied } from '@/utils'
 import dayjs from 'dayjs'
 import { config } from '@/config'
-import { setRootData } from '@/store/modules/loan'
-import { useDispatch, useSelector } from 'react-redux'
-import MarketClass from '@/models/loan-market-class'
 import { handleError } from '@/components/ErrorHandler'
+import BigNumber from 'bignumber.js'
+import debounce from 'lodash/debounce'
+import { patchLoanMiners, postLoanList } from '@/api/modules/loan'
 
 interface IProps {
   open: boolean
-  data?: LoanMarketListItem
+  loading?: boolean
+  minerInfo: (LoanMinerInfo & LoanMarketListItem) | undefined
   setOpen: (bol: boolean) => void
+  getList: () => void
 }
 
 export default function LoanLendDialog(props: IProps) {
-  const { open = false, data, setOpen } = props
-  const { currentAccount, contract } = useMetaMask()
-  const dispatch = useDispatch()
+  const { open = false, minerInfo, setOpen, getList } = props
+  const { currentAccount, loanContract } = useMetaMask()
 
   const [amount, setAmount] = useState<number | null>()
+  const [loading, setLoading] = useState<boolean>(false)
+  const debouncedAmount = debounce(setAmount, 800)
 
   const minerDetail = useMemo(() => {
     return [
       {
         title: 'Miner Available Balance',
-        value: `10000 FIL`
+        value: `${numberWithCommas((minerInfo?.available_balance_human || 0).toFixed(6))} FIL`
       },
       {
         title: 'Miner Pledge Amount',
-        value: `20000 FIL`
+        value: `${numberWithCommas(minerInfo?.initial_pledge_human)} FIL`
       },
       {
         title: 'Miner Locked Reward',
-        value: `900 FIL`
+        value: `${numberWithCommas(minerInfo?.locked_rewards_human)} FIL`
       },
       {
         title: 'Miner Total Value',
-        value: '3000 FIL'
+        value: `${numberWithCommas(minerInfo?.total_balance_human)} FIL`
       }
     ]
-  }, [])
+  }, [minerInfo])
 
   const loanDetail = useMemo(() => {
     return [
       {
-        title: 'Colletral Rate',
-        value: `20%`
+        title: 'Collateral Rate',
+        value: `${minerInfo?.collateral_rate}%`
       },
       {
         title: 'Amount request to borrow',
-        value: `20000 FIL`
+        value: `${numberWithCommas(minerInfo?.max_debt_amount_human)} FIL`
       },
       {
         title: 'Commit APY',
-        value: `30%`
+        value: `${BigNumber(minerInfo?.annual_interest_rate_human || 0).toFixed(2)}%`
       },
       {
         title: 'Approximate Interest / year',
-        value: '3000 FIL'
+        value: `${numberWithCommas(
+          BigNumber(minerInfo?.max_debt_amount_human || 0)
+            .multipliedBy(BigNumber((minerInfo?.annual_interest_rate_human || 0) / 100))
+            .toFixed(6)
+        )} FIL`
       }
     ]
-  }, [])
+  }, [minerInfo])
+
+  const orderDetail = useMemo(() => {
+    return [
+      {
+        title: 'Amount has been borrowed for this order',
+        value: `${numberWithCommas(minerInfo?.last_debt_amount_human)} FIL`
+      },
+      {
+        title: 'Order completed',
+        value: `${
+          Number(minerInfo?.max_debt_amount_human) <= 0
+            ? 0
+            : BigNumber(minerInfo?.last_debt_amount_human || 0)
+                .dividedBy(BigNumber(minerInfo?.max_debt_amount_human || 0))
+                .multipliedBy(100)
+                .toFixed(2)
+        } %`
+      },
+      {
+        title: 'Lending Quota left',
+        value: `${numberWithCommas(
+          BigNumber(minerInfo?.max_debt_amount_human || 0).minus(BigNumber(minerInfo?.last_debt_amount_human || 0))
+        )} FIL`
+      }
+    ]
+  }, [minerInfo])
+
+  const maxAmount = useMemo(() => {
+    return BigNumber(minerInfo?.max_debt_amount_human || 0)
+      .minus(BigNumber(minerInfo?.last_debt_amount_human || 0))
+      .decimalPlaces(6)
+      .toNumber()
+  }, [minerInfo])
+
+  const lendInfoByAmount = useMemo(() => {
+    return {
+      quota: BigNumber(amount || 0)
+        .dividedBy(BigNumber(minerInfo?.max_debt_amount_human || 0))
+        .multipliedBy(100)
+        .toFixed(2),
+      interest: BigNumber(amount || 0)
+        .multipliedBy(BigNumber((minerInfo?.annual_interest_rate_human || 0) / 100))
+        .decimalPlaces(6)
+    }
+  }, [amount, minerInfo])
 
   const onClose = () => {
     setOpen(false)
   }
 
   const handleMaxBtnClick = () => {
-    // to do: lending quota left
-    // setAmount()
+    setAmount(maxAmount)
   }
 
-  const handleConfirm = async (miner_id?: number, price_raw?: string) => {
+  const handleConfirm = async () => {
     if (!currentAccount) {
       return message({
         title: 'TIP',
@@ -87,29 +137,73 @@ export default function LoanLendDialog(props: IProps) {
         content: 'Please connect you wallet first'
       })
     }
-    try {
-      dispatch(setRootData({ loading: true }))
-      const tx = await contract.buyMiner(miner_id, {
-        value: price_raw
-        // gasLimit: 100000
-      })
-      message({
+    if (!amount) {
+      return message({
         title: 'TIP',
-        type: 'success',
-        content: tx.hash,
-        closeTime: 4000
+        type: 'warning',
+        content: 'Please enter the amount you would like to lend'
+      })
+    }
+    try {
+      setLoading(true)
+      const tx = await loanContract.buyMinerDebt(minerInfo?.miner_id, {
+        value: getValueMultiplied(amount)
       })
       const result = await tx.wait()
-
-      // await putMiner(miner_id, { miner_id, owner: currentAccount, price: 0, price_raw: 0, is_list: false })
-
-      // MarketClass.removeDataOfList(miner_id)
+      /* 
+        blockHash: "0xbc70c8b143268b0e38be2ded6ed1ccb8e42a44d5bcd1411b55a7301dbb932782"
+        blockNumber: 989424
+        contractAddress: null
+        cumulativeGasUsed: 0n
+        from: "0xA1151D1821704a4beB63e3f7dF6135327E9208e1"
+        gasPrice: 1874068663n
+        gasUsed: 15702298n
+        hash: "0xa8ea8292dcd0bc82c484101a12ad5163d00ad792a5f80a7b6e5c498134f587f6"
+        index: 8
+        provider: BrowserProvider {#subs: Map(0), #plugins: Map(0), #pausedState: null, #destroyed: false, #networkPromise: Promise, …}
+        root: "0x0000000000000000000000000000000000000000000000000000000000000000"
+        status: 1
+        to: "0x3f8A5C01063f4061f84beCFBA2D3056523407eE5"
+        type: 2
+      */
+      if (result) {
+        // update the miner
+        patchLoanMiners({
+          miner_id: minerInfo?.miner_id,
+          last_debt_amount_human: (minerInfo?.last_debt_amount_human || 0) + amount
+        })
+        // update the lend list
+        postLoanList({
+          ...minerInfo,
+          annual_interest_rate: minerInfo?.annual_interest_rate_human,
+          last_amount_human: (minerInfo?.last_debt_amount_human || 0) + amount,
+          miner_total_balance_human: minerInfo?.total_balance_human,
+          current_principal_human: amount,
+          user_address: currentAccount,
+          transaction_hash: result?.hash
+        })
+        message({
+          title: 'TIP',
+          type: 'success',
+          content: tx.hash,
+          closeTime: 4000
+        })
+        setOpen(false)
+        getList()
+      }
     } catch (error) {
       handleError(error)
     } finally {
-      dispatch(setRootData({ loading: false }))
+      // dispatch(setRootData({ loading: false }))
+      setLoading(false)
     }
   }
+
+  useEffect(() => {
+    if (!open) {
+      setAmount(null)
+    }
+  }, [open])
 
   return (
     <>
@@ -160,9 +254,15 @@ export default function LoanLendDialog(props: IProps) {
                       <div className='w-1/2'>
                         <div className='rounded-[10px] border border-gray-300 p-[12px]'>
                           <p className='pb-2 font-semibold'>Miner Detail</p>
-                          <div className='grid grid-cols-2 gap-2'>
-                            {minerDetail.map((item) => (
-                              <DetailColDesc key={item.title} title={item.title} desc={item.value} type='green' />
+                          <div className='grid grid-cols-3 gap-2'>
+                            {minerDetail.map((item, index) => (
+                              <DetailColDesc
+                                className={index === 0 ? 'col-span-3' : ''}
+                                key={item.title}
+                                title={item.title}
+                                desc={item.value}
+                                type='green'
+                              />
                             ))}
                           </div>
                           <p className='pb-2 pt-2 font-semibold'>Loan Detail</p>
@@ -171,52 +271,54 @@ export default function LoanLendDialog(props: IProps) {
                               <DetailColDesc key={item.title} title={item.title} desc={item.value} type='blue' />
                             ))}
                           </div>
-                          <DetailColDesc
-                            className='my-2'
-                            title='Amount has been borrowed for this order'
-                            desc='50000 FIL'
-                          />
-                          <div className='grid grid-cols-2 gap-2'>
-                            <DetailColDesc title='Order completed' desc='33.3%' />
-                            <DetailColDesc title='Lending Quota left' desc='50000 FIL' />
+                          <div className='grid grid-cols-2 gap-2 pt-2'>
+                            {orderDetail.map((item, index) => (
+                              <DetailColDesc
+                                key={item.title}
+                                className={index === 0 ? 'col-span-2' : ''}
+                                title={item.title}
+                                desc={item.value}
+                              />
+                            ))}
                           </div>
                         </div>
                       </div>
                       <div className='w-1/2'>
-                        <p className='text-xl font-semibold'>{`Miner ${config.address_zero_prefix}0${data?.miner_id}`}</p>
+                        <p className='text-xl font-semibold'>{`Miner ${config.address_zero_prefix}0${minerInfo?.miner_id}`}</p>
                         <p className='text-sm'>
                           Order listed:
                           <span className='ml-1 text-[#0077FE]'>
-                            {data?.list_time && dayjs(data.list_time * 1000).format('YYYY-MM-DD hh:mm:ss')}
+                            {minerInfo?.create_time && dayjs(minerInfo.create_time).format('YYYY-MM-DD hh:mm:ss')}
                           </span>
                         </p>
                         <p className='text-sm'>
-                          Published By: <span className='text-[#0077FE]'>{data?.owner && isIndent(data.owner)}</span>
+                          Published By:{' '}
+                          <span className='text-[#0077FE]'>
+                            {minerInfo?.delegator_address && isIndent(minerInfo.delegator_address)}
+                          </span>
                         </p>
                         <div className='mt-[30px] rounded-[10px] border border-[#ACCEF1] p-[20px]'>
                           <label>Amount you wound like to lend</label>
                           <NumberInput
+                            max={maxAmount}
                             maxButton
                             prefix='FIL'
                             value={amount}
-                            onChange={(val: number) => setAmount(val)}
+                            onChange={(val: number) => debouncedAmount(val)}
                             onMaxButtonClick={handleMaxBtnClick}
                           />
                           <div className='mt-[30px] flex justify-between'>
                             <span>% Quota of the loan</span>
-                            <span className='font-medium'>13.33%</span>
+                            <span className='font-medium'>{`${lendInfoByAmount.quota}%`}</span>
                           </div>
                           <div className='mt-[12px] flex justify-between'>
                             <span className='max-w-[200px]'>Approximate Interest you would earn / year</span>
-                            <span className='font-medium'>{`4000 FIL`}</span>
+                            <span className='font-medium'>{`${lendInfoByAmount.interest} FIL`}</span>
                           </div>
                         </div>
-                        <button
-                          onClick={() => handleConfirm()}
-                          className='bg-gradient-common my-10 flex h-11 w-full items-center justify-center rounded-full px-4 text-white md:mb-0'
-                        >
+                        <Button loading={loading} onClick={() => handleConfirm()}>
                           Confirm
-                        </button>
+                        </Button>
                       </div>
                     </div>
                   </Dialog.Panel>

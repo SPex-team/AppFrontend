@@ -1,170 +1,177 @@
 import { Dialog, Transition } from '@headlessui/react'
-import { Fragment, ReactNode, useEffect, useMemo, useState } from 'react'
-import { ethers, parseEther, ZeroAddress } from 'ethers'
+import { Fragment, useEffect, useMemo } from 'react'
 import { config } from '@/config'
-import { postBuildMessage, postMiner, postPushMessage, transferInCheck } from '@/api/modules'
-import { List, Skeleton, Divider, Table } from 'antd'
+import { Divider, Table } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
-import Tip, { message } from '../../../components/Tip'
 import { useMetaMask } from '@/hooks/useMetaMask'
 import DetailColDesc from '@/components/DetailColDesc'
-import NumberInput from '@/components/NumberInput'
-import { isIndent } from '@/utils'
+import { isIndent, numberWithCommas } from '@/utils'
 import './loanDetail.scss'
-import { LoanMarketListItem } from '@/types'
 import dayjs from 'dayjs'
+import BigNumber from 'bignumber.js'
+import ProfileClass from '@/models/profile-class'
+import { useSelector } from 'react-redux'
+import { RootState } from '@/store'
 
 interface IProps {
   open: boolean
-  data?: LoanMarketListItem | null
+  data?: any
   type?: 'borrow' | 'lend'
   setOpen: (bol: boolean) => void
 }
 
 interface DataType {
-  address: string
-  range: number
-  principle: number
+  user_address: string
+  current_principal_human: number
+  total_interest_human: number
 }
 
 export default function LoanDetailDialog(props: IProps) {
   const { open = false, data, type = 'lend', setOpen } = props
-  const { currentAccount, contract } = useMetaMask()
-
-  const [stepNum, setStepNum] = useState(0)
+  const { currentAccount } = useMetaMask()
+  const profileClasss = useMemo(() => new ProfileClass({ currentAccount }), [currentAccount])
+  const { lendListByMiner, tableLoading } = useSelector((state: RootState) => ({
+    lendListByMiner: state.loan.lendListByMiner,
+    tableLoading: state.root.tableLoading2
+  }))
 
   const columns: ColumnsType<DataType> = [
     {
       title: 'Lender Address',
-      dataIndex: 'address',
+      dataIndex: 'user_address',
       align: 'left',
       width: 150,
       render: (text) => <span className='whitespace-nowrap'>{isIndent(text)}</span>
     },
     {
-      title: 'Days',
-      dataIndex: 'days'
+      title: 'Lending Days',
+      dataIndex: 'create_time',
+      align: 'center',
+      render: (text) => `${dayjs(new Date()).diff(text, 'd')} Days`
     },
     {
       title: 'Principle',
-      dataIndex: 'Principle'
+      dataIndex: 'current_principal_human',
+      align: 'center',
+      render: (text) => `${text} FIL`
     }
   ]
+
+  const getList = async () => {
+    if (data?.miner_id) {
+      profileClasss.getLendListByMiner(data.miner_id)
+    }
+  }
+
+  useEffect(() => {
+    if (open) {
+      getList()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open])
 
   const borrowDetail = useMemo(() => {
     return [
       {
         title: 'Amount request to borrow',
-        value: `15000 FIL`
+        value: `${numberWithCommas(data?.max_debt_amount_human)} FIL`
       },
       {
-        title: 'Colletral Rate',
-        value: `50%`
+        title: 'Collateral Rate',
+        value: `${data?.collateral_rate}%`
       },
       {
         title: 'Commit APY',
-        value: `20%`
+        value: `${(data?.annual_interest_rate_human || 0).toFixed(2)}%`
       },
       {
         title: 'Approximate Interest',
-        value: '3000 FIL / year'
+        value: `${numberWithCommas(
+          BigNumber(data?.max_debt_amount_human || 0)
+            .multipliedBy(BigNumber((data?.annual_interest_rate_human || 0) / 100))
+            .toFixed(6)
+        )} FIL / year`
       }
     ]
-  }, [])
+  }, [data])
+
+  const minerDetail = useMemo(() => {
+    return [
+      {
+        title: 'Miner ID',
+        value: `${config.address_zero_prefix}0${data?.miner_id}`
+      },
+      {
+        title: 'Miner Available Balance',
+        value: `${numberWithCommas((data?.available_balance_human || 0).toFixed(6))} FIL`
+      },
+      {
+        title: 'Miner Locked Reward',
+        value: `${numberWithCommas(data?.locked_rewards_human)} FIL`
+      },
+      {
+        title: 'Miner Pledge Amount',
+        value: `${numberWithCommas(data?.initial_pledge_human)} FIL`
+      }
+    ]
+  }, [data])
+
+  const lendDetail = useMemo(() => {
+    return [
+      {
+        title: 'Amount has been borrowed for this order',
+        value: `${numberWithCommas(data?.last_debt_amount_human)} FIL`
+      },
+      {
+        title: 'Order completed',
+        value: `${
+          Number(data?.max_debt_amount_human) <= 0
+            ? 0
+            : BigNumber(data?.last_debt_amount_human || 0)
+                .dividedBy(BigNumber(data?.max_debt_amount_human || 0))
+                .multipliedBy(100)
+                .decimalPlaces(2)
+        } %`
+      },
+      {
+        title: 'Lending Quota left',
+        value: `${numberWithCommas(
+          BigNumber(data?.max_debt_amount_human || 0).minus(BigNumber(data?.last_debt_amount_human || 0))
+        )} FIL`
+      }
+    ]
+  }, [data])
 
   const orderDetail = useMemo(() => {
     return type === 'lend'
       ? [
           {
             title: 'Amount you lend',
-            value: `50000 FIL`
+            value: `${numberWithCommas(data?.current_principal_human)} FIL`
           },
           {
             title: '% of Total Loan',
-            value: `33.3%`
+            value: `${BigNumber(data?.current_principal_human || 0)
+              .dividedBy(BigNumber(data?.max_debt_amount_human || 0))
+              .multipliedBy(100)
+              .decimalPlaces(2)}%`
           },
           {
             title: 'Approximate interest you would earn / year',
-            value: `10000 FIL`
+            value: `${numberWithCommas(
+              BigNumber(data?.current_principal_human || 0).multipliedBy(
+                BigNumber((data?.annual_interest_rate_human || 0) / 100)
+              )
+            )} FIL`
           }
         ]
-      : [
-          {
-            title: 'Amount has been borrowed for this order',
-            value: `50000 FIL`
-          },
-          {
-            title: 'Order completed',
-            value: `33.3%`
-          },
-          {
-            title: 'Lending Quota left',
-            value: `10000 FIL`
-          }
-        ]
-  }, [])
-
-  const lendDetail = useMemo(() => {
-    return [
-      {
-        title: 'Amount has been borrowed for this order',
-        value: '50000 FIL'
-      },
-      {
-        title: 'Order completed',
-        value: '33.33%'
-      },
-      {
-        title: 'Lending Quota left',
-        value: '100000 FIL'
-      }
-    ]
-  }, [])
-
-  const list = useMemo(() => {
-    return [
-      {
-        address: '0xA1151D1821704a4beB63e3f7dF6135327E9208e1',
-        range: 60,
-        principle: 2000
-      },
-      {
-        address: '0xA1151D1821704a2beB63e3f7dF6135327E9208e1',
-        range: 60,
-        principle: 2000
-      },
-      {
-        address: '0xA1151D1321704a4beB63e3f7dF6135327E9208e1',
-        range: 60,
-        principle: 2000
-      },
-      {
-        address: '0xA115121821704a4beB63e3f7dF6135327E9208e1',
-        range: 60,
-        principle: 2000
-      },
-      {
-        address: '0xA1151D1121704a4beB63e3f7dF6135327E9208e1',
-        range: 60,
-        principle: 2000
-      },
-      {
-        address: '0xA1154D1821704a4beB63e3f7dF6135327E9208e1',
-        range: 60,
-        principle: 2000
-      }
-    ]
-  }, [])
+      : lendDetail
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data])
 
   const onClose = () => {
     setOpen(false)
   }
-
-  useEffect(() => {
-    if (!open) {
-      setStepNum(0)
-    }
-  }, [open])
 
   return (
     <>
@@ -215,7 +222,7 @@ export default function LoanDetailDialog(props: IProps) {
                       <div className='w-1/2'>
                         <div className='rounded-[10px] border border-gray-300 p-[20px]'>
                           <p className='font-semibold'>Miner Detail</p>
-                          {borrowDetail.map((item) => (
+                          {minerDetail.map((item) => (
                             <div className='my-[10px] flex justify-between' key={item.title}>
                               <span>{item.title}</span>
                               <span className='font-medium'>{item.value}</span>
@@ -224,7 +231,7 @@ export default function LoanDetailDialog(props: IProps) {
                           <Divider className='my-[12px] border-gray-300' />
                           <div className='my-[10px] flex justify-between'>
                             <span>Miner Total Value</span>
-                            <span className='font-medium'>30000 FIL</span>
+                            <span className='font-medium'>{`${numberWithCommas(data?.total_balance_human)} FIL`}</span>
                           </div>
                           <div>
                             {type === 'lend' ? (
@@ -243,9 +250,10 @@ export default function LoanDetailDialog(props: IProps) {
                                 <p className='pb-1 font-semibold'>Lender List</p>
                                 <Table
                                   columns={columns}
-                                  dataSource={list}
+                                  dataSource={lendListByMiner}
+                                  loading={tableLoading}
                                   pagination={false}
-                                  rowKey='address'
+                                  rowKey='user_address'
                                   scroll={{ y: 150 }}
                                 />
                               </>
@@ -258,11 +266,14 @@ export default function LoanDetailDialog(props: IProps) {
                         <p className='text-sm'>
                           Order listed:{' '}
                           <span className='text-[#0077FE]'>
-                            {data?.list_time && dayjs(data.list_time * 1000).format('YYYY-MM-DD hh:mm:ss')}
+                            {data?.create_time && dayjs(data.create_time).format('YYYY-MM-DD hh:mm:ss')}
                           </span>
                         </p>
                         <p className='text-sm'>
-                          Published By: <span className='text-[#0077FE]'>{data?.owner && isIndent(data.owner)}</span>
+                          Published By:{' '}
+                          <span className='text-[#0077FE]'>
+                            {data?.delegator_address && isIndent(data.delegator_address)}
+                          </span>
                         </p>
                         <div className='mt-[20px] grid grid-cols-3 gap-2'>
                           {borrowDetail.map((item, index) => (

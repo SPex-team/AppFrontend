@@ -5,12 +5,14 @@ import { ReactComponent as EmojiIcon } from '@/assets/images/emoji.svg'
 import Pagination from '@/components/Pagination'
 import { useEffect, useMemo, useState } from 'react'
 import CommentClass from '@/models/comment-class'
+import LoanCommentClass from '@/models/loan-comment-class'
 import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from '@/store'
 import AddDialog, { handleError } from '@/components/AddDialog'
 import { formatTime } from '@/plugins/dayjs'
 import { abi, config } from '@/config'
-import { postComment, postUpdataMiners, getMiner } from '@/api/modules'
+import { postUpdataMiners, postComment, getMiner } from '@/api/modules'
+import { getLoanMiner, postLoanComment } from '@/api/modules/loan'
 import { setRootData } from '@/store/modules/root'
 import { message } from '@/components/Tip'
 import { NavLink, useLocation, useParams, useNavigate } from 'react-router-dom'
@@ -21,13 +23,19 @@ import { useMetaMask } from '@/hooks/useMetaMask'
 const Comment = (props) => {
   const { currentAccount } = useMetaMask()
   let params = useParams()
-  console.log('params: ', params)
+  const location = useLocation()
+  // console.log('params: ', params)
+  // console.log('location ==> ', location)
+  const isLoan = location.pathname.toLocaleLowerCase().includes('loan')
   const minerId = Number(params.minerId)
   // let history = useHistory();
   const navigate = useNavigate()
 
   const dispatch = useDispatch()
-  const commentClass = useMemo(() => new CommentClass(params.minerId), [])
+  const commentClass = useMemo(
+    () => (isLoan ? new LoanCommentClass(params.minerId) : new CommentClass(params.minerId)),
+    [isLoan, params.minerId]
+  )
 
   const data = useSelector((state: RootState) => ({
     commentCount: state.root.commentCount,
@@ -106,7 +114,7 @@ const Comment = (props) => {
         miner: minerId
       }
       try {
-        await postComment(sign, postData)
+        isLoan ? await postLoanComment(sign, postData) : await postComment(sign, postData)
         commentClass.selectPage(1)
         contentElement.value = ''
       } catch (error) {
@@ -125,7 +133,7 @@ const Comment = (props) => {
   }
 
   const initCommentMiner = () => {
-    getMiner(minerId).then((resData) => {
+    ;(isLoan ? getLoanMiner : getMiner)(minerId).then((resData) => {
       dispatch(setRootData({ commentMinerOwner: resData.owner }))
       console.log('resData: ', resData)
     })

@@ -1,50 +1,48 @@
 import { Dialog, Transition } from '@headlessui/react'
 import { Fragment, ReactNode, useEffect, useMemo, useState } from 'react'
 import { config } from '@/config'
-import { postBuildMessage, postMiner, postPushMessage, transferInCheck } from '@/api/modules'
+import { postLoanMiners, patchLoanMiners } from '@/api/modules/loan'
 import { Input } from 'antd'
-import { RootState } from '@/store'
 import Tip, { message } from '../../../components/Tip'
 import { useMetaMask } from '@/hooks/useMetaMask'
 import { useSelector, useDispatch } from 'react-redux'
 import NumberInput from '@/components/NumberInput'
-import { isIndent } from '@/utils'
+import Button from '@/components/Button'
+import { getValueMultiplied, isIndent, numberWithCommas, convertRateToContract } from '@/utils'
 import { handleError } from '@/components/ErrorHandler'
 import { setRootData } from '@/store/modules/loan'
+import { LoanMarketListItem } from '@/types'
+
+import DigitalCoinURL from '@/assets/images/digital_coin.png'
+
+const { TextArea } = Input
 
 interface IProps {
   open: boolean
-  data?: any
+  data?: LoanMarketListItem | null
   setOpen: (bol: boolean) => void
+  updateList: () => void
 }
 
 export default function LoanEditDialog(props: IProps) {
-  const { open = false, data, setOpen } = props
-  const { currentAccount, contract } = useMetaMask()
-  const dispatch = useDispatch()
+  const { open = false, data, setOpen, updateList } = props
+  const { currentAccount, loanContract } = useMetaMask()
 
-  const [borrowAmount, setBorrowAmount] = useState<number | null>(null)
-  const [depositAddress, setDepositAddress] = useState<string>()
-
-  const { transactionHistoryList, transactionHistoryPage, transactionHistoryCount, tableLoading } = useSelector(
-    (state: RootState) => ({
-      transactionHistoryList: state.root.transactionHistoryList,
-      transactionHistoryPage: state.root.transactionHistoryPage,
-      transactionHistoryCount: state.root.transactionHistoryCount,
-      tableLoading: state.root.tableLoading2
-    })
-  )
+  const [borrowAmount, setBorrowAmount] = useState<number | null>()
+  const [APY, setAPY] = useState<number | null>()
+  const [depositAddress, setDepositAddress] = useState<string>('')
+  const [loading, setLoading] = useState<boolean>(false)
 
   const onClose = () => {
     setOpen(false)
   }
 
-  const handleDepositAddressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleDepositAddressChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const { value: inputValue } = e.target
     setDepositAddress(inputValue)
   }
 
-  const handleConfirm = async (miner_id?: number, price_raw?: string) => {
+  const handleConfirm = async () => {
     if (!currentAccount) {
       return message({
         title: 'TIP',
@@ -53,38 +51,53 @@ export default function LoanEditDialog(props: IProps) {
       })
     }
     try {
-      dispatch(setRootData({ loading: true }))
-      const tx = await contract.buyMiner(miner_id, {
-        value: price_raw
-        // gasLimit: 100000
-      })
-      message({
-        title: 'TIP',
-        type: 'success',
-        content: tx.hash,
-        closeTime: 4000
-      })
+      setLoading(true)
+      const params = [
+        data?.miner_id,
+        data?.delegator_address,
+        getValueMultiplied(borrowAmount || 0),
+        getValueMultiplied(convertRateToContract(APY || 0), 6),
+        depositAddress,
+        data?.disabled
+      ]
+
+      const tx = await loanContract.changeMinerBorrowParameters(...params)
       const result = await tx.wait()
 
-      // await putMiner(miner_id, { miner_id, owner: currentAccount, price: 0, price_raw: 0, is_list: false })
-
-      // MarketClass.removeDataOfList(miner_id)
+      if (result) {
+        message({
+          title: 'TIP',
+          type: 'success',
+          content: tx.hash,
+          closeTime: 4000
+        })
+        await patchLoanMiners({
+          miner_id: data?.miner_id,
+          receive_address: depositAddress,
+          max_debt_amount_human: borrowAmount,
+          annual_interest_rate_human: APY
+        })
+        setOpen(false)
+        updateList()
+      }
     } catch (error) {
       handleError(error)
     } finally {
-      dispatch(setRootData({ loading: false }))
+      setLoading(false)
     }
   }
 
   const clear = () => {
+    setBorrowAmount(null)
+    setAPY(null)
     setDepositAddress('')
   }
 
   useEffect(() => {
-    if (!open) {
-      clear()
-    }
-  }, [open])
+    setBorrowAmount(data?.max_debt_amount_human || null)
+    setAPY(data?.annual_interest_rate_human || null)
+    setDepositAddress(data?.receive_address || '')
+  }, [data?.max_debt_amount_human, data?.receive_address, data])
 
   return (
     <>
@@ -117,7 +130,7 @@ export default function LoanEditDialog(props: IProps) {
                   <Dialog.Panel className='flex min-h-[400px] w-full max-w-[900px] transform flex-col justify-between overflow-hidden rounded-2xl bg-white p-[30px] text-left shadow-xl transition-all'>
                     <div className='mb-4'>
                       <Dialog.Title as='h3' className='flex items-center justify-between text-2xl font-medium'>
-                        Miner f0123123 Loan Edit
+                        {`Miner ${config.address_zero_prefix}0${data?.miner_id} Loan Edit`}
                         <svg
                           xmlns='http://www.w3.org/2000/svg'
                           fill='none'
@@ -141,9 +154,10 @@ export default function LoanEditDialog(props: IProps) {
                         </div>
                         <div className='flex flex-col items-center'>
                           <p className='absolute -top-[50px] text-lg font-semibold'>Current</p>
-                          <p className='text-xl font-semibold text-[#0077FE]'>15000 FIL</p>
-                          <p className='text-sm font-medium'>Already completed</p>
-                          <p className='font-medium'>10000 FIL</p>
+                          <p className='flex items-center gap-[12px] text-xl font-semibold text-[#0077FE]'>
+                            <img width={24} height={24} src={DigitalCoinURL} alt='coin' />
+                            <span className='pr-5'>{`${numberWithCommas(data?.max_debt_amount_human)} FIL`}</span>
+                          </p>
                         </div>
                         <div>
                           <p className='absolute -top-[50px] right-[80px] text-center text-lg font-semibold'>
@@ -153,6 +167,33 @@ export default function LoanEditDialog(props: IProps) {
                             prefix='FIL'
                             value={borrowAmount}
                             onChange={(val: number) => setBorrowAmount(val)}
+                          />
+                          <div className='flex items-center justify-between'>
+                            <p className='text-sm'>Already completed</p>
+                            <p className='font-medium'>{`${numberWithCommas(data?.last_debt_amount_human)} FIL`}</p>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className='relative mb-[30px] grid grid-cols-3 gap-[20px]'>
+                        <div className='flex flex-col'>
+                          <p className='text-xl font-semibold'>Interest</p>
+                          <p className='text-sm text-gray-500'>
+                            Available to change only when there is no amount has been borrowed.
+                          </p>
+                        </div>
+                        <div className='flex flex-col items-center'>
+                          <p className='text-xl font-semibold'>{`APY ${numberWithCommas(
+                            data?.annual_interest_rate_human,
+                            2
+                          )} %`}</p>
+                        </div>
+                        <div>
+                          <NumberInput
+                            prefix='%'
+                            value={APY}
+                            disabled={Number(data?.last_debt_amount_human) > 0}
+                            onChange={(val: number) => setAPY(val)}
                           />
                         </div>
                       </div>
@@ -166,20 +207,22 @@ export default function LoanEditDialog(props: IProps) {
                           </p>
                         </div>
                         <div className='flex flex-col items-center'>
-                          <p className='font-medium'>123123123123123</p>
+                          <p className='font-medium'>{isIndent(data?.receive_address ?? '')}</p>
                         </div>
                         <div>
-                          <Input className='h-[49px]' value={depositAddress} onChange={handleDepositAddressChange} />
+                          <TextArea
+                            className='h-[49px]'
+                            autoSize={false}
+                            value={depositAddress}
+                            onChange={handleDepositAddressChange}
+                          />
                         </div>
                       </div>
                     </div>
                     <div className='text-center'>
-                      <button
-                        onClick={() => handleConfirm()}
-                        className='bg-gradient-common mx-auto my-10 h-11 w-[200px] rounded-full px-4 text-white md:mb-0'
-                      >
+                      <Button width={256} loading={loading} onClick={() => handleConfirm()}>
                         Confirm
-                      </button>
+                      </Button>
                     </div>
                   </Dialog.Panel>
                 </Transition.Child>

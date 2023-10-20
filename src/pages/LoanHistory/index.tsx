@@ -72,7 +72,7 @@ const columns = [
         <button
           className='whitespace-nowrap break-words hover:text-[#0077FE]'
           onClick={() => {
-            const url = `${config.filescanOrigin}/address/miner?address=${config.address_zero_prefix}0${row.miner_id}`
+            const url = `${config.filescanOrigin}/address/${config.address_zero_prefix}0${row.miner_id}`
             window.open(url)
           }}
         >

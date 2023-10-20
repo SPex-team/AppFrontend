@@ -1,15 +1,14 @@
-import { getMarketList, getMinerPriceAggregated } from '@/api/modules'
+import { getLoanMiners, getLoanByMinerId, getMinerBalance } from '@/api/modules/loan'
 import { setRootData } from '@/store/modules/loan'
 import Table from './table-class'
 
 export default class LoanMarket extends Table {
   static current_page_size?: number
-  ordering = '-list_time'
+  ordering = '-create_time'
   search: string | undefined = undefined
 
   public init() {
     this.getList(1)
-    // this.updateMinerPriceInMarket()
   }
 
   public updateMinerPriceInMarket() {
@@ -19,10 +18,9 @@ export default class LoanMarket extends Table {
 
   private getList(page) {
     this.dispatch(setRootData({ tableLoading: true }))
-    getMarketList({
+    getLoanMiners({
       ordering: this.ordering,
       search: this.search,
-      is_list: true,
       page,
       page_size: this.page_size
     })
@@ -32,7 +30,11 @@ export default class LoanMarket extends Table {
         this.page = page
 
         this.dispatch(
-          setRootData({ marketList: res.results ?? [], marketPage: page ?? 1, marketCount: res.count ?? 0 })
+          setRootData({
+            marketList: res.results?.filter((item) => !item.disabled) ?? [],
+            marketPage: page ?? 1,
+            marketCount: res.count ?? 0
+          })
         )
       })
       .finally(() => {
@@ -45,8 +47,18 @@ export default class LoanMarket extends Table {
   }
 
   private getMinerPriceInMarket(func: 'max' | 'min') {
-    getMinerPriceAggregated(func).then((res) => {
-      const payload = func === 'max' ? { minerPriceCeiling: res?.max || 0 } : { minerPriceFloor: res?.min || 0 }
+    // getMinerPriceAggregated(func).then((res) => {
+    //   const payload = func === 'max' ? { minerPriceCeiling: res?.max || 0 } : { minerPriceFloor: res?.min || 0 }
+    //   this.dispatch(setRootData(payload))
+    // })
+  }
+
+  public getLoanByMinerId(minerId: number) {
+    getLoanByMinerId({ minerId }).then((res) => {
+      // console.log('res ==> ', res)
+      const payload = {
+        minerInfo: res._data
+      }
       this.dispatch(setRootData(payload))
     })
   }
@@ -56,7 +68,7 @@ export default class LoanMarket extends Table {
   }
 
   public sortList = (ordering: string) => {
-    this.ordering = ordering === 'default' ? '-list_time' : ordering
+    this.ordering = ordering === 'default' ? '-create_time' : ordering
     this.getList(1)
   }
 
@@ -65,8 +77,18 @@ export default class LoanMarket extends Table {
     this.getList(1)
   }
 
-  public removeDataOfList(miner_id: number) {
+  public updateList(page: number) {
+    this.page = page
     this.getList(this.page)
     this.updateMinerPriceInMarket()
+  }
+
+  public getMinerBalance(miner_id: number) {
+    getMinerBalance(miner_id).then((res) => {
+      const payload = {
+        minerBalance: res._data
+      }
+      this.dispatch(setRootData(payload))
+    })
   }
 }

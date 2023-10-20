@@ -143,7 +143,7 @@ const Market = (props) => {
                 <button
                   className='hover:text-[#0077FE]'
                   onClick={() => {
-                    const url = `${config.filescanOrigin}/address/miner?address=${config.address_zero_prefix}0${row.miner_id}`
+                    const url = `${config.filescanOrigin}/address/${config.address_zero_prefix}0${row.miner_id}`
                     window.open(url)
                   }}
                 >
@@ -190,8 +190,8 @@ const Market = (props) => {
       dispatch(setRootData({ loading: true }))
 
       const tx = await contract.buyMiner(miner_id, {
-        value: price_raw
-        // gasLimit: 100000
+        value: price_raw,
+        gasLimit: 100000
       })
 
       message({

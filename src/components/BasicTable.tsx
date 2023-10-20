@@ -23,13 +23,13 @@ function BasicTable(props: IProps) {
             <table
               className={`${
                 data.length > 0 && 'basic-table'
-              } w-full border-separate border-spacing-x-0 border-spacing-y-[18px] whitespace-nowrap`}
+              } min-h-[250px] w-full border-separate border-spacing-x-0 border-spacing-y-[18px] whitespace-nowrap`}
             >
               <thead className={`px-4 ${joyGuide ?? ''}`}>
                 <tr>
                   {columns.map((column, columnIndex) => (
                     <th
-                      className={`text-l px-2 py-3 text-left font-medium first:pl-6 last:pr-6 sm:text-2xl first:sm:pl-12 last:sm:pr-12`}
+                      className={`text-l whitespace-pre-wrap px-2 py-3 text-left font-medium first:pl-6 last:pr-6 sm:text-2xl first:sm:pl-12 last:sm:pr-12`}
                       key={`table-head-cell-${columnIndex}`}
                       style={{ width: column.width, minWidth: column.minWidth ?? 'none' }}
                       scope='col'

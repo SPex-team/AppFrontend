@@ -25,11 +25,20 @@
     color: #57596c;
     opacity: 0.3;
   }
+  :root {
+    .ant-btn {
+      border: none;
+      font-size: 16px;
+    }
+  }
 }
 
 @layer components {
   .bg-gradient-common {
     @apply bg-gradient-to-r from-[#0077FE] from-0% to-[#3BF4BB] to-100%;
+  }
+  .common-tips {
+    @apply rounded-[10px] border border-[#8BB6FF] bg-[#E9F1FF] px-[24px] py-[12px] font-semibold;
   }
 }
 

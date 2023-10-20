@@ -1,7 +1,8 @@
-import { getMeList } from '@/api/modules'
+import { getLoanMiners, getLoanList, getLoanListByMiner } from '@/api/modules/loan'
 import { setRootData } from '@/store/modules/loan'
 import Table from './table-class'
 
+const ordering = '-create_time'
 class Profile extends Table {
   static current_page_size?: number
   currentAccount?: string
@@ -16,21 +17,20 @@ class Profile extends Table {
   }
 
   public initLend() {
-    this.getBorrowList(1)
+    this.getLendList(1)
   }
 
   private getBorrowList(page) {
     this.dispatch(setRootData({ tableLoading: true }))
 
-    getMeList({
-      ordering: '-list_time',
+    getLoanMiners({
+      ordering,
       page,
-      owner: this.currentAccount,
-      page_size: this.page_size
+      page_size: this.page_size,
+      delegator_address: this.currentAccount
     })
       .then((res) => {
         res = res._data
-
         this.page = page
         this.dispatch(
           setRootData({ borrowList: res.results ?? [], borrowPage: page ?? 1, borrowCount: res.count ?? 0 })
@@ -44,11 +44,11 @@ class Profile extends Table {
   private getLendList(page) {
     this.dispatch(setRootData({ tableLoading: true }))
 
-    getMeList({
-      ordering: '-list_time',
+    getLoanList({
+      ordering,
       page,
-      owner: this.currentAccount,
-      page_size: this.page_size
+      page_size: this.page_size,
+      user_address: this.currentAccount
     })
       .then((res) => {
         res = res._data
@@ -58,6 +58,28 @@ class Profile extends Table {
       })
       .finally(() => {
         this.dispatch(setRootData({ tableLoading: false }))
+      })
+  }
+
+  public getLendListByMiner(minerId) {
+    this.dispatch(setRootData({ tableLoading2: true }))
+
+    getLoanListByMiner({
+      ordering,
+      page: 1,
+      page_size: 1000,
+      miner_id: minerId
+    })
+      .then((res) => {
+        res = res._data
+        this.dispatch(
+          setRootData({
+            lendListByMiner: res.results ?? []
+          })
+        )
+      })
+      .finally(() => {
+        this.dispatch(setRootData({ tableLoading2: false }))
       })
   }
 
@@ -73,7 +95,11 @@ class Profile extends Table {
     this.getLendList(page)
   }
 
-  public removeDataOfList(miner_id: string) {
+  public updateBorrowList() {
+    this.getBorrowList(this.page)
+  }
+
+  public unlist() {
     this.getBorrowList(this.page)
   }
 }

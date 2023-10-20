@@ -3,55 +3,63 @@ import BasicTable from '@/components/BasicTable'
 import { config } from '@/config'
 import { useMemo, useEffect, useState } from 'react'
 import ProfileClass from '@/models/profile-class'
+import MarketClass from '@/models/loan-market-class'
 import { useSelector } from 'react-redux'
 import { RootState } from '@/store'
-import { formatListTime } from '@/utils/date'
-import { isEmpty } from '@/utils/index'
+import { isEmpty, numberWithCommas } from '@/utils/index'
 import clsx from 'clsx'
 import MinerIDRow from '@/pages/components/MinerIDRow'
 import { useMetaMask } from '@/hooks/useMetaMask'
 import ClaimDialog from './ClaimDialog'
 import LoanDetailDialog from './LoanDetailDialog'
-import { LoanMarketListItem } from '@/types'
+import { LoanOrderInfo, LoanMarketListItem } from '@/types'
 import { PayCircleOutlined } from '@ant-design/icons'
+import type { ColumnsType } from 'antd/es/table'
+import BigNumber from 'bignumber.js'
 
 const isDevEnv = process.env.NODE_ENV === 'development' || window.location.origin.includes('calibration')
 
 const History = () => {
   const { currentAccount } = useMetaMask()
-  const profileClass = useMemo(() => new ProfileClass({ currentAccount }), [])
-  const { borrowList, borrowCount, borrowPage, tableLoading } = useSelector((state: RootState) => ({
-    borrowList: state.loan.borrowList,
-    borrowPage: state.loan.borrowPage,
-    borrowCount: state.loan.borrowCount,
-    tableLoading: state.root.tableLoading2
+  const profileClass = useMemo(() => new ProfileClass({ currentAccount }), [currentAccount])
+  const marketClass = useMemo(() => new MarketClass(), [])
+  const { lendList, lendCount, lendPage, minerInfo, tableLoading } = useSelector((state: RootState) => ({
+    lendList: state.loan.lendList,
+    lendPage: state.loan.lendPage,
+    lendCount: state.loan.lendCount,
+    minerInfo: state.loan.minerInfo,
+    tableLoading: state.loan.tableLoading
   }))
 
-  const [selectedMiner, setSelectedMiner] = useState<LoanMarketListItem | null>()
+  const [selectedLoan, setSelectedLoan] = useState<LoanOrderInfo>()
   const [isClaimDialogOpen, setIsClaimDialogOpen] = useState(false)
   const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false)
 
-  const columns = [
+  const columns: ColumnsType<LoanOrderInfo> = [
     {
       title: 'Miner ID',
       key: 'miner_id',
-      minWidth: 160,
-      render: (val) => <MinerIDRow value={val} />
+      render: (val) => <MinerIDRow value={val} showType={false} />
     },
     {
-      title: 'Balance',
-      key: 'balance_human',
-      render: (val) => (!isEmpty(val) ? `${val} FIL` : '-')
+      title: 'Total Miner Value',
+      key: 'miner_total_balance_human',
+      render: (val) => (!isEmpty(val) ? `${numberWithCommas(val)} FIL` : '-')
     },
     {
-      title: 'Power',
-      key: 'power_human',
-      render: (val) => (!isEmpty(val) ? `${val} TiB` : '-')
+      title: 'Lend Amount',
+      key: 'current_principal_human',
+      render: (val) => (!isEmpty(val) ? `${numberWithCommas(val)} FIL` : '-')
     },
     {
-      title: 'Transaction Time',
-      key: 'time',
-      render: (val, row) => (val ? formatListTime(val) : '-')
+      title: 'APY',
+      key: 'annual_interest_rate',
+      render: (val) => (!isEmpty(val) ? `${BigNumber(val).decimalPlaces(2)} %` : '-')
+    },
+    {
+      title: 'Interest Earned',
+      key: 'total_interest_human',
+      render: (val, row) => (val ? `${numberWithCommas(val)} FIL` : '-')
     },
     {
       title: 'Status',
@@ -59,19 +67,12 @@ const History = () => {
       render: (val, row) => (
         <span
           className={clsx([
-            'inline-block h-[26px] w-[85px] rounded-full bg-[rgba(0,119,254,0.1)] text-center text-sm leading-[26px]',
-            row.buyer?.toLowerCase() !== currentAccount?.toLowerCase() ? 'text-[#0077fe]' : 'text-[#909399]'
+            'inline-block h-[26px] whitespace-nowrap rounded-full bg-[rgba(0,119,254,0.1)] px-2 text-center text-sm leading-[26px]'
           ])}
         >
-          {row.buyer?.toLowerCase() === currentAccount?.toLowerCase() ? 'Purchase' : 'Sold'}
+          {/* {row.max_debt_amount_human === row.last_debt_amount_human ? 'Complete' : 'Progressing'} */}
         </span>
       )
-    },
-    {
-      title: 'Price',
-      key: 'price_human',
-      minWidth: 100,
-      render: (val) => (!isEmpty(val) ? `${val} FIL` : '-')
     },
     {
       key: 'operation',
@@ -81,7 +82,8 @@ const History = () => {
           <button
             className='whitespace-nowrap break-words hover:text-[#0077FE]'
             onClick={() => {
-              setSelectedMiner(row)
+              setSelectedLoan(row)
+              marketClass.getLoanByMinerId(row.miner_id)
               setIsDetailDialogOpen(true)
             }}
           >
@@ -91,7 +93,8 @@ const History = () => {
           <button
             className='whitespace-nowrap break-words hover:text-[#0077FE]'
             onClick={() => {
-              setSelectedMiner(row)
+              setSelectedLoan(row)
+              marketClass.getLoanByMinerId(row.miner_id)
               setIsClaimDialogOpen(true)
             }}
           >
@@ -116,8 +119,8 @@ const History = () => {
   ]
 
   const page = {
-    pageNum: Math.ceil(borrowCount / profileClass.page_size),
-    currentPage: borrowPage,
+    pageNum: Math.ceil(lendCount / profileClass.page_size),
+    currentPage: lendPage,
     onChange: (page) => profileClass.selectPage(page)
   }
 
@@ -128,9 +131,18 @@ const History = () => {
 
   return (
     <section className='container mx-auto'>
-      <BasicTable columns={columns} data={borrowList} page={page} loading={tableLoading} />
-      <ClaimDialog open={isClaimDialogOpen} setOpen={setIsClaimDialogOpen} />
-      <LoanDetailDialog open={isDetailDialogOpen} setOpen={setIsDetailDialogOpen} data={selectedMiner} type='lend' />
+      <BasicTable columns={columns} data={lendList} page={page} loading={tableLoading} />
+      <ClaimDialog
+        open={isClaimDialogOpen}
+        data={minerInfo && selectedLoan && { ...selectedLoan, ...minerInfo }}
+        setOpen={setIsClaimDialogOpen}
+      />
+      <LoanDetailDialog
+        open={isDetailDialogOpen}
+        setOpen={setIsDetailDialogOpen}
+        data={minerInfo && selectedLoan && { ...selectedLoan, ...minerInfo }}
+        type='lend'
+      />
     </section>
   )
 }

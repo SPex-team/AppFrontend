@@ -1,10 +1,11 @@
 import { ReactComponent as DetailIcon } from '@/assets/images/detail.svg'
 import { ReactComponent as CommentIcon } from '@/assets/images/comment.svg'
 import { useEffect, useMemo, useState, Fragment } from 'react'
-import MarketClass from '@/models/market-class'
+import MarketClass from '@/models/loan-market-class'
 import { useSelector } from 'react-redux'
 import { RootState } from '@/store'
 import LoanAddDialog from '../../components/LoanAddDialog'
+import Progress from '../../components/Progress'
 import BeneficiaryBindDialog from './components/BeneficiaryBindDialog'
 import LoanLendDialog from './components/LoanLendDialog'
 import { ZeroAddress } from 'ethers'
@@ -13,7 +14,7 @@ import { putMiner } from '@/api/modules'
 import { setRootData } from '@/store/modules/root'
 import { message } from '@/components/Tip'
 import { NavLink } from 'react-router-dom'
-import { isEmpty } from '@/utils'
+import { isEmpty, numberWithCommas } from '@/utils'
 import BasicTable from '@/components/BasicTable'
 import MinerIDRow from '@/pages/components/MinerIDRow'
 import { useMetaMask } from '@/hooks/useMetaMask'
@@ -22,9 +23,10 @@ import { ShoppingCartOutlined } from '@ant-design/icons'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import { LoanMarketListItem } from '@/types'
+import BigNumber from 'bignumber.js'
+import useLoading from '@/hooks/useLoading'
 
 import DigitalCoinURL from '@/assets/images/digital_coin.png'
-import PrivatePoolIcon from '@/assets/images/privatePoolIcon.png'
 
 const LoanMarket = (props) => {
   const { currentAccount } = useMetaMask()
@@ -34,19 +36,21 @@ const LoanMarket = (props) => {
   const [isBeneficiaryBindDialogOpen, setIsBeneficiaryBindDialogOpen] = useState<boolean>(false)
   const [isLendDialogOpen, setIsLendDialogOpen] = useState<boolean>(false)
   const [selectedMiner, setSelectedMiner] = useState<LoanMarketListItem>()
-  // console.log('selectedMiner ==> ', selectedMiner)
+  const [createdMinerId, setCreatedMinerId] = useState<number | null>()
+  const { loading, setLoading } = useLoading()
 
   const [buttonRef, setButtonRef] = useState<HTMLButtonElement | null>(null)
 
   const data = useSelector((state: RootState) => ({
-    marketCount: state.root.marketCount,
-    marketPage: state.root.marketPage,
-    marketList: state.root.marketList,
-    signer: state.root.signer,
-    minerPriceCeiling: state.root.minerPriceCeiling,
-    minerPriceFloor: state.root.minerPriceFloor
+    marketCount: state.loan.marketCount,
+    marketPage: state.loan.marketPage,
+    marketList: state.loan.marketList,
+    signer: state.loan.signer,
+    minerPriceCeiling: state.loan.minerPriceCeiling,
+    minerPriceFloor: state.loan.minerPriceFloor,
+    minerInfo: state.loan.minerInfo
   }))
-  const tableLoading = useSelector((state: RootState) => state.root.tableLoading)
+  const tableLoading = useSelector((state: RootState) => state.loan.tableLoading)
 
   dayjs.extend(relativeTime)
 
@@ -54,32 +58,40 @@ const LoanMarket = (props) => {
     {
       title: 'Miner ID',
       key: 'miner_id',
-      render: (val, row) => <MinerIDRow value={val} />
+      render: (val, row) => <MinerIDRow showType={false} value={val} />
     },
     {
       title: 'Total Miner Value',
-      key: 'balance_human',
-      render: (val) => `${val ?? '0'} FIL`
+      key: 'total_balance_human',
+      render: (val) => `${numberWithCommas(val) ?? '0'} FIL`
     },
     {
       title: 'Borrow Amount',
-      key: 'power_human',
-      render: (val) => (!isEmpty(val) ? `${val} FIL` : '-')
+      key: 'max_debt_amount_human',
+      render: (val) => (!isEmpty(val) ? `${numberWithCommas(val)} FIL` : '-')
     },
     {
       title: 'APY',
-      key: 'price',
-      render: (val) => `${val ?? '0'} %`
+      key: 'annual_interest_rate_human',
+      render: (val) => <span className='whitespace-nowrap'>{`${BigNumber(val).decimalPlaces(2) ?? '0'} %`}</span>
     },
     {
       title: 'Listed Date',
-      key: 'list_time',
+      key: 'last_list_time',
       render: (val) =>
-        val
-          ? dayjs(new Date()).diff(val * 1000, 'day') >= 10
-            ? dayjs(val * 1000).format('YYYY-MM-DD')
-            : dayjs(val * 1000).fromNow()
-          : '-'
+        val ? (dayjs(new Date()).diff(val, 'day') >= 10 ? dayjs(val).format('YYYY-MM-DD') : dayjs(val).fromNow()) : '-'
+    },
+    {
+      title: 'Loan Progress',
+      key: 'progress',
+      render: (val, row) => (
+        <Progress
+          percent={BigNumber(row?.last_debt_amount_human || 0)
+            .dividedBy(BigNumber(row?.max_debt_amount_human || 0))
+            .multipliedBy(100)
+            .toNumber()}
+        />
+      )
     },
     {
       title: (
@@ -137,39 +149,28 @@ const LoanMarket = (props) => {
       key: 'operation',
       width: '35%',
       render: (val, row) => {
-        const isPrivate = row.buyer !== ZeroAddress
-        const cannotBuy = !(row.buyer.toLowerCase() === currentAccount?.toLowerCase() || row.buyer === ZeroAddress)
         return (
-          <div className='min-w-[140px]'>
-            {cannotBuy ? (
-              <span>The buyer has been designated</span>
-            ) : (
-              <div className='justify-space flex flex-wrap gap-x-7'>
-                <button
-                  className='hover:text-[#0077FE]'
-                  onClick={() => {
-                    const url = `${config.filescanOrigin}/address/miner?address=${config.address_zero_prefix}0${row.miner_id}`
-                    window.open(url)
-                  }}
-                >
-                  Detail
-                  <DetailIcon className='ml-2 inline-block w-[14px]' />
-                </button>
-                <button className='hover:text-[#0077FE]' onClick={() => onLendButtonClick(row)}>
-                  Lend
-                  <ShoppingCartOutlined className='ml-1 align-middle' />
-                </button>
-                <NavLink to={'/comment/' + row.miner_id.toString()}>
-                  <button className='hover:text-[#0077FE]'>
-                    Comments
-                    <CommentIcon className='ml-2 inline-block' width={14} height={14} />
-                  </button>
-                </NavLink>
-              </div>
-            )}
-            {isPrivate && (
-              <img className='absolute -right-[7px] -top-[7px]' src={PrivatePoolIcon} alt='private_pool_pic' />
-            )}
+          <div className='justify-space flex flex-wrap gap-x-7'>
+            <button
+              className='hover:text-[#0077FE]'
+              onClick={() => {
+                const url = `${config.filescanOrigin}/address/${config.address_zero_prefix}0${row.miner_id}`
+                window.open(url)
+              }}
+            >
+              Detail
+              <DetailIcon className='ml-2 inline-block w-[14px]' />
+            </button>
+            <button className='hover:text-[#0077FE]' disabled={row.disabled} onClick={() => onLendButtonClick(row)}>
+              Lend
+              <ShoppingCartOutlined className='ml-1 align-middle' />
+            </button>
+            <NavLink to={'/loanComment/' + row.miner_id.toString()}>
+              <button className='hover:text-[#0077FE]'>
+                Comments
+                <CommentIcon className='ml-2 inline-block' width={14} height={14} />
+              </button>
+            </NavLink>
           </div>
         )
       }
@@ -184,36 +185,22 @@ const LoanMarket = (props) => {
 
   const onLendButtonClick = (miner: LoanMarketListItem) => {
     setSelectedMiner(miner)
+    marketClass.getLoanByMinerId(miner.miner_id)
     setIsLendDialogOpen(true)
   }
 
-  const onLoanCreate = () => {
+  const onLoanCreate = (minerId: number) => {
+    setCreatedMinerId(minerId)
     setOpen(true)
     setIsBeneficiaryBindDialogOpen(false)
   }
 
-  const renderInterestTotal = () => (
-    <div className='lg:gap-21 mb-4 flex flex-row gap-12'>
-      <div className='flex flex-col items-center'>
-        <div className='flex items-center gap-[10px]'>
-          <img width={24} src={DigitalCoinURL} alt='coin' />
-          <span className='text-4xl font-medium text-primary'>{`${data.minerPriceFloor} FIL`}</span>
-        </div>
-        <span className='text-[#57596C]'>Total Interest Paid</span>
-      </div>
-      <div className='-mt-[30px] inline-block h-[120px] min-h-[1em] w-0.5 self-stretch bg-neutral-100 opacity-100 dark:opacity-50'></div>
-      <div className='flex flex-col items-center'>
-        <div className='flex items-center gap-[10px]'>
-          <img width={24} src={DigitalCoinURL} alt='coin' />
-          <span className='text-4xl font-medium text-primary'>{`${data.minerPriceCeiling} FIL`}</span>
-        </div>
-        <span className='text-[#57596C]'>Total Interest Received</span>
-      </div>
-    </div>
-  )
+  const getList = () => {
+    marketClass.init()
+  }
 
   useEffect(() => {
-    marketClass.init()
+    getList()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -228,7 +215,6 @@ const LoanMarket = (props) => {
               the liquidity of your pledge amount and locked rewards OR you can lend for exchange of interest.
             </div>
           </div>
-          <div className='mx-5 hidden pt-5 xl:block'>{renderInterestTotal()}</div>
           <button
             onClick={() => {
               if (currentAccount) {
@@ -241,7 +227,7 @@ const LoanMarket = (props) => {
                 })
               }
             }}
-            className='bg-gradient-common mb-10 flex h-11 items-center justify-center rounded-full px-4 text-white md:mb-0'
+            className='bg-gradient-common mb-10 flex h-11 items-center justify-center whitespace-nowrap rounded-full px-4 text-white md:mb-0'
           >
             Create Loan
             <svg
@@ -258,13 +244,23 @@ const LoanMarket = (props) => {
         </div>
         <BasicTable columns={columns} data={data.marketList} page={page} loading={tableLoading} />
       </section>
-      <LoanAddDialog open={open} setOpen={setOpen} updateList={() => marketClass.removeDataOfList(1)} />
+      <LoanAddDialog
+        open={open}
+        setOpen={setOpen}
+        miner={{ miner_id: createdMinerId || 0 }}
+        updateList={() => marketClass.updateList(1)}
+      />
       <BeneficiaryBindDialog
         open={isBeneficiaryBindDialogOpen}
         setOpen={setIsBeneficiaryBindDialogOpen}
         onLoanCreate={onLoanCreate}
       />
-      <LoanLendDialog open={isLendDialogOpen} setOpen={setIsLendDialogOpen} data={selectedMiner} />
+      <LoanLendDialog
+        open={isLendDialogOpen}
+        setOpen={setIsLendDialogOpen}
+        getList={getList}
+        minerInfo={selectedMiner && data.minerInfo && { ...selectedMiner, ...data.minerInfo }}
+      />
     </>
   )
 }

@@ -1,29 +1,33 @@
 import { Dialog, Transition } from '@headlessui/react'
 import { Fragment, ReactNode, useEffect, useMemo, useState } from 'react'
-import clsx from 'clsx'
 import { ethers, parseEther, ZeroAddress } from 'ethers'
 import { config } from '@/config'
-import { postBuildMessage, postMiner, postPushMessage, transferInCheck } from '@/api/modules'
+import { postPushMessage, postLoanBuildMessage, transferLoanCheck } from '@/api/modules'
+import { postLoanMiners, getMinerBalance } from '@/api/modules/loan'
 import Tip, { message } from '../../../components/Tip'
 import { useMetaMask } from '@/hooks/useMetaMask'
 import { handleError } from '@/components/ErrorHandler'
+import { WarningOutlined } from '@ant-design/icons'
+import Button from '@/components/Button'
+import { MinerBalance } from '@/types'
 
 interface IProps {
   open: boolean
   setOpen: (bol: boolean) => void
-  updataList?: () => void
-  onLoanCreate?: () => void
+  updateList?: () => void
+  onLoanCreate?: (minerId: number) => void
 }
 
 const abiCoder = ethers.AbiCoder.defaultAbiCoder()
 
 export default function BeneficiaryBindDialog(props: IProps) {
-  const { open = false, setOpen, updataList, onLoanCreate } = props
-  const { currentAccount, contract } = useMetaMask()
+  const { open = false, setOpen, updateList, onLoanCreate } = props
+  const { currentAccount, loanContract } = useMetaMask()
 
   const [stepNum, setStepNum] = useState(0)
   const [loading, setLoading] = useState(false)
   const [data, setData] = useState<any>()
+  const [miner, setMiner] = useState<MinerBalance>()
 
   const onClose = () => {
     setStepNum(0)
@@ -65,7 +69,7 @@ export default function BeneficiaryBindDialog(props: IProps) {
 
   const handleLoanCreate = () => {
     if (onLoanCreate) {
-      onLoanCreate()
+      onLoanCreate(data.miner_id)
     }
   }
 
@@ -132,10 +136,13 @@ export default function BeneficiaryBindDialog(props: IProps) {
           <li>{`2) Use your beneficary as collateral to customize your loan details.`}</li>
           <li>{`3) List your loan order. Lenders fund agreed upon loans, and you receive the borrowed amount!`}</li>
         </ul>
-        <p className='pt-[30px] text-gray-500'>
-          Please note: The beneficiary address only controls the available balance funds of your miner. It cannot access
-          your pledged funds, locked rewards, or control the miner itself. The address simply represents collateral in
-          the contract. Lenders can only claim repayments from the available balance.
+        <p className='pt-[30px] font-semibold text-gray-500'>
+          <WarningOutlined />
+          PS: SPex will only charge 1% from the interest of the loan as the transaction fee.
+        </p>
+        <p className='text-gray-500'>
+          Your asset is secured: Binding Beneficiary will only allow lenders to claim repayment from your avaliable
+          balance via smart contract. There is no access to your locked assets.
         </p>
       </div>
     )
@@ -158,7 +165,7 @@ export default function BeneficiaryBindDialog(props: IProps) {
             autoComplete='off'
             placeholder={`${config.address_zero_prefix}0xxxxxx`}
           />
-          <span className='text-xs'>Commission fee 1% For Platform</span>
+          {/* <span className='text-xs'>Commission fee 1% For Platform</span> */}
 
           <input type='text' value='' className='hidden' readOnly />
         </div>
@@ -207,9 +214,38 @@ export default function BeneficiaryBindDialog(props: IProps) {
 
   const step3 = () => {
     return (
-      <p className='pt-[100px]'>
-        With beneficiary address to confirm transfer beneficiary to SPex contract and bind login address
-      </p>
+      <form className='text-[#57596C]' id='form_confirm'>
+        <span className='mb-4 mt-[10px] inline-block w-full text-sm font-light'>
+          {'Sign '}
+          <span className='inline-block w-full break-words font-medium'>
+            {confirmSignContent?.toString()?.slice(2)}
+          </span>
+        </span>
+        <p className='pt-[10px]'>
+          With beneficiary address to confirm transfer beneficiary to SPex contract and bind login address
+        </p>
+        <div className=''>
+          <label htmlFor='sign' className='mb-[10px] block text-base'>
+            Sign:
+          </label>
+
+          <div className='relative flex h-[49px] w-full flex-row-reverse overflow-clip rounded-lg'>
+            <input
+              type='text'
+              name='sign'
+              id='sign'
+              className='peer w-full rounded-r-[10px] px-5 transition-colors duration-300'
+              required
+              autoComplete='off'
+            />
+            <span className='flex items-center rounded-l-[10px] border border-r-0 border-[#EAEAEF] bg-slate-50 px-4 text-sm text-slate-400 transition-colors duration-300 peer-focus:border-primary peer-focus:bg-primary peer-focus:text-white'>
+              0x
+            </span>
+          </div>
+        </div>
+        {/* <span className='text-xs'>Commission fee 1% For Platform</span> */}
+        <input type='text' value='' className='hidden' readOnly />
+      </form>
     )
   }
 
@@ -259,7 +295,7 @@ export default function BeneficiaryBindDialog(props: IProps) {
     switch (key) {
       case 0:
         return {
-          text: 'Next',
+          text: `OK, Let's get started`,
           onClick: () => {
             onNext()
           }
@@ -276,7 +312,6 @@ export default function BeneficiaryBindDialog(props: IProps) {
 
               let miner_id: any = formData.get('miner_id')
               miner_id = miner_id.trim()
-
               if (!miner_id) {
                 throw new Error('Please input Miner Address')
               }
@@ -284,23 +319,25 @@ export default function BeneficiaryBindDialog(props: IProps) {
               if (config.address_zero_prefix === 'f') {
                 reg = /^f0.{1,}/
               }
-
               if (!reg.test(miner_id)) {
                 throw new Error(`Please output ${config.address_zero_prefix}0xxxxxx format`)
               }
 
               miner_id = parseInt(miner_id.slice(2))
-              let checkRes = await transferInCheck({ miner_id })
+              let checkRes = await transferLoanCheck({ miner_id })
               if (checkRes['in_spex'] === true) {
                 throw new Error(`Miner already in SPex, Please go to 'Me' page to view`)
               }
-              let res = await postBuildMessage({ miner_id })
-
+              let res = await postLoanBuildMessage({ miner_id })
               setData({
                 ...res,
                 miner_id
               })
 
+              const balance = await getMinerBalance(miner_id)
+              console.log('balance ==> ', balance)
+
+              setMiner(balance._data)
               onNext(form)
             } catch (error: any) {
               handleError(error)
@@ -354,31 +391,16 @@ export default function BeneficiaryBindDialog(props: IProps) {
               setLoading(true)
 
               const form = document.getElementById('form_confirm') as HTMLFormElement
-
               const formData = new FormData(form)
 
               let sign = formData.get('sign')
               if (!sign) {
                 throw new Error('Please input Sign')
               }
-              const price = formData.get('price')?.toString()
-              if (!price) {
-                throw new Error('Please input Price')
-              }
-              const targetBuyer = formData.get('targetBuyer')
               sign = '0x' + sign.slice(2)
 
-              // console.log('ZeroAddress: ', ZeroAddress)
-              // console.log('parseEther(price): ', parseEther(price))
-              // console.log('sign: ', sign)
-              // console.log('data: ', data)
-              const tx = await contract?.confirmTransferMinerIntoSPexAndList(
-                data.miner_id,
-                sign,
-                data.timestamp,
-                parseEther(price),
-                targetBuyer || ZeroAddress
-              )
+              const params = [data.miner_id, sign, data.timestamp, 0, 0, ZeroAddress, true]
+              const tx = await loanContract?.pledgeBeneficiaryToSpex(...params)
 
               message({
                 title: 'TIP',
@@ -387,15 +409,19 @@ export default function BeneficiaryBindDialog(props: IProps) {
                 closeTime: 10000
               })
 
-              const result = await tx.wait()
+              await tx.wait()
 
-              await postMiner({
-                owner: currentAccount,
+              await postLoanMiners({
+                delegator_address: currentAccount,
                 miner_id: data.miner_id,
-                price: parseFloat(price),
-                price_raw: parseFloat(price) * 1e18,
-                is_list: true,
-                list_time: data.timestamp
+                receive_address: ZeroAddress,
+                disabled: true,
+                max_debt_amount_raw: 0,
+                max_debt_amount_human: 0,
+                total_balance_human: miner?.total_balance_human || 0,
+                available_balance_human: miner?.available_balance_human || 0,
+                initial_pledge_human: miner?.pledge_balance_human || 0,
+                locked_rewards_human: miner?.locked_balance_human || 0
               })
 
               onNext(form)
@@ -410,7 +436,7 @@ export default function BeneficiaryBindDialog(props: IProps) {
           text: 'Done',
           onClick: () => {
             onClose()
-            // updataList()
+            // updateList()
           }
         }
       default:
@@ -536,7 +562,7 @@ export default function BeneficiaryBindDialog(props: IProps) {
                   <Dialog.Panel className='flex min-h-[523px] w-full max-w-[900px] transform flex-col justify-between overflow-hidden rounded-2xl bg-white p-[30px] text-left align-middle shadow-xl transition-all'>
                     <div>
                       <Dialog.Title as='h3' className='flex items-center justify-between text-2xl font-medium'>
-                        Bind Beneficiary
+                        {stepNum === 0 ? 'Intro' : 'Bind Beneficiary'}
                         <svg
                           xmlns='http://www.w3.org/2000/svg'
                           fill='none'
@@ -567,39 +593,9 @@ export default function BeneficiaryBindDialog(props: IProps) {
                     </div>
 
                     <div className='text-center'>
-                      <button
-                        type='button'
-                        className={clsx([
-                          'bg-gradient-common mt-5 inline-flex h-[44px] w-[256px] items-center justify-center rounded-full text-white focus-visible:ring-0',
-                          { 'cursor-not-allowed': loading }
-                        ])}
-                        onClick={btnData.onClick}
-                        disabled={loading}
-                      >
-                        {loading && (
-                          <svg
-                            className='-ml-1 mr-3 h-5 w-5 animate-spin text-white'
-                            xmlns='http://www.w3.org/2000/svg'
-                            fill='none'
-                            viewBox='0 0 24 24'
-                          >
-                            <circle
-                              className='opacity-25'
-                              cx='12'
-                              cy='12'
-                              r='10'
-                              stroke='currentColor'
-                              strokeWidth='4'
-                            ></circle>
-                            <path
-                              className='opacity-75'
-                              fill='currentColor'
-                              d='M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z'
-                            ></path>
-                          </svg>
-                        )}
+                      <Button width={256} loading={loading} onClick={btnData.onClick}>
                         {btnData.text}
-                      </button>
+                      </Button>
                     </div>
                   </Dialog.Panel>
                 </Transition.Child>

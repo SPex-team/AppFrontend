@@ -4,9 +4,10 @@ import { getTypeOfRareNumbers } from '@/utils'
 
 interface Props {
   value: string | number
+  showType?: boolean
 }
 
-const MinerIDRow = ({ value }: Props) => {
+const MinerIDRow = ({ value, showType = true }: Props) => {
   const numberType = getTypeOfRareNumbers(value)
   const name = NUMBER_TYPE_NAME[numberType]
   const color = NUMBER_TYPE_COLOR[numberType]
@@ -14,7 +15,7 @@ const MinerIDRow = ({ value }: Props) => {
 
   return (
     <div className='keep-all relative'>
-      {numberType ? (
+      {numberType && showType ? (
         <div className='flex flex-wrap items-center gap-x-1'>
           <span className={`${NUMBER_TYPE_CLASS_NAME[numberType]}`} style={{ color }}>
             {idText}

@@ -12,6 +12,8 @@ import {
 } from 'react'
 import detectEthereumProvider from '@metamask/detect-provider'
 import { abi, config } from '@/config'
+import { loanABI } from '@/contract'
+
 import { Dialog, Transition } from '@headlessui/react'
 import { toast } from 'react-toastify'
 import { ethers, Contract } from 'ethers'
@@ -29,6 +31,7 @@ interface MetaMaskContextData {
   wallet: WalletState
   currentAccount: string
   contract: any
+  loanContract: any
   hasProvider: boolean | null
   error: boolean
   errorMsg: string
@@ -90,6 +93,7 @@ export const MetaMaskContextProvider = ({ children }: PropsWithChildren) => {
   }, [wallet])
 
   const contract = useMemo(() => new Contract(config.contractAddress, abi, wallet.signer), [wallet.signer])
+  const loanContract = useMemo(() => new Contract(config.contractLoanAddress, loanABI, wallet.signer), [wallet.signer])
 
   const _updateWallet = useCallback(async (providedAccounts?: any) => {
     const accounts = providedAccounts || (await window?.ethereum.request({ method: 'eth_accounts' }))
@@ -220,6 +224,7 @@ export const MetaMaskContextProvider = ({ children }: PropsWithChildren) => {
         currentAccount,
         hasProvider,
         contract,
+        loanContract,
         error: Boolean(errorMsg),
         errorMsg,
         isConnecting,
