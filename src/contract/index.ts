@@ -181,7 +181,7 @@ export const loanABI = [
         type: 'uint256'
       }
     ],
-    name: 'EventChangeLoanDayRate',
+    name: 'EventChangeLoanInterestRate',
     type: 'event'
   },
   {
@@ -444,19 +444,6 @@ export const loanABI = [
   },
   {
     inputs: [],
-    name: 'MAX_DEBT_RATE',
-    outputs: [
-      {
-        internalType: 'uint256',
-        name: '',
-        type: 'uint256'
-      }
-    ],
-    stateMutability: 'view',
-    type: 'function'
-  },
-  {
-    inputs: [],
     name: 'MAX_FEE_RATE',
     outputs: [
       {
@@ -569,6 +556,11 @@ export const loanABI = [
     outputs: [
       {
         internalType: 'uint256',
+        name: 'principleAmount',
+        type: 'uint256'
+      },
+      {
+        internalType: 'uint256',
         name: 'lastAmount',
         type: 'uint256'
       },
@@ -621,7 +613,7 @@ export const loanABI = [
       },
       {
         internalType: 'uint256',
-        name: 'loanDayRate',
+        name: 'loanInterestRate',
         type: 'uint256'
       },
       {
@@ -633,6 +625,11 @@ export const loanABI = [
         internalType: 'bool',
         name: 'disabled',
         type: 'bool'
+      },
+      {
+        internalType: 'uint256',
+        name: 'principleAmount',
+        type: 'uint256'
       },
       {
         internalType: 'uint256',
@@ -715,8 +712,14 @@ export const loanABI = [
       }
     ],
     name: 'batchRepayment',
-    outputs: [],
-    stateMutability: 'nonpayable',
+    outputs: [
+      {
+        internalType: 'uint256[]',
+        name: 'actualRepaymentAmounts',
+        type: 'uint256[]'
+      }
+    ],
+    stateMutability: 'payable',
     type: 'function'
   },
   {
@@ -738,7 +741,13 @@ export const loanABI = [
       }
     ],
     name: 'batchWithdrawRepayment',
-    outputs: [],
+    outputs: [
+      {
+        internalType: 'uint256',
+        name: 'actuallRepaymentAmount',
+        type: 'uint256'
+      }
+    ],
     stateMutability: 'nonpayable',
     type: 'function'
   },
@@ -821,11 +830,11 @@ export const loanABI = [
       },
       {
         internalType: 'uint256',
-        name: 'newLoanDayRate',
+        name: 'newLoanInterestRate',
         type: 'uint256'
       }
     ],
-    name: 'changeLoanDayRate',
+    name: 'changeLoanInterestRate',
     outputs: [],
     stateMutability: 'nonpayable',
     type: 'function'
@@ -862,7 +871,7 @@ export const loanABI = [
       },
       {
         internalType: 'uint256',
-        name: 'newLoanDayRate',
+        name: 'newLoanInterestRate',
         type: 'uint256'
       },
       {
@@ -956,6 +965,59 @@ export const loanABI = [
   {
     inputs: [
       {
+        internalType: 'address',
+        name: 'lender',
+        type: 'address'
+      },
+      {
+        internalType: 'CommonTypes.FilActorId',
+        name: 'minerId',
+        type: 'uint64'
+      }
+    ],
+    name: 'getCurrentAmountOwedToLender',
+    outputs: [
+      {
+        internalType: 'uint256',
+        name: 'totalAmountOwed',
+        type: 'uint256'
+      },
+      {
+        internalType: 'uint256',
+        name: 'principal',
+        type: 'uint256'
+      }
+    ],
+    stateMutability: 'view',
+    type: 'function'
+  },
+  {
+    inputs: [
+      {
+        internalType: 'CommonTypes.FilActorId',
+        name: 'minerId',
+        type: 'uint64'
+      }
+    ],
+    name: 'getCurrentTotalDebtAmount',
+    outputs: [
+      {
+        internalType: 'uint256',
+        name: 'totalDebt',
+        type: 'uint256'
+      },
+      {
+        internalType: 'uint256',
+        name: 'principal',
+        type: 'uint256'
+      }
+    ],
+    stateMutability: 'view',
+    type: 'function'
+  },
+  {
+    inputs: [
+      {
         internalType: 'CommonTypes.FilActorId',
         name: 'minerId',
         type: 'uint64'
@@ -1000,7 +1062,7 @@ export const loanABI = [
       },
       {
         internalType: 'uint256',
-        name: 'loanDayRate',
+        name: 'loanInterestRate',
         type: 'uint256'
       },
       {
@@ -1083,7 +1145,13 @@ export const loanABI = [
       }
     ],
     name: 'repayment',
-    outputs: [],
+    outputs: [
+      {
+        internalType: 'uint256',
+        name: 'actualRepaymentAmount',
+        type: 'uint256'
+      }
+    ],
     stateMutability: 'payable',
     type: 'function'
   },
@@ -1132,7 +1200,7 @@ export const loanABI = [
     inputs: [
       {
         internalType: 'address payable',
-        name: 'who',
+        name: 'bondOwner',
         type: 'address'
       },
       {
@@ -1147,7 +1215,13 @@ export const loanABI = [
       }
     ],
     name: 'withdrawRepayment',
-    outputs: [],
+    outputs: [
+      {
+        internalType: 'uint256',
+        name: 'actualRepaymentAmount',
+        type: 'uint256'
+      }
+    ],
     stateMutability: 'nonpayable',
     type: 'function'
   }

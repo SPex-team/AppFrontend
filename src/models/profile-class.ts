@@ -6,6 +6,7 @@ const ordering = '-create_time'
 class Profile extends Table {
   static current_page_size?: number
   currentAccount?: string
+  lendPage?: number
 
   constructor(props) {
     super()
@@ -53,7 +54,7 @@ class Profile extends Table {
       .then((res) => {
         res = res._data
 
-        this.page = page
+        this.lendPage = page
         this.dispatch(setRootData({ lendList: res.results ?? [], lendPage: page ?? 1, lendCount: res.count ?? 0 }))
       })
       .finally(() => {
@@ -74,7 +75,7 @@ class Profile extends Table {
         res = res._data
         this.dispatch(
           setRootData({
-            lendListByMiner: res.results ?? []
+            lendListByMiner: (res.results ?? []).sort((a, b) => b?.current_principal_human - a?.current_principal_human)
           })
         )
       })
@@ -97,6 +98,10 @@ class Profile extends Table {
 
   public updateBorrowList() {
     this.getBorrowList(this.page)
+  }
+
+  public updateLendList() {
+    this.getLendList(this.lendPage)
   }
 
   public unlist() {

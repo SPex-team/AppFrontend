@@ -130,7 +130,7 @@ export default function BeneficiaryBindDialog(props: IProps) {
         <p>
           👂 Heard you're looking to free up your locked miner value through a loan. You've come to the right place! 🚀
         </p>
-        <p>It's super easy and quick - just follow theses few simple steps:</p>
+        <p>It's super easy and quick - just follow these few simple steps:</p>
         <ul>
           <li>{`1) Bind your Beneficiary address to SPex.`}</li>
           <li>{`2) Use your beneficary as collateral to customize your loan details.`}</li>
@@ -179,7 +179,7 @@ export default function BeneficiaryBindDialog(props: IProps) {
         <span className='mb-4 mt-[10px] inline-block text-sm font-light'>
           {'Sign '}
           <span className='inline-block w-full break-words font-medium'>{data?.msg_cid_hex}</span>
-          {' with owner address to propose transfer owner to SPex contract'}
+          {' with owner address to propose transfer beneficiary to SPex contract'}
         </span>
         <div className=''>
           <label htmlFor='sign' className='mb-[10px] block text-base'>
@@ -204,7 +204,7 @@ export default function BeneficiaryBindDialog(props: IProps) {
             'You can also propose by other tools, e.g. Lotus,Venus, please do not input anything if you are already use other tools'
           }
           <span className='inline-block w-full break-words font-medium'>
-            SPex contract address: {config.contractFilecoinAddress} (new owner)
+            SPex contract address: {config.contractLoanAddress} (new beneficary address)
           </span>
         </span>
         <input type='text' value='' className='hidden' readOnly />

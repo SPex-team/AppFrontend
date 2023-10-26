@@ -18,6 +18,8 @@ export interface LoanMarketListItem {
   daily_interest_rate?: number
   annual_interest_rate?: number
   annual_interest_rate_human?: number
+  current_total_principal_human?: number
+  current_total_interest_human?: number
   last_debt_amount_raw?: string
   last_debt_amount_human?: number
   last_update_timestamp?: number
@@ -48,6 +50,9 @@ interface LoanMinerInfo {
   available_balance_human: number
   initial_pledge_human: number
   locked_rewards_human: number
+  current_total_principal_human: number
+  current_total_interest_human: number
+  current_total_debt_human: number
   create_time: string
   update_time: string
 }
@@ -60,7 +65,9 @@ interface LoanOrderInfo {
   daily_interest_rate: number
   annual_interest_rate: number
   current_principal_human: number
+  current_interest_human: number
   total_interest_human: number
+  current_total_amount_human: number
   last_amount_raw: string
   last_amount_human: number
   last_update_timestamp: number

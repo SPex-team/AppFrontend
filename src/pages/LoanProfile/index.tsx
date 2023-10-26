@@ -62,7 +62,7 @@ const LoanProfile = (props) => {
             type='card'
             size='large'
             destroyInactiveTabPane
-            items={['Borrow', 'Lend'].map((tab, i) => {
+            items={['Lend', 'Borrow'].map((tab, i) => {
               return {
                 label: tab,
                 key: tab,

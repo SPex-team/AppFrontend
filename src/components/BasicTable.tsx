@@ -21,9 +21,9 @@ function BasicTable(props: IProps) {
         <div className='-mx-2 overflow-x-auto px-2'>
           <SpinWrapper loading={loading}>
             <table
-              className={`${
-                data.length > 0 && 'basic-table'
-              } min-h-[250px] w-full border-separate border-spacing-x-0 border-spacing-y-[18px] whitespace-nowrap`}
+              className={`${data.length > 0 && 'basic-table'} ${
+                data.length === 0 && 'min-h-[250px]'
+              } w-full border-separate border-spacing-x-0 border-spacing-y-[18px] whitespace-nowrap`}
             >
               <thead className={`px-4 ${joyGuide ?? ''}`}>
                 <tr>

@@ -57,10 +57,10 @@ export function isIndent(str: string, unit: number = 6) {
 }
 
 export function numberWithCommas(x, decimal?: number) {
-  if (!x) return '0'
+  if (!x || x <= 0) return '0'
   return new Intl.NumberFormat('en-US', { maximumSignificantDigits: 18 }).format(
     BigNumber(x || 0)
-      .decimalPlaces(decimal || 6)
+      .decimalPlaces(decimal || 6, 1)
       .toNumber()
   )
 }
@@ -69,6 +69,20 @@ export function getValueMultiplied(num: number | string, pow: number = 18) {
   return new BigNumber(num).multipliedBy(Math.pow(10, pow)).toFixed(0)
 }
 
-export function convertRateToContract(num: number | string) {
-  return Math.pow(BigNumber(num).dividedBy(100).plus(1).toNumber(), 1 / 365) - 1
+export function getValueDivide(num: number, pow: number = 18, unit: number = 6) {
+  let res = new BigNumber(num || 0).dividedBy(Math.pow(10, pow))
+  return res.toFixed(unit)
 }
+
+export function getContinuousProfile(p: number | string, apy: number | string) {
+  if (Number(p) <= 0) return 0
+  return BigNumber(p || 0)
+    .times(Math.pow(Math.E, Number(apy) / 100))
+    .minus(p || 0)
+    .decimalPlaces(6, 1)
+    .toNumber()
+}
+
+// export function convertRateToContract(num: number | string) {
+//   return Math.pow(BigNumber(num).dividedBy(100).plus(1).toNumber(), 1 / 365) - 1
+// }

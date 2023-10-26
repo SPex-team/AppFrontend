@@ -11,7 +11,7 @@ import NumberInput from '@/components/NumberInput'
 import Button from '@/components/Button'
 import { handleError } from './ErrorHandler'
 import { LoanMarketListItem } from '@/types'
-import { convertRateToContract, getValueMultiplied } from '@/utils'
+import { getValueMultiplied, getContinuousProfile, numberWithCommas } from '@/utils'
 import { useSelector } from 'react-redux'
 import BigNumber from 'bignumber.js'
 import { RootState } from '@/store'
@@ -59,6 +59,7 @@ export default function LoanAddDialog(props: IProps) {
   const maxBorrowAmount = useMemo(() => {
     return BigNumber(minerBalance?.available_balance_human || 0)
       .times(0.6)
+      .decimalPlaces(6, 1)
       .toNumber()
   }, [minerBalance])
 
@@ -152,6 +153,7 @@ export default function LoanAddDialog(props: IProps) {
       borrowColleteral: BigNumber(maxBorrowAmount || 0)
         .dividedBy(minerBalance?.total_balance_human || 0)
         .times(100)
+        .decimalPlaces(2)
         .toNumber()
     })
   }
@@ -160,19 +162,19 @@ export default function LoanAddDialog(props: IProps) {
     const BorrowAmountMap = [
       {
         title: 'Pledge amount',
-        value: `${minerBalance?.pledge_balance_human || 0} FIL`
+        value: `${numberWithCommas(minerBalance?.pledge_balance_human) || 0} FIL`
       },
       {
         title: 'Locked rewards',
-        value: `${minerBalance?.locked_balance_human || 0} FIL`
+        value: `${numberWithCommas(minerBalance?.locked_balance_human) || 0} FIL`
       },
       {
         title: 'Available balance',
-        value: `${minerBalance?.available_balance_human || 0} FIL`
+        value: `${numberWithCommas(minerBalance?.available_balance_human) || 0} FIL`
       },
       {
         title: 'The Miner Total Current Value',
-        value: `${minerBalance?.total_balance_human || 0} FIL`
+        value: `${numberWithCommas(minerBalance?.total_balance_human) || 0} FIL`
       }
     ]
     return (
@@ -213,6 +215,7 @@ export default function LoanAddDialog(props: IProps) {
                     borrowColleteral: BigNumber(val || 0)
                       .dividedBy(minerBalance?.total_balance_human || 0)
                       .times(100)
+                      .decimalPlaces(2)
                       .toNumber()
                   })
                 }
@@ -230,7 +233,17 @@ export default function LoanAddDialog(props: IProps) {
                 maxButton
                 max={60}
                 onMaxButtonClick={handleMaxBtnClick}
-                onChange={(val: number) => setBorrowInfo({ ...borrowInfo, borrowColleteral: val })}
+                onChange={(val: number) =>
+                  setBorrowInfo({
+                    ...borrowInfo,
+                    borrowColleteral: val,
+                    borrowAmount: BigNumber(val)
+                      .dividedBy(100)
+                      .times(minerBalance?.total_balance_human || 0)
+                      .precision(2)
+                      .toNumber()
+                  })
+                }
                 prefix='%'
               />
             ) : (
@@ -290,11 +303,17 @@ export default function LoanAddDialog(props: IProps) {
             {borrowInfo?.borrowInterestFunction === 1 ? (
               <NumberInput
                 value={borrowInfo.borrowInterestRate}
-                onChange={(val: number) => setBorrowInfo({ ...borrowInfo, borrowInterestRate: val })}
+                onChange={(val: number) =>
+                  setBorrowInfo({
+                    ...borrowInfo,
+                    borrowInterestRate: val,
+                    borrowInterestAmount: getContinuousProfile(borrowInfo.borrowAmount || 0, val)
+                  })
+                }
                 prefix='%'
               />
             ) : (
-              <p className='h-[49px] leading-[49px]'>{borrowInfo.borrowInterestAmount}</p>
+              <p className='h-[49px] leading-[49px]'>{borrowInfo.borrowInterestRate} % </p>
             )}
           </div>
           <div className='w-1/2'>
@@ -303,11 +322,27 @@ export default function LoanAddDialog(props: IProps) {
                 value={borrowInfo.borrowInterestAmount}
                 maxButton
                 onMaxButtonClick={handleMaxBtnClick}
-                onChange={(val: number) => setBorrowInfo({ ...borrowInfo, borrowInterestAmount: val })}
+                onChange={(val: number) =>
+                  setBorrowInfo({
+                    ...borrowInfo,
+                    borrowInterestAmount: val,
+                    borrowInterestRate: BigNumber(
+                      Math.log(
+                        BigNumber(val)
+                          .plus(borrowInfo.borrowAmount || 0)
+                          .dividedBy(borrowInfo.borrowAmount || 0)
+                          .toNumber()
+                      ) / Math.log(Math.E)
+                    )
+                      .times(100)
+                      .decimalPlaces(2)
+                      .toNumber()
+                  })
+                }
                 prefix='FIL'
               />
             ) : (
-              <p className='h-[49px] leading-[49px]'>{borrowInfo.borrowInterestRate}</p>
+              <p className='h-[49px] leading-[49px]'>{borrowInfo.borrowInterestAmount} FIL</p>
             )}
           </div>
         </div>
@@ -443,7 +478,12 @@ export default function LoanAddDialog(props: IProps) {
                 miner?.miner_id,
                 currentAccount,
                 getValueMultiplied(borrowInfo.borrowAmount || 0),
-                getValueMultiplied(convertRateToContract(borrowInfo.borrowInterestRate || 0), 6),
+                getValueMultiplied(
+                  BigNumber(borrowInfo.borrowInterestRate || 0)
+                    .dividedBy(100)
+                    .toNumber(),
+                  6
+                ),
                 borrowInfo.depositAddress,
                 false
               ]
@@ -466,7 +506,8 @@ export default function LoanAddDialog(props: IProps) {
                   receive_address: borrowInfo.depositAddress,
                   disabled: false,
                   max_debt_amount_human: borrowInfo.borrowAmount,
-                  annual_interest_rate_human: borrowInfo.borrowInterestRate
+                  annual_interest_rate_human: borrowInfo.borrowInterestRate,
+                  collateral_rate: borrowInfo.borrowColleteral
                 })
                 onClose()
                 updateList()

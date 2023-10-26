@@ -54,7 +54,7 @@ const BorrowList = () => {
     {
       title: 'Collateral Rate',
       key: 'collateral_rate',
-      render: (val) => (!isEmpty(val) ? `${val} %` : '-')
+      render: (val) => (!isEmpty(val) ? `${BigNumber(val).decimalPlaces(2)} %` : '-')
     },
     {
       title: 'APY',
@@ -78,7 +78,7 @@ const BorrowList = () => {
               'inline-block h-[26px] whitespace-nowrap rounded-full bg-[rgba(0,119,254,0.1)] px-2 text-center text-sm leading-[26px]'
             ])}
           >
-            {row.max_debt_amount_human === row.last_debt_amount_human ? 'Complete' : 'Progressing'}
+            {row.max_debt_amount_human === row.current_total_principal_human ? 'Complete' : 'Progressing'}
           </span>
         )
     },
@@ -133,6 +133,7 @@ const BorrowList = () => {
           ) : (
             <button
               className='whitespace-nowrap break-words hover:text-[#0077FE]'
+              disabled={loading}
               onClick={async () => {
                 try {
                   if (loading) return

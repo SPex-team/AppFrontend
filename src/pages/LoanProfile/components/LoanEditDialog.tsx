@@ -5,13 +5,12 @@ import { postLoanMiners, patchLoanMiners } from '@/api/modules/loan'
 import { Input } from 'antd'
 import Tip, { message } from '../../../components/Tip'
 import { useMetaMask } from '@/hooks/useMetaMask'
-import { useSelector, useDispatch } from 'react-redux'
 import NumberInput from '@/components/NumberInput'
 import Button from '@/components/Button'
-import { getValueMultiplied, isIndent, numberWithCommas, convertRateToContract } from '@/utils'
+import { getValueMultiplied, isIndent, numberWithCommas } from '@/utils'
 import { handleError } from '@/components/ErrorHandler'
-import { setRootData } from '@/store/modules/loan'
 import { LoanMarketListItem } from '@/types'
+import BigNumber from 'bignumber.js'
 
 import DigitalCoinURL from '@/assets/images/digital_coin.png'
 
@@ -56,7 +55,13 @@ export default function LoanEditDialog(props: IProps) {
         data?.miner_id,
         data?.delegator_address,
         getValueMultiplied(borrowAmount || 0),
-        getValueMultiplied(convertRateToContract(APY || 0), 6),
+        getValueMultiplied(
+          BigNumber(APY || 0)
+            .dividedBy(100)
+            .precision(6)
+            .toNumber(),
+          6
+        ),
         depositAddress,
         data?.disabled
       ]
@@ -94,10 +99,16 @@ export default function LoanEditDialog(props: IProps) {
   }
 
   useEffect(() => {
-    setBorrowAmount(data?.max_debt_amount_human || null)
-    setAPY(data?.annual_interest_rate_human || null)
-    setDepositAddress(data?.receive_address || '')
-  }, [data?.max_debt_amount_human, data?.receive_address, data])
+    if (open) {
+      setBorrowAmount(data?.max_debt_amount_human || null)
+      setAPY(
+        BigNumber(data?.annual_interest_rate_human || 0)
+          .decimalPlaces(6, 1)
+          .toNumber() || null
+      )
+      setDepositAddress(data?.receive_address || '')
+    }
+  }, [data?.max_debt_amount_human, data?.receive_address, data, open])
 
   return (
     <>

@@ -11,9 +11,9 @@ import { useMetaMask } from '@/hooks/useMetaMask'
 import { useSelector } from 'react-redux'
 import NumberInput from '@/components/NumberInput'
 import SpinWrapper from '@/components/SpinWrapper'
-import { getValueMultiplied, isIndent } from '@/utils'
+import { getValueMultiplied, isIndent, getValueDivide, numberWithCommas } from '@/utils'
 import ProfileClass from '@/models/profile-class'
-import { LoanMarketListItem } from '@/types'
+import { LoanMarketListItem, LoanOrderInfo } from '@/types'
 import dayjs from 'dayjs'
 import BigNumber from 'bignumber.js'
 import Button from '@/components/Button'
@@ -29,10 +29,11 @@ interface IProps {
   updateList: () => void
 }
 
-interface DataType {
+interface DataType extends LoanOrderInfo {
   user_address: string
   current_principal_human: number
   total_interest_human: number
+  current_total_amount_human: number
 }
 
 export default function RepayDialog(props: IProps) {
@@ -43,9 +44,8 @@ export default function RepayDialog(props: IProps) {
   const [loading, setLoading] = useState(false)
   const [repayMethod, setRepayMethod] = useState(1)
   const [repayAmount, setRepayAmount] = useState<number | null>(null)
-  const [maxRepayAmount, setMaxRepayAmount] = useState<number>(0)
   const [selectedAddress, setSelectedAddress] = useState<any>()
-  const [selectedLender, setSelectedLender] = useState<any>()
+  const [selectedLender, setSelectedLender] = useState<LoanOrderInfo>()
   const [payoff, setPayoff] = useState<boolean>(false)
 
   const { lendListByMiner, tableLoading } = useSelector((state: RootState) => ({
@@ -54,10 +54,20 @@ export default function RepayDialog(props: IProps) {
   }))
 
   const totalInterestToRepay = useMemo(() => {
-    return (lendListByMiner || []).reduce((c, R) => {
-      return c + R.total_interest_human
-    }, 0)
+    return BigNumber(
+      (lendListByMiner || []).reduce((c, R) => {
+        return c + R.current_interest_human
+      }, 0)
+    ).decimalPlaces(6, 1)
   }, [lendListByMiner])
+
+  const maxRepayAmount = useMemo(() => {
+    const target = lendListByMiner.find((item) => item.user_address === selectedLender?.user_address)
+    return BigNumber(target?.current_principal_human || 0)
+      .plus(target?.current_interest_human || 0)
+      .decimalPlaces(6, 1)
+      .toNumber()
+  }, [lendListByMiner, selectedLender])
 
   const columns: ColumnsType<DataType> = [
     {
@@ -77,13 +87,13 @@ export default function RepayDialog(props: IProps) {
       title: 'Principle',
       dataIndex: 'current_principal_human',
       align: 'center',
-      render: (text) => `${text} FIL`
+      render: (text) => `${BigNumber(text).decimalPlaces(6, 1).toNumber()} FIL`
     },
     {
       title: 'Interest Owed',
-      dataIndex: 'total_interest_human',
+      dataIndex: 'current_interest_human',
       align: 'center',
-      render: (text) => `${text} FIL`
+      render: (text) => `${BigNumber(text).decimalPlaces(6, 1)} FIL`
     }
   ]
 
@@ -100,9 +110,6 @@ export default function RepayDialog(props: IProps) {
       // console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows)
       setSelectedAddress(selectedRowKeys[0])
       setSelectedLender(selectedRows[0])
-      setMaxRepayAmount(
-        BigNumber(selectedRows[0].current_principal_human).plus(selectedRows[0].total_interest_human).toNumber()
-      )
     },
     getCheckboxProps: (record: DataType) => ({
       name: record?.user_address
@@ -117,17 +124,32 @@ export default function RepayDialog(props: IProps) {
 
   const handleRepayment = async () => {
     try {
+      if (!selectedLender) return
       setLoading(true)
+
+      const isMax = BigNumber(repayAmount || 0).gte(maxRepayAmount)
+
+      const checkRes = await loanContract.getCurrentAmountOwedToLender(selectedLender?.user_address, miner?.miner_id)
+      const totalAmountOwned = isMax ? getValueDivide(checkRes[0]) : repayAmount
+      const totalRepayAmount = isMax
+        ? BigNumber(totalAmountOwned || 0)
+            .times(1 + (selectedLender.annual_interest_rate || 0) / 365 / 48)
+            .decimalPlaces(6, 1)
+            .toNumber()
+        : repayAmount
+
+      console.log('totalRepayAmount ==> ', totalRepayAmount, 'totalAmountOwned ==>', totalAmountOwned)
+
       let tx: any
       if (repayMethod === 1) {
         const params = [selectedAddress, miner?.miner_id]
         tx = await loanContract?.repayment(...params, {
-          value: getValueMultiplied(repayAmount || 0)
+          value: getValueMultiplied(totalRepayAmount || 0)
         })
       }
 
       if (repayMethod === 2) {
-        const params = [selectedAddress, miner?.miner_id, getValueMultiplied(repayAmount || 0)]
+        const params = [selectedAddress, miner?.miner_id, getValueMultiplied(totalRepayAmount || 0)]
         tx = await loanContract?.withdrawRepayment(...params)
       }
 
@@ -143,34 +165,92 @@ export default function RepayDialog(props: IProps) {
         const params: any = {
           id: selectedLender.id,
           miner_id: miner?.miner_id,
-          user_address: miner.delegator_address,
+          user_address: selectedLender.user_address,
           transaction_hash: result.hash
         }
-        if (BigNumber(repayAmount || 0).lte(selectedLender?.total_interest_human || 0)) {
-          params.total_interest_human = BigNumber(selectedLender?.total_interest_human)
-            .minus(repayAmount || 0)
-            .toNumber()
+        if (BigNumber(totalAmountOwned || 0).lte(selectedLender?.current_interest_human || 0)) {
+          params.current_interest_human = Math.max(
+            BigNumber(selectedLender?.current_interest_human)
+              .minus(totalAmountOwned || 0)
+              .toNumber(),
+            0
+          )
         }
-        if (BigNumber(repayAmount || 0).gt(selectedLender?.total_interest_human || 0)) {
-          const leftRepayment = BigNumber(repayAmount || 0)
-            .minus(selectedLender?.total_interest_human || 0)
-            .toNumber()
+        if (BigNumber(totalAmountOwned || 0).gt(selectedLender?.current_interest_human || 0)) {
+          const principleTaken = Math.max(
+            BigNumber(totalAmountOwned || 0)
+              .minus(selectedLender?.current_interest_human || 0)
+              .toNumber(),
+            0
+          )
 
-          params.total_interest_human = 0
-          params.current_principal_human = BigNumber(selectedLender.current_principal_human || 0)
-            .minus(leftRepayment)
-            .toNumber()
+          params.current_interest_human = 0
+          params.current_principal_human = Math.max(
+            BigNumber(selectedLender.current_principal_human || 0)
+              .minus(principleTaken)
+              .toNumber(),
+            0
+          )
         }
+        params.current_total_amount_human = Math.max(
+          BigNumber(selectedLender.current_total_amount_human || 0)
+            .minus(totalAmountOwned || 0)
+            .toNumber(),
+          0
+        )
 
         await patchLoanById(params)
+
+        const minerPatchParams: any = {
+          miner_id: miner?.miner_id
+        }
+
+        if (BigNumber(selectedLender?.current_interest_human || 0).lte(totalAmountOwned || 0)) {
+          const principleTaken = BigNumber(totalAmountOwned || 0)
+            .minus(selectedLender?.current_interest_human || 0)
+            .toNumber()
+          minerPatchParams.current_total_interest_human = Math.max(
+            BigNumber(miner?.current_total_interest_human || 0)
+              .minus(selectedLender?.current_interest_human || 0)
+              .toNumber(),
+            0
+          )
+          minerPatchParams.current_total_principal_human = Math.max(
+            BigNumber(miner?.current_total_principal_human || 0)
+              .minus(principleTaken || 0)
+              .toNumber(),
+            0
+          )
+        }
+
+        if (BigNumber(selectedLender?.current_interest_human || 0).gt(totalAmountOwned || 0)) {
+          minerPatchParams.current_total_interest_human = Math.max(
+            BigNumber(miner?.current_total_interest_human || 0)
+              .minus(totalAmountOwned || 0)
+              .toNumber(),
+            0
+          )
+        }
+
+        minerPatchParams.current_total_debt_human = BigNumber(minerPatchParams.current_total_interest_human || 0)
+          .plus(minerPatchParams.current_total_interest_human || 0)
+          .toNumber()
+
+        await patchLoanMiners(minerPatchParams)
 
         const res = await getLoanListByMiner({
           page: 1,
           page_size: 1000,
           miner_id: miner?.miner_id
         })
+
         const lenListWithDebt = res?.results?.filter(
-          (item) => !(item.current_principal_human <= 0 && item.total_interest_human <= 0)
+          (item) =>
+            !(
+              BigNumber(item.current_interest_human || 0)
+                .plus(item.current_principal_human || 0)
+                .toNumber() <= 0
+            )
         )
         if (lenListWithDebt?.length) {
           onClose()
@@ -190,10 +270,9 @@ export default function RepayDialog(props: IProps) {
     getList()
     if (!open) {
       setRepayAmount(null)
-      setMaxRepayAmount(0)
       setRepayMethod(1)
       setSelectedAddress(null)
-      setSelectedLender(null)
+      setSelectedLender(undefined)
       setPayoff(false)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -203,13 +282,14 @@ export default function RepayDialog(props: IProps) {
     setLoading(true)
     try {
       const tx = await loanContract.changeMinerDisabled(miner?.miner_id, true)
-      await tx.await()
+      await tx.wait()
       if (miner?.miner_id) {
         patchLoanMiners({
           miner_id: miner.miner_id,
           disabled: true
         }).then(() => {
           updateList()
+          onClose()
         })
       }
     } catch (error) {
@@ -280,7 +360,7 @@ export default function RepayDialog(props: IProps) {
                         </div>
                       </div>
                     ) : (
-                      <div className='px-[20px]'>
+                      <div>
                         <div className='common-tips mb-[20px]'>
                           If you don't want to borrow anymore, don't forget to close the loan
                         </div>
@@ -330,15 +410,20 @@ export default function RepayDialog(props: IProps) {
                                   <p className='text-xl font-semibold'>Repayment Method</p>
                                   <Radio.Group onChange={onRadioChange} value={repayMethod}>
                                     <Radio value={1}>Wallet</Radio>
-                                    <Radio
-                                      value={2}
-                                    >{`Miner Available Balance: ${miner?.available_balance_human} FIL`}</Radio>
+                                    <Radio value={2}>{`Miner Available Balance: ${numberWithCommas(
+                                      miner?.available_balance_human || 0
+                                    )} FIL`}</Radio>
                                   </Radio.Group>
                                 </div>
                               </div>
                             </div>
                             <div className='text-center'>
-                              <Button width={256} loading={loading} onClick={handleRepayment}>
+                              <Button
+                                width={256}
+                                loading={loading}
+                                disabled={maxRepayAmount <= 0}
+                                onClick={handleRepayment}
+                              >
                                 Repay
                               </Button>
                             </div>

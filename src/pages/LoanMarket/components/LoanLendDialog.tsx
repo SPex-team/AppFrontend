@@ -6,13 +6,13 @@ import DetailColDesc from '@/components/DetailColDesc'
 import NumberInput from '@/components/NumberInput'
 import Button from '@/components/Button'
 import { LoanMarketListItem, LoanMinerInfo } from '@/types'
-import { isIndent, numberWithCommas, getValueMultiplied } from '@/utils'
+import { isIndent, numberWithCommas, getValueMultiplied, getContinuousProfile } from '@/utils'
 import dayjs from 'dayjs'
 import { config } from '@/config'
 import { handleError } from '@/components/ErrorHandler'
 import BigNumber from 'bignumber.js'
 import debounce from 'lodash/debounce'
-import { patchLoanMiners, postLoanList } from '@/api/modules/loan'
+import { patchLoanMiners, postLoanList, patchLoanById, getLoanList } from '@/api/modules/loan'
 
 interface IProps {
   open: boolean
@@ -34,7 +34,7 @@ export default function LoanLendDialog(props: IProps) {
     return [
       {
         title: 'Miner Available Balance',
-        value: `${numberWithCommas((minerInfo?.available_balance_human || 0).toFixed(6))} FIL`
+        value: `${numberWithCommas(minerInfo?.available_balance_human || 0)} FIL`
       },
       {
         title: 'Miner Pledge Amount',
@@ -55,7 +55,7 @@ export default function LoanLendDialog(props: IProps) {
     return [
       {
         title: 'Collateral Rate',
-        value: `${minerInfo?.collateral_rate}%`
+        value: `${BigNumber(minerInfo?.collateral_rate || 0).decimalPlaces(2)}%`
       },
       {
         title: 'Amount request to borrow',
@@ -67,10 +67,9 @@ export default function LoanLendDialog(props: IProps) {
       },
       {
         title: 'Approximate Interest / year',
-        value: `${numberWithCommas(
-          BigNumber(minerInfo?.max_debt_amount_human || 0)
-            .multipliedBy(BigNumber((minerInfo?.annual_interest_rate_human || 0) / 100))
-            .toFixed(6)
+        value: `${getContinuousProfile(
+          minerInfo?.max_debt_amount_human || 0,
+          minerInfo?.annual_interest_rate_human || 0
         )} FIL`
       }
     ]
@@ -80,14 +79,14 @@ export default function LoanLendDialog(props: IProps) {
     return [
       {
         title: 'Amount has been borrowed for this order',
-        value: `${numberWithCommas(minerInfo?.last_debt_amount_human)} FIL`
+        value: `${numberWithCommas(minerInfo?.current_total_principal_human)} FIL`
       },
       {
         title: 'Order completed',
         value: `${
           Number(minerInfo?.max_debt_amount_human) <= 0
             ? 0
-            : BigNumber(minerInfo?.last_debt_amount_human || 0)
+            : BigNumber(minerInfo?.current_total_principal_human || 0)
                 .dividedBy(BigNumber(minerInfo?.max_debt_amount_human || 0))
                 .multipliedBy(100)
                 .toFixed(2)
@@ -96,7 +95,9 @@ export default function LoanLendDialog(props: IProps) {
       {
         title: 'Lending Quota left',
         value: `${numberWithCommas(
-          BigNumber(minerInfo?.max_debt_amount_human || 0).minus(BigNumber(minerInfo?.last_debt_amount_human || 0))
+          BigNumber(minerInfo?.max_debt_amount_human || 0).minus(
+            BigNumber(minerInfo?.current_total_principal_human || 0)
+          )
         )} FIL`
       }
     ]
@@ -104,8 +105,8 @@ export default function LoanLendDialog(props: IProps) {
 
   const maxAmount = useMemo(() => {
     return BigNumber(minerInfo?.max_debt_amount_human || 0)
-      .minus(BigNumber(minerInfo?.last_debt_amount_human || 0))
-      .decimalPlaces(6)
+      .minus(BigNumber(minerInfo?.current_total_principal_human || 0))
+      .decimalPlaces(6, 1)
       .toNumber()
   }, [minerInfo])
 
@@ -114,10 +115,8 @@ export default function LoanLendDialog(props: IProps) {
       quota: BigNumber(amount || 0)
         .dividedBy(BigNumber(minerInfo?.max_debt_amount_human || 0))
         .multipliedBy(100)
-        .toFixed(2),
-      interest: BigNumber(amount || 0)
-        .multipliedBy(BigNumber((minerInfo?.annual_interest_rate_human || 0) / 100))
-        .decimalPlaces(6)
+        .decimalPlaces(2),
+      interest: getContinuousProfile(amount || 0, minerInfo?.annual_interest_rate_human || 0)
     }
   }, [amount, minerInfo])
 
@@ -170,18 +169,43 @@ export default function LoanLendDialog(props: IProps) {
         // update the miner
         patchLoanMiners({
           miner_id: minerInfo?.miner_id,
-          last_debt_amount_human: (minerInfo?.last_debt_amount_human || 0) + amount
+          current_total_principal_human: (minerInfo?.current_total_principal_human || 0) + amount,
+          last_debt_amount_human: (minerInfo?.last_debt_amount_human || 0) + amount,
+          collateral_rate: BigNumber((minerInfo?.current_total_principal_human || 0) + amount || 0)
+            .dividedBy(minerInfo?.total_balance_human || 0)
+            .times(100)
+            .decimalPlaces(2)
+            .toNumber()
         })
-        // update the lend list
-        postLoanList({
-          ...minerInfo,
-          annual_interest_rate: minerInfo?.annual_interest_rate_human,
-          last_amount_human: (minerInfo?.last_debt_amount_human || 0) + amount,
-          miner_total_balance_human: minerInfo?.total_balance_human,
-          current_principal_human: amount,
+        // Update or add lendlist
+        const res = await getLoanList({
+          page: 1,
+          page_size: 1000,
           user_address: currentAccount,
-          transaction_hash: result?.hash
+          miner_id: minerInfo?.miner_id
         })
+        if (!res?.results?.length) {
+          postLoanList({
+            ...minerInfo,
+            annual_interest_rate: minerInfo?.annual_interest_rate_human,
+            current_total_principal_human: (minerInfo?.current_total_principal_human || 0) + amount,
+            miner_total_balance_human: minerInfo?.total_balance_human,
+            current_principal_human: amount,
+            user_address: currentAccount,
+            transaction_hash: result?.hash
+          })
+        } else {
+          const target = res.results?.find((item) => item.miner_id === minerInfo?.miner_id)
+          console.log('target ==> ', target)
+
+          patchLoanById({
+            id: target.id,
+            current_principal_human: BigNumber(target.current_principal_human || 0)
+              .plus(amount)
+              .toNumber()
+          })
+        }
+
         message({
           title: 'TIP',
           type: 'success',

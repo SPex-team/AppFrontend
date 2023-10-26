@@ -12,7 +12,7 @@ import MinerIDRow from '@/pages/components/MinerIDRow'
 import { useMetaMask } from '@/hooks/useMetaMask'
 import ClaimDialog from './ClaimDialog'
 import LoanDetailDialog from './LoanDetailDialog'
-import { LoanOrderInfo, LoanMarketListItem } from '@/types'
+import { LoanOrderInfo } from '@/types'
 import { PayCircleOutlined } from '@ant-design/icons'
 import type { ColumnsType } from 'antd/es/table'
 import BigNumber from 'bignumber.js'
@@ -58,7 +58,7 @@ const History = () => {
     },
     {
       title: 'Interest Earned',
-      key: 'total_interest_human',
+      key: 'current_interest_human',
       render: (val, row) => (val ? `${numberWithCommas(val)} FIL` : '-')
     },
     {
@@ -70,7 +70,7 @@ const History = () => {
             'inline-block h-[26px] whitespace-nowrap rounded-full bg-[rgba(0,119,254,0.1)] px-2 text-center text-sm leading-[26px]'
           ])}
         >
-          {/* {row.max_debt_amount_human === row.last_debt_amount_human ? 'Complete' : 'Progressing'} */}
+          {row.current_principal_human <= 0 ? 'Complete' : 'Progressing'}
         </span>
       )
     },
@@ -127,7 +127,7 @@ const History = () => {
   useEffect(() => {
     profileClass.initLend()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [profileClass])
 
   return (
     <section className='container mx-auto'>
@@ -136,6 +136,7 @@ const History = () => {
         open={isClaimDialogOpen}
         data={minerInfo && selectedLoan && { ...selectedLoan, ...minerInfo }}
         setOpen={setIsClaimDialogOpen}
+        updateList={() => profileClass.updateLendList()}
       />
       <LoanDetailDialog
         open={isDetailDialogOpen}

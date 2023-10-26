@@ -4,12 +4,13 @@ import clsx from 'clsx'
 interface Props {
   width?: number
   children?: string | React.ReactNode
+  disabled?: boolean
   loading?: boolean
   onClick?: () => void
 }
 
 function CustomButton(props: Props) {
-  const { width, children, loading, onClick } = props
+  const { width, children, disabled, loading, onClick } = props
 
   const handleClick = () => {
     if (onClick) {
@@ -21,14 +22,16 @@ function CustomButton(props: Props) {
     <button
       type='button'
       className={clsx([
-        'bg-gradient-common mt-5 inline-flex h-[44px] w-[100%] items-center justify-center rounded-full text-white focus-visible:ring-0',
-        { 'cursor-not-allowed': loading }
+        'mt-5 inline-flex h-[44px] w-[100%] items-center justify-center rounded-full text-white focus-visible:ring-0',
+        { 'cursor-not-allowed': loading },
+        { 'bg-gray-300': disabled },
+        { 'bg-gradient-common': !disabled }
       ])}
       style={{
         width: `${width}px`
       }}
+      disabled={loading || disabled}
       onClick={handleClick}
-      disabled={loading}
     >
       {loading && (
         <svg

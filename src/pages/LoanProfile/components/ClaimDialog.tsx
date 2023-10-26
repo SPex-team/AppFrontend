@@ -1,21 +1,16 @@
 import { Dialog, Transition } from '@headlessui/react'
 import { Fragment, ReactNode, useEffect, useMemo, useState } from 'react'
-import { RootState } from '@/store'
 import Tip, { message } from '../../../components/Tip'
 import { useMetaMask } from '@/hooks/useMetaMask'
-import { useSelector } from 'react-redux'
 import DetailColDesc from '@/components/DetailColDesc'
 import NumberInput from '@/components/NumberInput'
 import { handleError } from '@/components/ErrorHandler'
-import { isIndent, numberWithCommas, getValueMultiplied } from '@/utils'
+import { isIndent, numberWithCommas, getValueMultiplied, getValueDivide } from '@/utils'
 import { config } from '@/config'
-import dayjs from 'dayjs'
 import BigNumber from 'bignumber.js'
-import { useDispatch } from 'react-redux'
-import { setRootData } from '@/store/modules/root'
 import Button from '@/components/Button'
 import { LoanMinerInfo, LoanOrderInfo } from '@/types'
-import { postLoanMiners, patchLoanMiners } from '@/api/modules/loan'
+import { patchLoanById, patchLoanMiners } from '@/api/modules/loan'
 
 import DigitalCoinURL from '@/assets/images/digital_coin.png'
 
@@ -23,25 +18,26 @@ interface IProps {
   open: boolean
   data?: LoanMinerInfo & LoanOrderInfo
   setOpen: (bol: boolean) => void
+  updateList?: () => void
 }
 
 export default function ClaimDialog(props: IProps) {
-  const { open = false, data, setOpen } = props
+  const { open = false, data, setOpen, updateList } = props
   const { currentAccount, loanContract } = useMetaMask()
-  const dispatch = useDispatch()
 
   const [amount, setAmount] = useState<number | null>()
   const [loading, setLoading] = useState<boolean>(false)
 
   const maxClaimAmount = useMemo(() => {
-    return BigNumber(data?.total_interest_human || 0)
-      .plus(data?.current_principal_human || 0)
+    return BigNumber(data?.current_principal_human || 0)
+      .plus(data?.current_interest_human || 0)
+      .decimalPlaces(6, 1)
       .toNumber()
   }, [data])
 
   const info = [
     {
-      title: 'Principle',
+      title: 'Your Principle',
       value: `${numberWithCommas(data?.current_principal_human)} FIL`
     },
     // {
@@ -53,16 +49,10 @@ export default function ClaimDialog(props: IProps) {
       value: `${(data?.annual_interest_rate_human || 0).toFixed(2)}%`
     },
     {
-      title: 'Interest Owed',
-      value: `${numberWithCommas(data?.total_interest_human)} FIL`
-    },
-    {
       title: 'Miner Available Balance',
-      value: `${numberWithCommas((data?.available_balance_human || 0).toFixed(6))} FIL`
+      value: `${numberWithCommas(data?.available_balance_human || 0)} FIL`
     }
   ]
-
-  console.log('data ==> ', data)
 
   const onClose = () => {
     setOpen(false)
@@ -75,10 +65,26 @@ export default function ClaimDialog(props: IProps) {
   const handleClaim = async () => {
     try {
       setLoading(true)
-      console.log(currentAccount, data?.miner_id, amount)
+      const isMax = BigNumber(amount || 0).gte(maxClaimAmount)
 
-      const tx = await loanContract.withdrawRepayment(currentAccount, data?.miner_id, getValueMultiplied(amount || 0))
+      const checkRes = await loanContract.getCurrentAmountOwedToLender(currentAccount, data?.miner_id)
+      const totalAmountOwned = isMax ? getValueDivide(checkRes[0]) : amount
+      const totalClaimAmount = isMax
+        ? BigNumber(totalAmountOwned || 0)
+            .times(1 + (data?.annual_interest_rate || 0) / 365 / 48)
+            .decimalPlaces(6, 1)
+            .toNumber()
+        : amount
+
+      console.log('totalClaimAmount ==> ', totalClaimAmount, 'totalAmountOwned ==>', totalAmountOwned)
+
+      const tx = await loanContract.withdrawRepayment(
+        currentAccount,
+        data?.miner_id,
+        getValueMultiplied(totalClaimAmount || 0)
+      )
       const result = await tx.wait()
+
       if (result) {
         message({
           title: 'TIP',
@@ -89,24 +95,69 @@ export default function ClaimDialog(props: IProps) {
         const params: any = {
           miner_id: data?.miner_id
         }
-        if (BigNumber(data?.total_interest_human || 0).lt(amount || 0)) {
-          params.total_interest_human = 0
-          params.current_principal_human = BigNumber(data?.current_principal_human || 0)
-            .minus(BigNumber(amount || 0).minus(data?.total_interest_human || 0))
-            .toNumber()
+        if (BigNumber(data?.current_interest_human || 0).lte(totalAmountOwned || 0)) {
+          params.current_interest_human = 0
+          params.current_principal_human = Math.max(
+            BigNumber(data?.current_principal_human || 0)
+              .minus(BigNumber(totalAmountOwned || 0).minus(data?.current_interest_human || 0))
+              .toNumber(),
+            0
+          )
         }
-        if (BigNumber(data?.total_interest_human || 0).eq(amount || 0)) {
-          params.total_interest_human = 0
+        if (BigNumber(data?.current_interest_human || 0).gt(totalAmountOwned || 0)) {
+          params.current_interest_human = Math.max(
+            BigNumber(data?.current_interest_human || 0)
+              .minus(totalAmountOwned || 0)
+              .toNumber(),
+            0
+          )
         }
-        if (BigNumber(data?.total_interest_human || 0).gt(amount || 0)) {
-          params.total_interest_human = BigNumber(data?.total_interest_human || 0)
-            .minus(amount || 0)
-            .toNumber()
-        }
-        console.log('params ==> ', params)
 
-        await patchLoanMiners(params)
+        await patchLoanById({
+          ...params,
+          id: data?.id
+        })
+
+        const minerPatchParams: any = {
+          miner_id: data?.miner_id
+        }
+
+        if (BigNumber(data?.current_interest_human || 0).lte(totalAmountOwned || 0)) {
+          const principleTaken = BigNumber(totalAmountOwned || 0)
+            .minus(data?.current_interest_human || 0)
+            .toNumber()
+          minerPatchParams.current_total_interest_human = Math.max(
+            BigNumber(data?.current_total_interest_human || 0)
+              .minus(data?.current_interest_human || 0)
+              .toNumber(),
+            0
+          )
+          minerPatchParams.current_total_principal_human = Math.max(
+            BigNumber(data?.current_total_principal_human || 0)
+              .minus(principleTaken || 0)
+              .toNumber(),
+            0
+          )
+        }
+
+        if (BigNumber(data?.current_interest_human || 0).gt(totalAmountOwned || 0)) {
+          minerPatchParams.current_total_interest_human = Math.max(
+            BigNumber(data?.current_total_interest_human || 0)
+              .minus(totalAmountOwned || 0)
+              .toNumber(),
+            0
+          )
+        }
+
+        minerPatchParams.current_total_debt_human = BigNumber(minerPatchParams.current_total_interest_human || 0)
+          .plus(minerPatchParams.current_total_interest_human || 0)
+          .toNumber()
+
+        await patchLoanMiners(minerPatchParams)
         onClose()
+        if (updateList) {
+          updateList()
+        }
       }
     } catch (error) {
       handleError(error)
@@ -171,7 +222,11 @@ export default function ClaimDialog(props: IProps) {
                         <p className='text-2xl font-semibold'>Total Interest You Earn</p>
                         <div className='flex items-center gap-[10px]'>
                           <img width={24} src={DigitalCoinURL} alt='coin' />
-                          <div className='text-2xl font-semibold text-[#0077FE]'>{`${data?.total_interest_human} FIL`}</div>
+                          <div className='text-2xl font-semibold text-[#0077FE]'>{`${BigNumber(
+                            data?.current_interest_human || 0
+                          )
+                            .decimalPlaces(6, 1)
+                            .toNumber()} FIL`}</div>
                         </div>
                       </div>
                       {/* <div className='mb-[20px] flex justify-between'>
@@ -212,14 +267,18 @@ export default function ClaimDialog(props: IProps) {
                             <div className='flex justify-between pt-[20px]'>
                               <span className='font-semibold'>Amount left to withdraw</span>
                               <span>{`${numberWithCommas(
-                                BigNumber(data?.current_principal_human || 0)
-                                  .plus(data?.total_interest_human || 0)
+                                BigNumber(maxClaimAmount || 0)
                                   .minus(BigNumber(amount || 0))
                                   .toNumber()
                               )} FIL`}</span>
                             </div>
                             <div className='text-center'>
-                              <Button width={256} loading={loading} onClick={handleClaim}>
+                              <Button
+                                width={256}
+                                loading={loading}
+                                disabled={Number(amount) <= 0}
+                                onClick={handleClaim}
+                              >
                                 Claim
                               </Button>
                             </div>

@@ -5,7 +5,7 @@ import { Divider, Table } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 import { useMetaMask } from '@/hooks/useMetaMask'
 import DetailColDesc from '@/components/DetailColDesc'
-import { isIndent, numberWithCommas } from '@/utils'
+import { getContinuousProfile, isIndent, numberWithCommas } from '@/utils'
 import './loanDetail.scss'
 import dayjs from 'dayjs'
 import BigNumber from 'bignumber.js'
@@ -53,7 +53,7 @@ export default function LoanDetailDialog(props: IProps) {
       title: 'Principle',
       dataIndex: 'current_principal_human',
       align: 'center',
-      render: (text) => `${text} FIL`
+      render: (text) => `${BigNumber(text).decimalPlaces(6, 1).toNumber()} FIL`
     }
   ]
 
@@ -78,19 +78,15 @@ export default function LoanDetailDialog(props: IProps) {
       },
       {
         title: 'Collateral Rate',
-        value: `${data?.collateral_rate}%`
+        value: `${BigNumber(data?.collateral_rate || 0).decimalPlaces(2)}%`
       },
       {
         title: 'Commit APY',
-        value: `${(data?.annual_interest_rate_human || 0).toFixed(2)}%`
+        value: `${BigNumber(data?.annual_interest_rate_human || 0).decimalPlaces(2)}%`
       },
       {
         title: 'Approximate Interest',
-        value: `${numberWithCommas(
-          BigNumber(data?.max_debt_amount_human || 0)
-            .multipliedBy(BigNumber((data?.annual_interest_rate_human || 0) / 100))
-            .toFixed(6)
-        )} FIL / year`
+        value: `${getContinuousProfile(data?.max_debt_amount_human || 0, data?.annual_interest_rate_human)} FIL / year`
       }
     ]
   }, [data])
@@ -120,14 +116,14 @@ export default function LoanDetailDialog(props: IProps) {
     return [
       {
         title: 'Amount has been borrowed for this order',
-        value: `${numberWithCommas(data?.last_debt_amount_human)} FIL`
+        value: `${numberWithCommas(data?.current_total_principal_human)} FIL`
       },
       {
         title: 'Order completed',
         value: `${
           Number(data?.max_debt_amount_human) <= 0
             ? 0
-            : BigNumber(data?.last_debt_amount_human || 0)
+            : BigNumber(data?.current_total_principal_human || 0)
                 .dividedBy(BigNumber(data?.max_debt_amount_human || 0))
                 .multipliedBy(100)
                 .decimalPlaces(2)
@@ -136,7 +132,7 @@ export default function LoanDetailDialog(props: IProps) {
       {
         title: 'Lending Quota left',
         value: `${numberWithCommas(
-          BigNumber(data?.max_debt_amount_human || 0).minus(BigNumber(data?.last_debt_amount_human || 0))
+          BigNumber(data?.max_debt_amount_human || 0).minus(BigNumber(data?.current_total_principal_human || 0))
         )} FIL`
       }
     ]
@@ -158,10 +154,9 @@ export default function LoanDetailDialog(props: IProps) {
           },
           {
             title: 'Approximate interest you would earn / year',
-            value: `${numberWithCommas(
-              BigNumber(data?.current_principal_human || 0).multipliedBy(
-                BigNumber((data?.annual_interest_rate_human || 0) / 100)
-              )
+            value: `${getContinuousProfile(
+              data?.current_principal_human || 0,
+              data?.annual_interest_rate_human || 0
             )} FIL`
           }
         ]
