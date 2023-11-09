@@ -4,55 +4,54 @@ import { NavLink, useLocation } from 'react-router-dom'
 import { config } from '@/config'
 import { useMetaMask } from '@/hooks/useMetaMask'
 
-// to do: differentiate loan market and market
-const isLoan = true
-
-const links = isLoan
-  ? [
-      {
-        name: 'Home',
-        href: 'https://www.spex.website/'
-      },
-      {
-        name: 'Loan Market',
-        href: '/loanMarket'
-      },
-      // {
-      //   name: 'History',
-      //   href: '/loanHistory'
-      // },
-      {
-        name: 'Profile',
-        href: '/profile'
-      }
-    ]
-  : [
-      {
-        name: 'Home',
-        href: 'https://www.spex.website/'
-      },
-      {
-        name: 'Market',
-        href: '/market'
-      },
-      {
-        name: 'History',
-        href: '/history'
-      },
-      {
-        name: 'Profile',
-        href: '/me'
-      },
-      {
-        name: 'FAQ',
-        href: '/faq'
-      }
-    ]
-
 export default function Header() {
   const location = useLocation()
   const { connectButton } = useMetaMask()
   const net = config.net
+
+  const isLoan = location.pathname.includes('loan') || location.pathname.includes('profile')
+
+  const links = isLoan
+    ? [
+        {
+          name: 'Home',
+          href: 'https://www.spex.website/'
+        },
+        {
+          name: 'Loan Market',
+          href: '/loanMarket'
+        },
+        // {
+        //   name: 'History',
+        //   href: '/loanHistory'
+        // },
+        {
+          name: 'Profile',
+          href: '/profile'
+        }
+      ]
+    : [
+        {
+          name: 'Home',
+          href: 'https://www.spex.website/'
+        },
+        {
+          name: 'Market',
+          href: '/market'
+        },
+        {
+          name: 'History',
+          href: '/history'
+        },
+        {
+          name: 'Profile',
+          href: '/me'
+        },
+        {
+          name: 'FAQ',
+          href: '/faq'
+        }
+      ]
 
   return (
     <header className='fixed top-0 z-20 w-screen bg-transparent backdrop-blur-lg [font-family:GeneralSansVariable]'>

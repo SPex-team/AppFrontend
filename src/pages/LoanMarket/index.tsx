@@ -86,6 +86,7 @@ const LoanMarket = (props) => {
       key: 'progress',
       render: (val, row) => (
         <Progress
+          format={(percent) => `${percent}%`}
           percent={BigNumber(row?.last_debt_amount_human || 0)
             .dividedBy(BigNumber(row?.max_debt_amount_human || 0))
             .multipliedBy(100)
