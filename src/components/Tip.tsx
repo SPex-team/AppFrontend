@@ -1,5 +1,6 @@
 import clsx from 'clsx'
-import ReactDOM from 'react-dom'
+// import ReactDOM from 'react-dom'
+import ReactDOM from 'react-dom/client'
 
 interface IProps {
   className?: string
@@ -24,6 +25,8 @@ const colorConfig = {
     bg: '#fca5a5'
   }
 }
+
+const tip = ReactDOM.createRoot(document.getElementById('tip'))
 
 export default function Tip(props: IProps) {
   const { className = '', type = 'success', title = '', open = false, content = '' } = props
@@ -75,13 +78,12 @@ interface IParams {
 
 export function message(params: IParams) {
   const { className = '', type = 'success', title, content = '', closeTime = 8000 } = params
-  const tipRootDom = document.getElementById('tip') as HTMLElement
 
   setTimeout(() => {
-    ReactDOM.unmountComponentAtNode(tipRootDom)
+    tip.unmount()
   }, closeTime)
 
-  ReactDOM.render(
+  tip.render(
     <div
       className={clsx([
         'bg fixed left-1/2 top-[8%] z-40 -translate-x-1/2 rounded-[10px] border-l-[6px] px-[18px] py-5',
@@ -113,7 +115,6 @@ export function message(params: IParams) {
         </div>
       )}
       <p className=''>{content}</p>
-    </div>,
-    tipRootDom
+    </div>
   )
 }
