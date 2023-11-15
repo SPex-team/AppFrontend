@@ -29,6 +29,7 @@ export const mainnet_config = {
   baseUrl: window.location.protocol + '//' + window.location.host,
   contractAddress: '0xc284ff2a0bed6A72143423482739C9345c254924',
   contractFilecoinAddress: 'f410fykcp6kql5vvhefbuenecooojgrocksje3cvi7ta',
+  contractLoanAddress: '0xD8eE90cFFcABf5F2D04F30Bb65a4F0199ed4eBC8',
   address_zero_prefix: 'f',
   net: 'MainNet',
   filescanOrigin: 'https://filscan.io',
