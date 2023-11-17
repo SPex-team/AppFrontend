@@ -2,6 +2,11 @@
   position: absolute;
   top: 5px;
   left: 30%;
-  margin-inline-start: 0;
+  margin-inline-start: calc(1.5em - 8px);
+  padding-inline-end: calc(2em + 8px);
   transform: translateX(-50%);
+}
+
+.ant-progress.ant-progress-status-success .ant-progress-text {
+  color: inherit;
 }

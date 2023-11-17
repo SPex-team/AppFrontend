@@ -3,7 +3,7 @@ import BasicTable from '@/components/BasicTable'
 import { config } from '@/config'
 import { useMemo, useEffect, useState } from 'react'
 import ProfileClass from '@/models/profile-class'
-import { useSelector } from 'react-redux'
+import { useSelector, shallowEqual } from 'react-redux'
 import { RootState } from '@/store'
 import { formatListTime } from '@/utils/date'
 import { isEmpty, numberWithCommas } from '@/utils/index'
@@ -12,30 +12,28 @@ import MinerIDRow from '@/pages/components/MinerIDRow'
 import LoanDetailDialog from './LoanDetailDialog'
 import RepayDialog from './RepayDialog'
 import LoanAddDialog from '@/components/LoanAddDialog'
+import BeneficiaryReleaseDialog from './BeneficiaryReleaseDialog'
 import LoanEditDialog from './LoanEditDialog'
 import { useMetaMask } from '@/hooks/useMetaMask'
 import { LoanMarketListItem } from '@/types'
-import { PayCircleOutlined, CloseSquareOutlined, EditOutlined } from '@ant-design/icons'
+import { PayCircleOutlined, CloseSquareOutlined, EditOutlined, RollbackOutlined } from '@ant-design/icons'
 import type { ColumnsType } from 'antd/es/table'
 import { patchLoanMiners } from '@/api/modules/loan'
 import { handleError } from '@/components/AddDialog'
 import BigNumber from 'bignumber.js'
 
-const isDevEnv = process.env.NODE_ENV === 'development' || window.location.origin.includes('calibration')
-
 const BorrowList = () => {
   const { currentAccount, loanContract } = useMetaMask()
   const profileClasss = useMemo(() => new ProfileClass({ currentAccount }), [currentAccount])
-  const { borrowList, borrowCount, borrowPage, tableLoading } = useSelector((state: RootState) => ({
-    borrowList: state.loan.borrowList,
-    borrowPage: state.loan.borrowPage,
-    borrowCount: state.loan.borrowCount,
-    tableLoading: state.loan.tableLoading
-  }))
+  const { borrowList, borrowCount, borrowPage, tableLoading } = useSelector(
+    (state: RootState) => state.loan,
+    shallowEqual
+  )
 
   const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false)
   const [isRepayDialogOpen, setIsRepayDialogOpen] = useState(false)
   const [isLoanAddDialogOpen, setIsLoanAddDialogOpen] = useState(false)
+  const [isBeneficiaryReleaseDialogOpen, setIsBeneficiaryReleaseDialogOpen] = useState(false)
   const [isLoanEditDialogOpen, setIsLoanEditDialogOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [selectedMiner, setSelectedMiner] = useState<LoanMarketListItem>()
@@ -169,6 +167,18 @@ const BorrowList = () => {
             Edit
             <EditOutlined className='mb-[4px] ml-1 align-middle' />
           </button>
+          {row.disabled && (
+            <button
+              className='whitespace-nowrap break-words hover:text-[#0077FE]'
+              onClick={() => {
+                setSelectedMiner(row)
+                setIsBeneficiaryReleaseDialogOpen(true)
+              }}
+            >
+              Redemption
+              <RollbackOutlined className='mb-[4px] ml-1 align-middle' />
+            </button>
+          )}
         </div>
       )
     }
@@ -203,6 +213,12 @@ const BorrowList = () => {
         open={isLoanAddDialogOpen}
         miner={selectedMiner}
         setOpen={setIsLoanAddDialogOpen}
+        updateList={updateBorrowList}
+      />
+      <BeneficiaryReleaseDialog
+        open={isBeneficiaryReleaseDialogOpen}
+        miner={selectedMiner}
+        setOpen={setIsBeneficiaryReleaseDialogOpen}
         updateList={updateBorrowList}
       />
       <LoanEditDialog

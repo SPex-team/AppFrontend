@@ -67,7 +67,7 @@ export default function ClaimDialog(props: IProps) {
       setLoading(true)
       const isMax = BigNumber(amount || 0).gte(maxClaimAmount)
 
-      const checkRes = await loanContract.getCurrentAmountOwedToLender(currentAccount, data?.miner_id)
+      const checkRes = await loanContract.getCurrentLenderOwedAmount(currentAccount, data?.miner_id)
       const totalAmountOwned = isMax ? getValueDivide(checkRes[0]) : amount
       const totalClaimAmount = isMax
         ? BigNumber(totalAmountOwned || 0)
@@ -76,7 +76,7 @@ export default function ClaimDialog(props: IProps) {
             .toNumber()
         : amount
 
-      console.log('totalClaimAmount ==> ', totalClaimAmount, 'totalAmountOwned ==>', totalAmountOwned)
+      // console.log('totalClaimAmount ==> ', totalClaimAmount, 'totalAmountOwned ==>', totalAmountOwned)
 
       const tx = await loanContract.withdrawRepayment(
         currentAccount,

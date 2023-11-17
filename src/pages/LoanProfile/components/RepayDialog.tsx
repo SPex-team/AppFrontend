@@ -129,7 +129,7 @@ export default function RepayDialog(props: IProps) {
 
       const isMax = BigNumber(repayAmount || 0).gte(maxRepayAmount)
 
-      const checkRes = await loanContract.getCurrentAmountOwedToLender(selectedLender?.user_address, miner?.miner_id)
+      const checkRes = await loanContract.getCurrentLenderOwedAmount(selectedLender?.user_address, miner?.miner_id)
       const totalAmountOwned = isMax ? getValueDivide(checkRes[0]) : repayAmount
       const totalRepayAmount = isMax
         ? BigNumber(totalAmountOwned || 0)
@@ -138,12 +138,10 @@ export default function RepayDialog(props: IProps) {
             .toNumber()
         : repayAmount
 
-      console.log('totalRepayAmount ==> ', totalRepayAmount, 'totalAmountOwned ==>', totalAmountOwned)
-
       let tx: any
       if (repayMethod === 1) {
         const params = [selectedAddress, miner?.miner_id]
-        tx = await loanContract?.repayment(...params, {
+        tx = await loanContract?.directRepayment(...params, {
           value: getValueMultiplied(totalRepayAmount || 0)
         })
       }
@@ -159,8 +157,7 @@ export default function RepayDialog(props: IProps) {
         message({
           title: 'TIP',
           type: 'success',
-          content: result.hash,
-          closeTime: 10000
+          content: result.hash
         })
         const params: any = {
           id: selectedLender.id,

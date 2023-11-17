@@ -45,6 +45,13 @@ export function postLoanBuildMessage(data: { miner_id: number }): Promise<any> {
   })
 }
 
+export function postLoanReleaseBuildMessage(data: { miner_id: number }): Promise<any> {
+  return postReq({
+    url: '/api/v1/spex/messages/build-change-beneficiary-out',
+    data
+  })
+}
+
 // step 2 api
 export function postPushMessage(data: { message: string; sign: string; cid: string; wait: boolean }): Promise<any> {
   return postReq({

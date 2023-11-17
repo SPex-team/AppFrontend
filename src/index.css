@@ -30,13 +30,6 @@
       border: none;
       font-size: 16px;
     }
-    .ant-progress.ant-progress-status-success .ant-progress-text {
-      color: inherit;
-    }
-    .ant-progress-text {
-      margin-inline-start: calc(1.5em - 8px);
-      padding-inline-end: calc(2em + 8px);
-    }
   }
 }
 
@@ -46,6 +39,9 @@
   }
   .common-tips {
     @apply rounded-[10px] border border-[#8BB6FF] bg-[#E9F1FF] px-[24px] py-[12px] font-semibold;
+  }
+  .common-container {
+    @apply container mx-auto px-[12px] pb-[60px] pt-[100px] md:px-[0] md:pt-[190px];
   }
 }
 

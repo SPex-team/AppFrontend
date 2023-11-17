@@ -270,13 +270,13 @@ const Market = (props) => {
 
   return (
     <>
-      <section className='container mx-auto pb-[60px] pt-[190px]'>
+      <section className='common-container'>
         <div className='flex flex-col justify-between sm:flex-row'>
           <div className='mb-5 xl:mb-20'>
             <h2 className='jr-market mb-[13px] text-[30px] font-semibold leading-[61px] sm:text-[56px]'>
               Miner Account Market
             </h2>
-            <p className='w-[420px] text-lg text-[#57596C] sm:w-[620px]'>
+            <p className='w-[360px] text-lg text-[#57596C] sm:w-[620px] md:w-[420px]'>
               Allowing Storage Providers to implement securely trustless account trading, optimize capital efficiency,
               select special ID numbers, etc.
             </p>

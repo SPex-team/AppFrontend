@@ -1,4 +1,5 @@
 import clsx from 'clsx'
+import { useEffect } from 'react'
 // import ReactDOM from 'react-dom'
 import ReactDOM from 'react-dom/client'
 
@@ -25,8 +26,6 @@ const colorConfig = {
     bg: '#fca5a5'
   }
 }
-
-const tip = ReactDOM.createRoot(document.getElementById('tip'))
 
 export default function Tip(props: IProps) {
   const { className = '', type = 'success', title = '', open = false, content = '' } = props
@@ -78,6 +77,12 @@ interface IParams {
 
 export function message(params: IParams) {
   const { className = '', type = 'success', title, content = '', closeTime = 8000 } = params
+
+  let tip: any = null
+
+  if (!tip) {
+    tip = ReactDOM.createRoot(document.getElementById('tip'))
+  }
 
   setTimeout(() => {
     tip.unmount()

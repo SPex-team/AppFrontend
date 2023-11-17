@@ -103,7 +103,7 @@ const History = () => {
   }, [])
 
   return (
-    <section className='container mx-auto px-2 pb-[60px] pt-[100px] sm:pt-[190px]'>
+    <section className='common-container'>
       <div className='flex justify-between'>
         <div className='mb-5 sm:mb-20'>
           <h2 className='mb-[13px] text-[32px] font-semibold leading-[61px] sm:text-[56px]'>Market Sales History</h2>

@@ -11,8 +11,8 @@ const FAQ = () => {
   }, [])
 
   return (
-    <section className='container mx-auto pb-[60px] pt-[190px]'>
-      <div className='flex gap-x-20'>
+    <section className='common-container'>
+      <div className='flex flex-col gap-x-20 md:flex-row'>
         <div className='max-w-md'>
           <h2 className='mb-5 text-[32px] font-semibold'>Frequently asked questions</h2>
           <p className='text-[#57596C]'>

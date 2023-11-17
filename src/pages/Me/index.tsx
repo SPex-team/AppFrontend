@@ -279,11 +279,11 @@ const Me = (props) => {
   return (
     <>
       {currentAccount ? (
-        <section className='container mx-auto pb-[60px] pt-[190px]'>
+        <section className='common-container'>
           <div className='flex flex-col justify-between sm:flex-row'>
             <div className='mb-10 sm:mb-20'>
-              <h2 className='mb-[13px] text-[56px] font-semibold leading-[61px]'>My Miners</h2>
-              <p className='w-[300px] text-lg text-[#57596C] sm:w-[480px]'>
+              <h2 className='mb-[13px] text-[32px] font-semibold leading-[61px] md:text-[56px]'>My Miners</h2>
+              <p className='w-[300px] text-[#57596C] sm:w-[480px] md:text-lg'>
                 Here you can find the miners you possess and their details.
               </p>
             </div>

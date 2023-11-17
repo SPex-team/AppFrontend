@@ -33,8 +33,8 @@ export default function LoanLendDialog(props: IProps) {
   const minerDetail = useMemo(() => {
     return [
       {
-        title: 'Miner Available Balance',
-        value: `${numberWithCommas(minerInfo?.available_balance_human || 0)} FIL`
+        title: 'Miner Total Value',
+        value: `${numberWithCommas(minerInfo?.total_balance_human)} FIL`
       },
       {
         title: 'Miner Pledge Amount',
@@ -45,8 +45,8 @@ export default function LoanLendDialog(props: IProps) {
         value: `${numberWithCommas(minerInfo?.locked_rewards_human)} FIL`
       },
       {
-        title: 'Miner Total Value',
-        value: `${numberWithCommas(minerInfo?.total_balance_human)} FIL`
+        title: 'Miner Available Balance',
+        value: `${numberWithCommas(minerInfo?.available_balance_human || 0)} FIL`
       }
     ]
   }, [minerInfo])
@@ -145,7 +145,7 @@ export default function LoanLendDialog(props: IProps) {
     }
     try {
       setLoading(true)
-      const tx = await loanContract.buyMinerDebt(minerInfo?.miner_id, {
+      const tx = await loanContract.lendToMiner(minerInfo?.miner_id, {
         value: getValueMultiplied(amount)
       })
       const result = await tx.wait()
@@ -196,7 +196,6 @@ export default function LoanLendDialog(props: IProps) {
           })
         } else {
           const target = res.results?.find((item) => item.miner_id === minerInfo?.miner_id)
-          console.log('target ==> ', target)
 
           patchLoanById({
             id: target.id,

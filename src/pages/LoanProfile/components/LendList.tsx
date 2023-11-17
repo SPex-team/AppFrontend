@@ -23,13 +23,7 @@ const History = () => {
   const { currentAccount } = useMetaMask()
   const profileClass = useMemo(() => new ProfileClass({ currentAccount }), [currentAccount])
   const marketClass = useMemo(() => new MarketClass(), [])
-  const { lendList, lendCount, lendPage, minerInfo, tableLoading } = useSelector((state: RootState) => ({
-    lendList: state.loan.lendList,
-    lendPage: state.loan.lendPage,
-    lendCount: state.loan.lendCount,
-    minerInfo: state.loan.minerInfo,
-    tableLoading: state.loan.tableLoading
-  }))
+  const { lendList, lendCount, lendPage, minerInfo, tableLoading } = useSelector((state: RootState) => state.loan)
 
   const [selectedLoan, setSelectedLoan] = useState<LoanOrderInfo>()
   const [isClaimDialogOpen, setIsClaimDialogOpen] = useState(false)

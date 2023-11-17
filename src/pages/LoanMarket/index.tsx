@@ -8,10 +8,7 @@ import LoanAddDialog from '../../components/LoanAddDialog'
 import Progress from '../../components/Progress'
 import BeneficiaryBindDialog from './components/BeneficiaryBindDialog'
 import LoanLendDialog from './components/LoanLendDialog'
-import { ZeroAddress } from 'ethers'
 import { config } from '@/config'
-import { putMiner } from '@/api/modules'
-import { setRootData } from '@/store/modules/root'
 import { message } from '@/components/Tip'
 import { NavLink } from 'react-router-dom'
 import { isEmpty, numberWithCommas } from '@/utils'
@@ -25,8 +22,6 @@ import relativeTime from 'dayjs/plugin/relativeTime'
 import { LoanMarketListItem } from '@/types'
 import BigNumber from 'bignumber.js'
 import useLoading from '@/hooks/useLoading'
-
-import DigitalCoinURL from '@/assets/images/digital_coin.png'
 
 const LoanMarket = (props) => {
   const { currentAccount } = useMetaMask()
@@ -153,7 +148,7 @@ const LoanMarket = (props) => {
         return (
           <div className='justify-space flex flex-wrap gap-x-7'>
             <button
-              className='hover:text-[#0077FE]'
+              className='whitespace-nowrap hover:text-[#0077FE]'
               onClick={() => {
                 const url = `${config.filescanOrigin}/miner/${config.address_zero_prefix}0${row.miner_id}`
                 window.open(url)
@@ -162,12 +157,16 @@ const LoanMarket = (props) => {
               Detail
               <DetailIcon className='ml-2 inline-block w-[14px]' />
             </button>
-            <button className='hover:text-[#0077FE]' disabled={row.disabled} onClick={() => onLendButtonClick(row)}>
+            <button
+              className='whitespace-nowrap hover:text-[#0077FE]'
+              disabled={row.disabled}
+              onClick={() => onLendButtonClick(row)}
+            >
               Lend
               <ShoppingCartOutlined className='ml-1 align-middle' />
             </button>
             <NavLink to={'/loanComment/' + row.miner_id.toString()}>
-              <button className='hover:text-[#0077FE]'>
+              <button className='whitespace-nowrap hover:text-[#0077FE]'>
                 Comments
                 <CommentIcon className='ml-2 inline-block' width={14} height={14} />
               </button>
@@ -207,13 +206,13 @@ const LoanMarket = (props) => {
 
   return (
     <>
-      <section className='container mx-auto pb-[60px] pt-[190px]'>
+      <section className='common-container'>
         <div className='flex flex-col justify-between sm:flex-row'>
           <div className='mb-5 xl:mb-20'>
-            <h2 className='jr-market mb-[13px] text-[30px] font-semibold leading-[61px] sm:text-[56px]'>Loan Market</h2>
-            <div className='w-[420px] text-lg text-[#57596C] sm:w-[620px]'>
-              <p>You could list your loan request order in the market to acquire</p>
-              the liquidity of your pledge amount and locked rewards OR you can lend for exchange of interest.
+            <h2 className='jr-market mb-[13px] text-[32px] font-semibold leading-[61px] sm:text-[56px]'>Loan Market</h2>
+            <div className='w-[360px] text-[#57596C] md:w-[500px] md:text-lg'>
+              You could list your loan request order in the market to acquire the liquidity of your pledge amount and
+              locked rewards OR you can lend for exchange of interest.
             </div>
           </div>
           <button

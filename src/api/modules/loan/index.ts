@@ -21,6 +21,13 @@ export function patchLoanMiners(data?: any): Promise<any> {
   })
 }
 
+export function delLoanMiners(data?: any): Promise<any> {
+  return delReq({
+    url: `/api/v1/loan/miners/${data.miner_id}`,
+    data
+  })
+}
+
 export function getLoanByMinerId(params): Promise<any> {
   return getReq({
     url: `/api/v1/loan/miners/${params.minerId}`

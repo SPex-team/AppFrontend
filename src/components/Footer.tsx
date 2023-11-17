@@ -31,9 +31,9 @@ export default function Footer() {
   return (
     <footer className='bg-[#d0e6ff] [font-family:GeneralSansVariable]'>
       <div className='container mx-auto px-2'>
-        <div className='flex justify-between pb-24 pt-20'>
+        <div className='flex flex-col justify-between gap-[20px] pb-24 pt-20 md:flex-row'>
           <img width={104} height={38} src='/logo.svg' alt='SPex' />
-          <div className='space-x-6 pr-10'>
+          <div className='space-x-6'>
             {Informations.map((item, index) => (
               <a key={index} href={item.link} className='inline-block h-[30px] w-[30px] hover:text-[#545368]'>
                 {item.icon}
