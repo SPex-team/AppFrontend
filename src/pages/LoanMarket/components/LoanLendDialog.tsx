@@ -145,9 +145,14 @@ export default function LoanLendDialog(props: IProps) {
     }
     try {
       setLoading(true)
-      const tx = await loanContract.lendToMiner(minerInfo?.miner_id, {
-        value: getValueMultiplied(amount)
-      })
+
+      const tx = await loanContract.lendToMiner(
+        minerInfo?.miner_id,
+        getValueMultiplied(minerInfo?.annual_interest_rate_human || 0, 4),
+        {
+          value: getValueMultiplied(amount)
+        }
+      )
       const result = await tx.wait()
       /* 
         blockHash: "0xbc70c8b143268b0e38be2ded6ed1ccb8e42a44d5bcd1411b55a7301dbb932782"
