@@ -485,7 +485,14 @@ export default function LoanAddDialog(props: IProps) {
                   6
                 ),
                 borrowInfo.depositAddress,
-                false
+                false,
+                20, // maxLenderCount
+                getValueMultiplied(
+                  BigNumber(minerBalance?.total_balance_human || 0)
+                    .dividedBy(2)
+                    .dividedBy(20)
+                    .toNumber()
+                ) // minLendAmount (miner total balance / 2 /20)
               ]
 
               const tx = await loanContract?.changeMinerBorrowParameters(...params)
@@ -654,7 +661,7 @@ export default function LoanAddDialog(props: IProps) {
                       {stepContent}
                     </div>
 
-                    <div className='text-center'>
+                    <div className='mt-5 text-center'>
                       {stepNum > 1 && <LeftOutlined className='mr-[60px]' onClick={handleBack} />}
                       <Button width={256} loading={loading} onClick={btnData.onClick}>
                         {btnData.text}

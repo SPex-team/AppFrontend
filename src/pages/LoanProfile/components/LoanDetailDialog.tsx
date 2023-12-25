@@ -44,16 +44,16 @@ export default function LoanDetailDialog(props: IProps) {
       render: (text) => <span className='whitespace-nowrap'>{isIndent(text)}</span>
     },
     {
-      title: 'Lending Days',
-      dataIndex: 'create_time',
+      title: 'Total Amount',
+      dataIndex: 'current_total_amount_human',
       align: 'center',
-      render: (text) => `${dayjs(new Date()).diff(text, 'd')} Days`
+      render: (text) => `${BigNumber(text).decimalPlaces(6, BigNumber.ROUND_DOWN).toNumber()} FIL`
     },
     {
       title: 'Principle',
       dataIndex: 'current_principal_human',
       align: 'center',
-      render: (text) => `${BigNumber(text).decimalPlaces(6, 1).toNumber()} FIL`
+      render: (text) => `${BigNumber(text).decimalPlaces(6, BigNumber.ROUND_DOWN).toNumber()} FIL`
     }
   ]
 

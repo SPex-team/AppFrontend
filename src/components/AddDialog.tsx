@@ -6,6 +6,7 @@ import { postBuildMessage, postMiner, postPushMessage, transferInCheck } from '@
 import Tip, { message } from './Tip'
 import { useMetaMask } from '@/hooks/useMetaMask'
 import Button from '@/components/Button'
+import { LeftOutlined } from '@ant-design/icons'
 
 interface IProps {
   open?: boolean
@@ -551,6 +552,18 @@ export default function AddDialog(props: IProps) {
     )
   }
 
+  const handleSkip = () => {
+    if (stepNum === 2) {
+      return setStepNum(3)
+    }
+  }
+
+  const handleBack = () => {
+    if (stepNum === 3) {
+      return setStepNum(2)
+    }
+  }
+
   return (
     <>
       <Transition
@@ -618,7 +631,13 @@ export default function AddDialog(props: IProps) {
                       {stepContent}
                     </div>
 
-                    <div className='text-center'>
+                    <div className='mt-10 flex items-center justify-center gap-[60px] text-center'>
+                      {stepNum === 2 && (
+                        <div className='cursor-pointer' onClick={handleSkip}>
+                          Skip
+                        </div>
+                      )}
+                      {stepNum === 3 && <LeftOutlined onClick={handleBack} />}
                       <Button width={256} loading={loading} onClick={btnData.onClick}>
                         {btnData.text}
                       </Button>

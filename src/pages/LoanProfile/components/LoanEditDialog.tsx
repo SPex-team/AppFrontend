@@ -63,7 +63,9 @@ export default function LoanEditDialog(props: IProps) {
           6
         ),
         depositAddress,
-        data?.disabled
+        data?.disabled,
+        data?.max_lender_count,
+        data?.min_lend_amount_raw
       ]
 
       const tx = await loanContract.changeMinerBorrowParameters(...params)
@@ -230,7 +232,7 @@ export default function LoanEditDialog(props: IProps) {
                         </div>
                       </div>
                     </div>
-                    <div className='text-center'>
+                    <div className='mt-10 text-center'>
                       <Button width={256} loading={loading} onClick={() => handleConfirm()}>
                         Confirm
                       </Button>

@@ -3,6 +3,7 @@ import clsx from 'clsx'
 
 interface Props {
   width?: number
+  className?: string
   children?: string | React.ReactNode
   disabled?: boolean
   loading?: boolean
@@ -10,7 +11,7 @@ interface Props {
 }
 
 function CustomButton(props: Props) {
-  const { width, children, disabled, loading, onClick } = props
+  const { width, className, children, disabled, loading, onClick } = props
 
   const handleClick = () => {
     if (onClick) {
@@ -22,10 +23,11 @@ function CustomButton(props: Props) {
     <button
       type='button'
       className={clsx([
-        'mt-5 inline-flex h-[44px] w-[100%] items-center justify-center rounded-full text-white focus-visible:ring-0',
+        'inline-flex h-[44px] w-[100%] items-center justify-center rounded-full text-white focus-visible:ring-0',
         { 'cursor-not-allowed': loading },
         { 'bg-gray-300': disabled },
-        { 'bg-gradient-common': !disabled }
+        { 'bg-gradient-common': !disabled },
+        className
       ])}
       style={{
         width: `${width}px`

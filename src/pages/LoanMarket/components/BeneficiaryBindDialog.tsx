@@ -7,7 +7,7 @@ import { postLoanMiners, getMinerBalance } from '@/api/modules/loan'
 import Tip, { message } from '../../../components/Tip'
 import { useMetaMask } from '@/hooks/useMetaMask'
 import { handleError } from '@/components/ErrorHandler'
-import { WarningOutlined } from '@ant-design/icons'
+import { WarningOutlined, LeftOutlined } from '@ant-design/icons'
 import Button from '@/components/Button'
 import { MinerBalance } from '@/types'
 
@@ -138,7 +138,7 @@ export default function BeneficiaryBindDialog(props: IProps) {
         </ul>
         <p className='pt-[30px] font-semibold text-gray-500'>
           <WarningOutlined />
-          PS: SPex will only charge 1% from the interest of the loan as the transaction fee.
+          PS: SPex will only charge lender 10% from the interest of the loan as the transaction fee.
         </p>
         <p className='text-gray-500'>
           Your asset is secured: Binding Beneficiary will only allow lenders to claim repayment from your avaliable
@@ -177,7 +177,7 @@ export default function BeneficiaryBindDialog(props: IProps) {
     return (
       <form className='text-[#57596C]' id='form_sign'>
         <span className='mb-4 mt-[10px] inline-block text-sm font-light'>
-          {'Sign '}
+          {'Key:'}
           <span className='inline-block w-full break-words font-medium'>{data?.msg_cid_hex}</span>
           {' with owner address to propose transfer beneficiary to SPex contract'}
         </span>
@@ -216,7 +216,7 @@ export default function BeneficiaryBindDialog(props: IProps) {
     return (
       <form className='text-[#57596C]' id='form_confirm'>
         <span className='mb-4 mt-[10px] inline-block w-full text-sm font-light'>
-          {'Sign '}
+          {'Key '}
           <span className='inline-block w-full break-words font-medium'>
             {confirmSignContent?.toString()?.slice(2)}
           </span>
@@ -398,7 +398,7 @@ export default function BeneficiaryBindDialog(props: IProps) {
               }
               sign = '0x' + sign.slice(2)
 
-              const params = [data.miner_id, sign, data.timestamp, 0, 0, ZeroAddress, true]
+              const params = [data.miner_id, sign, data.timestamp, 0, 0, ZeroAddress, true, 0, 0]
               const tx = await loanContract?.pledgeBeneficiaryToSpex(...params)
 
               message({
@@ -519,6 +519,18 @@ export default function BeneficiaryBindDialog(props: IProps) {
     }
   }, [open])
 
+  const handleSkip = () => {
+    if (stepNum === 2) {
+      return setStepNum(3)
+    }
+  }
+
+  const handleBack = () => {
+    if (stepNum === 3) {
+      return setStepNum(2)
+    }
+  }
+
   return (
     <>
       <Transition
@@ -591,7 +603,13 @@ export default function BeneficiaryBindDialog(props: IProps) {
                       {stepContent}
                     </div>
 
-                    <div className='text-center'>
+                    <div className='mt-10 flex items-center justify-center gap-[60px] text-center'>
+                      {stepNum === 2 && (
+                        <div className='cursor-pointer' onClick={handleSkip}>
+                          Skip
+                        </div>
+                      )}
+                      {stepNum === 3 && <LeftOutlined onClick={handleBack} />}
                       <Button width={256} loading={loading} onClick={btnData.onClick}>
                         {btnData.text}
                       </Button>

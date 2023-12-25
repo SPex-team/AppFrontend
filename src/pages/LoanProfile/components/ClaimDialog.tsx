@@ -272,7 +272,7 @@ export default function ClaimDialog(props: IProps) {
                                   .toNumber()
                               )} FIL`}</span>
                             </div>
-                            <div className='text-center'>
+                            <div className='mt-10 text-center'>
                               <Button
                                 width={256}
                                 loading={loading}

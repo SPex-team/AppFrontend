@@ -72,9 +72,8 @@ const LoanMarket = (props) => {
     },
     {
       title: 'Listed Date',
-      key: 'last_list_time',
-      render: (val) =>
-        val ? (dayjs(new Date()).diff(val, 'day') >= 10 ? dayjs(val).format('YYYY-MM-DD') : dayjs(val).fromNow()) : '-'
+      key: 'min_lend_amount_human',
+      render: (val) => `${numberWithCommas(val) ?? '0'} FIL`
     },
     {
       title: 'Loan Progress',
@@ -82,7 +81,7 @@ const LoanMarket = (props) => {
       render: (val, row) => (
         <Progress
           format={(percent) => `${percent}%`}
-          percent={BigNumber(row?.last_debt_amount_human || 0)
+          percent={BigNumber(row?.current_total_principal_human || 0)
             .dividedBy(BigNumber(row?.max_debt_amount_human || 0))
             .multipliedBy(100)
             .toNumber()}

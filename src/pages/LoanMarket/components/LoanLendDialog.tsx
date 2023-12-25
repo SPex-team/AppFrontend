@@ -176,8 +176,8 @@ export default function LoanLendDialog(props: IProps) {
           miner_id: minerInfo?.miner_id,
           current_total_principal_human: (minerInfo?.current_total_principal_human || 0) + amount,
           last_debt_amount_human: (minerInfo?.last_debt_amount_human || 0) + amount,
-          collateral_rate: BigNumber((minerInfo?.current_total_principal_human || 0) + amount || 0)
-            .dividedBy(minerInfo?.total_balance_human || 0)
+          collateral_rate: BigNumber(minerInfo?.total_balance_human || 0)
+            .dividedBy((minerInfo?.current_total_principal_human || 0) + amount || 0)
             .times(100)
             .decimalPlaces(2)
             .toNumber()
@@ -190,7 +190,7 @@ export default function LoanLendDialog(props: IProps) {
           miner_id: minerInfo?.miner_id
         })
         if (!res?.results?.length) {
-          postLoanList({
+          const params = {
             ...minerInfo,
             annual_interest_rate: minerInfo?.annual_interest_rate_human,
             current_total_principal_human: (minerInfo?.current_total_principal_human || 0) + amount,
@@ -198,10 +198,10 @@ export default function LoanLendDialog(props: IProps) {
             current_principal_human: amount,
             user_address: currentAccount,
             transaction_hash: result?.hash
-          })
+          }
+          postLoanList(params)
         } else {
           const target = res.results?.find((item) => item.miner_id === minerInfo?.miner_id)
-
           patchLoanById({
             id: target.id,
             current_principal_human: BigNumber(target.current_principal_human || 0)
@@ -344,7 +344,7 @@ export default function LoanLendDialog(props: IProps) {
                             <span className='font-medium'>{`${lendInfoByAmount.interest} FIL`}</span>
                           </div>
                         </div>
-                        <Button loading={loading} onClick={() => handleConfirm()}>
+                        <Button className='mt-5' loading={loading} onClick={() => handleConfirm()}>
                           Confirm
                         </Button>
                       </div>

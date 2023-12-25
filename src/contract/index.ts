@@ -3,25 +3,28 @@ export const loanABI = [
     inputs: [
       {
         internalType: 'address',
-        name: 'foundation',
+        name: 'lender',
         type: 'address'
       },
       {
-        internalType: 'uint256',
-        name: 'maxDebtRate',
-        type: 'uint256'
-      },
+        internalType: 'CommonTypes.FilActorId',
+        name: 'minerId',
+        type: 'uint64'
+      }
+    ],
+    name: '_updateLenderOwedAmount',
+    outputs: [
       {
         internalType: 'uint256',
-        name: 'feeRate',
-        type: 'uint256'
-      },
-      {
-        internalType: 'uint256',
-        name: 'minLendAmount',
+        name: 'currentOwedAmount',
         type: 'uint256'
       }
     ],
+    stateMutability: 'nonpayable',
+    type: 'function'
+  },
+  {
+    inputs: [],
     stateMutability: 'nonpayable',
     type: 'constructor'
   },
@@ -168,6 +171,11 @@ export const loanABI = [
         internalType: 'uint256',
         name: 'buyAmount',
         type: 'uint256'
+      },
+      {
+        internalType: 'uint256',
+        name: 'expectedPricePerFil',
+        type: 'uint256'
       }
     ],
     name: 'buyLoan',
@@ -258,6 +266,16 @@ export const loanABI = [
         internalType: 'bool',
         name: 'disabled',
         type: 'bool'
+      },
+      {
+        internalType: 'uint256',
+        name: 'maxLenderCount',
+        type: 'uint256'
+      },
+      {
+        internalType: 'uint256',
+        name: 'minLendAmount',
+        type: 'uint256'
       }
     ],
     name: 'changeMinerBorrowParameters',
@@ -345,12 +363,12 @@ export const loanABI = [
         type: 'uint64'
       },
       {
-        internalType: 'address',
-        name: 'newReceiveAddress',
-        type: 'address'
+        internalType: 'uint256',
+        name: 'maxLenderCount',
+        type: 'uint256'
       }
     ],
-    name: 'changeMinerReceiveAddress',
+    name: 'changeMinerMaxLenderCount',
     outputs: [],
     stateMutability: 'nonpayable',
     type: 'function'
@@ -358,12 +376,35 @@ export const loanABI = [
   {
     inputs: [
       {
+        internalType: 'CommonTypes.FilActorId',
+        name: 'minerId',
+        type: 'uint64'
+      },
+      {
         internalType: 'uint256',
-        name: 'newMinLendAmount',
+        name: 'minLendAmount',
         type: 'uint256'
       }
     ],
-    name: 'changeMinLendAmount',
+    name: 'changeMinerMinLendAmount',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function'
+  },
+  {
+    inputs: [
+      {
+        internalType: 'CommonTypes.FilActorId',
+        name: 'minerId',
+        type: 'uint64'
+      },
+      {
+        internalType: 'address',
+        name: 'newReceiveAddress',
+        type: 'address'
+      }
+    ],
+    name: 'changeMinerReceiveAddress',
     outputs: [],
     stateMutability: 'nonpayable',
     type: 'function'
@@ -391,11 +432,6 @@ export const loanABI = [
     ],
     stateMutability: 'payable',
     type: 'function'
-  },
-  {
-    inputs: [],
-    name: 'FailToCallActor',
-    type: 'error'
   },
   {
     inputs: [],
@@ -465,6 +501,12 @@ export const loanABI = [
         internalType: 'CommonTypes.FilActorId',
         name: '',
         type: 'uint64'
+      },
+      {
+        indexed: false,
+        internalType: 'uint256',
+        name: '',
+        type: 'uint256'
       },
       {
         indexed: false,
@@ -588,6 +630,44 @@ export const loanABI = [
       },
       {
         indexed: false,
+        internalType: 'uint256',
+        name: '',
+        type: 'uint256'
+      }
+    ],
+    name: 'EventChangeMinerMaxLenderCount',
+    type: 'event'
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: 'CommonTypes.FilActorId',
+        name: '',
+        type: 'uint64'
+      },
+      {
+        indexed: false,
+        internalType: 'uint256',
+        name: '',
+        type: 'uint256'
+      }
+    ],
+    name: 'EventChangeMinerMinLendAmount',
+    type: 'event'
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: 'CommonTypes.FilActorId',
+        name: '',
+        type: 'uint64'
+      },
+      {
+        indexed: false,
         internalType: 'address',
         name: '',
         type: 'address'
@@ -653,6 +733,18 @@ export const loanABI = [
         internalType: 'address',
         name: '',
         type: 'address'
+      },
+      {
+        indexed: false,
+        internalType: 'uint8',
+        name: '',
+        type: 'uint8'
+      },
+      {
+        indexed: false,
+        internalType: 'uint256',
+        name: '',
+        type: 'uint256'
       }
     ],
     name: 'EventPledgeBeneficiaryToSpex',
@@ -689,32 +781,6 @@ export const loanABI = [
     inputs: [
       {
         indexed: false,
-        internalType: 'CommonTypes.FilActorId',
-        name: '',
-        type: 'uint64'
-      },
-      {
-        components: [
-          {
-            internalType: 'bytes',
-            name: 'data',
-            type: 'bytes'
-          }
-        ],
-        indexed: false,
-        internalType: 'struct CommonTypes.FilAddress',
-        name: '',
-        type: 'tuple'
-      }
-    ],
-    name: 'EventReleaseBeneficiaryAgain',
-    type: 'event'
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: false,
         internalType: 'address',
         name: '',
         type: 'address'
@@ -730,6 +796,12 @@ export const loanABI = [
         internalType: 'CommonTypes.FilActorId',
         name: '',
         type: 'uint64'
+      },
+      {
+        indexed: false,
+        internalType: 'uint256',
+        name: '',
+        type: 'uint256'
       },
       {
         indexed: false,
@@ -792,6 +864,12 @@ export const loanABI = [
         internalType: 'CommonTypes.FilActorId',
         name: '',
         type: 'uint64'
+      },
+      {
+        indexed: false,
+        internalType: 'uint256',
+        name: '',
+        type: 'uint256'
       },
       {
         indexed: false,
@@ -880,6 +958,16 @@ export const loanABI = [
         internalType: 'bool',
         name: 'disabled',
         type: 'bool'
+      },
+      {
+        internalType: 'uint8',
+        name: 'maxLenderCount',
+        type: 'uint8'
+      },
+      {
+        internalType: 'uint256',
+        name: 'minLendAmount',
+        type: 'uint256'
       }
     ],
     name: 'pledgeBeneficiaryToSpex',
@@ -1032,7 +1120,7 @@ export const loanABI = [
     outputs: [
       {
         internalType: 'uint256',
-        name: 'principleAmount',
+        name: 'principalAmount',
         type: 'uint256'
       },
       {
@@ -1104,25 +1192,17 @@ export const loanABI = [
       },
       {
         internalType: 'uint256',
-        name: 'principleAmount',
+        name: 'principalAmount',
         type: 'uint256'
       },
       {
         internalType: 'uint256',
-        name: 'lastUpdateTime',
+        name: 'maxLenderCount',
         type: 'uint256'
-      }
-    ],
-    stateMutability: 'view',
-    type: 'function'
-  },
-  {
-    inputs: [],
-    name: '_minLendAmount',
-    outputs: [
+      },
       {
         internalType: 'uint256',
-        name: '',
+        name: 'minLendAmount',
         type: 'uint256'
       }
     ],
@@ -1206,6 +1286,77 @@ export const loanABI = [
         internalType: 'uint256',
         name: 'principal',
         type: 'uint256'
+      }
+    ],
+    stateMutability: 'view',
+    type: 'function'
+  },
+  {
+    inputs: [
+      {
+        internalType: 'CommonTypes.FilActorId',
+        name: 'minerId',
+        type: 'uint64'
+      }
+    ],
+    name: 'getMiner',
+    outputs: [
+      {
+        components: [
+          {
+            internalType: 'CommonTypes.FilActorId',
+            name: 'minerId',
+            type: 'uint64'
+          },
+          {
+            internalType: 'address',
+            name: 'delegator',
+            type: 'address'
+          },
+          {
+            internalType: 'uint256',
+            name: 'maxDebtAmount',
+            type: 'uint256'
+          },
+          {
+            internalType: 'uint256',
+            name: 'loanInterestRate',
+            type: 'uint256'
+          },
+          {
+            internalType: 'address',
+            name: 'receiveAddress',
+            type: 'address'
+          },
+          {
+            internalType: 'bool',
+            name: 'disabled',
+            type: 'bool'
+          },
+          {
+            internalType: 'uint256',
+            name: 'principalAmount',
+            type: 'uint256'
+          },
+          {
+            internalType: 'uint256',
+            name: 'maxLenderCount',
+            type: 'uint256'
+          },
+          {
+            internalType: 'uint256',
+            name: 'minLendAmount',
+            type: 'uint256'
+          },
+          {
+            internalType: 'address[]',
+            name: 'lenders',
+            type: 'address[]'
+          }
+        ],
+        internalType: 'struct SPexBeneficiary.Miner',
+        name: '',
+        type: 'tuple'
       }
     ],
     stateMutability: 'view',

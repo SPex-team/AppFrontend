@@ -75,17 +75,25 @@ interface IParams {
   // setOpen: (bol: boolean) => void
 }
 
+let tip: any = null
+let timer: any = null
+
 export function message(params: IParams) {
   const { className = '', type = 'success', title, content = '', closeTime = 8000 } = params
-
-  let tip: any = null
 
   if (!tip) {
     tip = ReactDOM.createRoot(document.getElementById('tip'))
   }
 
-  setTimeout(() => {
-    tip.unmount()
+  if (timer) {
+    clearTimeout(timer)
+    timer = null
+  }
+
+  timer = setTimeout(() => {
+    if (tip) {
+      tip = tip.unmount()
+    }
   }, closeTime)
 
   tip.render(

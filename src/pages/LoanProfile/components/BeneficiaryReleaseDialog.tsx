@@ -9,6 +9,7 @@ import { useMetaMask } from '@/hooks/useMetaMask'
 import { handleError } from '@/components/ErrorHandler'
 import Button from '@/components/Button'
 import { LoanMarketListItem } from '@/types'
+import { LeftOutlined } from '@ant-design/icons'
 
 interface IProps {
   miner?: LoanMarketListItem
@@ -52,7 +53,7 @@ export default function BeneficiaryReleaseDialog(props: IProps) {
       desc: (
         <>
           <p>Sign to transfer back the beneficary address to your own address.</p>
-          <p>You have two options to confirm the transfer :</p>
+          <p>You have two options to confirm the transfer proposal :</p>
           <ul className='list-inside list-disc'>
             <li>Copy the provided command, sign it in your terminal, and paste the signature here;</li>
             <li>
@@ -80,8 +81,8 @@ export default function BeneficiaryReleaseDialog(props: IProps) {
     return (
       <form className='text-[#57596C]' id='form_sign'>
         <span className='mb-4 mt-[10px] inline-block text-sm font-light'>
-          Sign:
-          <span className='inline-block w-full break-words font-medium'>{data?.msg_cid_hex}</span>
+          Key:
+          <span className='inline-block w-full break-words font-medium'>{data?.msg_cid_hex || 'loading...'}</span>
         </span>
         <div className=''>
           <label htmlFor='sign' className='mb-[10px] block text-base'>
@@ -305,6 +306,14 @@ export default function BeneficiaryReleaseDialog(props: IProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open])
 
+  const handleSkip = () => {
+    setStepNum(stepNum + 1)
+  }
+
+  const handleBack = () => {
+    setStepNum(stepNum - 1)
+  }
+
   return (
     <>
       <Transition
@@ -376,7 +385,13 @@ export default function BeneficiaryReleaseDialog(props: IProps) {
                       {stepContent}
                     </div>
 
-                    <div className='text-center'>
+                    <div className='mt-10 flex items-center justify-center gap-[60px] text-center'>
+                      {stepNum === 1 && (
+                        <div className='cursor-pointer' onClick={handleSkip}>
+                          Skip
+                        </div>
+                      )}
+                      {stepNum === 2 && <LeftOutlined onClick={handleBack} />}
                       <Button width={256} loading={loading} onClick={btnData.onClick}>
                         {btnData.text}
                       </Button>

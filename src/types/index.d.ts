@@ -23,6 +23,9 @@ export interface LoanMarketListItem {
   last_debt_amount_raw?: string
   last_debt_amount_human?: number
   last_update_timestamp?: number
+  max_lender_count?: number
+  min_lend_amount_human?: number
+  min_lend_amount_raw?: string
   disabled?: boolean
   collateral_rate?: number
   total_balance_human?: number
