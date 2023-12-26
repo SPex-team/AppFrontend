@@ -93,6 +93,13 @@ export default function LoanEditDialog(props: IProps) {
         content: 'Please connect you wallet first'
       })
     }
+    if (!APY) {
+      return message({
+        title: 'TIP',
+        type: 'warning',
+        content: 'Please input APY'
+      })
+    }
     try {
       setAPYEditLoading(true)
       const params = [
@@ -133,6 +140,13 @@ export default function LoanEditDialog(props: IProps) {
         title: 'TIP',
         type: 'warning',
         content: 'Please connect you wallet first'
+      })
+    }
+    if (!depositAddress) {
+      return message({
+        title: 'TIP',
+        type: 'warning',
+        content: 'Please input Deposit Address'
       })
     }
     try {
