@@ -1,5 +1,6 @@
 import { ReactComponent as DetailIcon } from '@/assets/images/detail.svg'
 import { ReactComponent as CommentIcon } from '@/assets/images/comment.svg'
+import { ReactComponent as ExportIcon } from '@/assets/images/export.svg'
 import { useEffect, useMemo, useState, Fragment } from 'react'
 import MarketClass from '@/models/loan-market-class'
 import { useSelector } from 'react-redux'
@@ -142,22 +143,22 @@ const LoanMarket = (props) => {
         </Popover>
       ),
       key: 'operation',
-      width: '25%',
+      width: '30%',
       render: (val, row) => {
         return (
           <div className='justify-space flex flex-wrap gap-x-7'>
             <button
-              className='whitespace-nowrap hover:text-[#0077FE]'
+              className='flex items-center whitespace-nowrap hover:text-[#0077FE]'
               onClick={() => {
                 const url = `${config.filescanOrigin}/miner/${config.address_zero_prefix}0${row.miner_id}`
                 window.open(url)
               }}
             >
-              Detail
-              <DetailIcon className='ml-2 inline-block w-[14px]' />
+              Miner Detail
+              <ExportIcon className='ml-1 inline-block w-[18px]' />
             </button>
             <button
-              className='whitespace-nowrap hover:text-[#0077FE]'
+              className='flex items-center whitespace-nowrap hover:text-[#0077FE]'
               disabled={row.disabled}
               onClick={() => onLendButtonClick(row)}
             >
@@ -165,9 +166,9 @@ const LoanMarket = (props) => {
               <ShoppingCartOutlined className='ml-1 align-middle' />
             </button>
             <NavLink to={'/loanComment/' + row.miner_id.toString()}>
-              <button className='whitespace-nowrap hover:text-[#0077FE]'>
+              <button className='flex items-center whitespace-nowrap hover:text-[#0077FE]'>
                 Comments
-                <CommentIcon className='ml-2 inline-block' width={14} height={14} />
+                <CommentIcon className='ml-1 inline-block' width={14} height={14} />
               </button>
             </NavLink>
           </div>

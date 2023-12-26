@@ -1,4 +1,5 @@
 import { ReactComponent as DetailIcon } from '@/assets/images/detail.svg'
+import { ReactComponent as ExportIcon } from '@/assets/images/export.svg'
 import BasicTable from '@/components/BasicTable'
 import { config } from '@/config'
 import { useMemo, useEffect, useState } from 'react'
@@ -74,7 +75,7 @@ const History = () => {
       render: (val, row) => (
         <div className='justify-space flex flex-wrap gap-x-7'>
           <button
-            className='whitespace-nowrap break-words hover:text-[#0077FE]'
+            className='flex items-center whitespace-nowrap break-words hover:text-[#0077FE]'
             onClick={() => {
               setSelectedLoan(row)
               marketClass.getLoanByMinerId(row.miner_id)
@@ -85,7 +86,7 @@ const History = () => {
             <DetailIcon className='ml-2 inline-block w-[14px]' />
           </button>
           <button
-            className='whitespace-nowrap break-words hover:text-[#0077FE]'
+            className='flex items-center whitespace-nowrap break-words hover:text-[#0077FE]'
             onClick={() => {
               setSelectedLoan(row)
               marketClass.getLoanByMinerId(row.miner_id)
@@ -93,10 +94,10 @@ const History = () => {
             }}
           >
             Claim Repayment
-            <PayCircleOutlined className='mb-[4px] ml-1 align-middle' />
+            <PayCircleOutlined className='ml-1 align-middle' />
           </button>
           <button
-            className='whitespace-nowrap break-words hover:text-[#0077FE]'
+            className='flex items-center whitespace-nowrap break-words hover:text-[#0077FE]'
             onClick={() => {
               const url = `${isDevEnv ? 'https://calibration.filfox.info/en' : config.filescanOrigin}/message/${
                 row.transaction_hash
@@ -105,7 +106,7 @@ const History = () => {
             }}
           >
             Transaction
-            <DetailIcon className='ml-2 inline-block w-[14px]' />
+            <ExportIcon className='ml-1 inline-block w-[18px]' />
           </button>
         </div>
       )

@@ -393,7 +393,7 @@ export default function ChangeOwnerDialog(props: IProps) {
                   {stepContent}
                 </div>
 
-                <div className='mt-5 text-center'>
+                <div className='mt-10 text-center'>
                   <Button width={256} loading={loading} onClick={btnData.onClick}>
                     {btnData.text}
                   </Button>

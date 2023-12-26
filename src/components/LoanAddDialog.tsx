@@ -59,7 +59,7 @@ export default function LoanAddDialog(props: IProps) {
   const maxBorrowAmount = useMemo(() => {
     return BigNumber(minerBalance?.available_balance_human || 0)
       .times(0.6)
-      .decimalPlaces(6, 1)
+      .decimalPlaces(0, BigNumber.ROUND_DOWN)
       .toNumber()
   }, [minerBalance])
 
@@ -150,10 +150,10 @@ export default function LoanAddDialog(props: IProps) {
     setBorrowInfo({
       ...borrowInfo,
       borrowAmount: maxBorrowAmount,
-      borrowColleteral: BigNumber(maxBorrowAmount || 0)
-        .dividedBy(minerBalance?.total_balance_human || 0)
+      borrowColleteral: BigNumber(minerBalance?.total_balance_human || 0)
+        .dividedBy(maxBorrowAmount)
         .times(100)
-        .decimalPlaces(2)
+        .decimalPlaces(0, BigNumber.ROUND_DOWN)
         .toNumber()
     })
   }
@@ -212,44 +212,44 @@ export default function LoanAddDialog(props: IProps) {
                   setBorrowInfo({
                     ...borrowInfo,
                     borrowAmount: val,
-                    borrowColleteral: BigNumber(val || 0)
-                      .dividedBy(minerBalance?.total_balance_human || 0)
+                    borrowColleteral: BigNumber(minerBalance?.total_balance_human || 0)
+                      .dividedBy(val)
                       .times(100)
-                      .decimalPlaces(2)
+                      .decimalPlaces(0, BigNumber.ROUND_DOWN)
                       .toNumber()
                   })
                 }
                 prefix='FIL'
               />
             ) : (
-              <p className='h-[49px] leading-[49px]'>{borrowInfo.borrowColleteral}</p>
+              <p className='h-[49px] leading-[49px]'>{borrowInfo.borrowAmount}</p>
             )}
-            <p className='pt-[5px] text-sm text-gray-500'>The colleteral rate cannot over 60%</p>
+            <p className='pt-[5px] text-sm text-gray-500'>The colleteral rate cannot be less than 166%</p>
           </div>
           <div className='w-1/2'>
             {borrowInfo?.borrowFunction === 2 ? (
               <NumberInput
                 value={borrowInfo.borrowColleteral}
                 maxButton
-                max={60}
+                min={166}
                 onMaxButtonClick={handleMaxBtnClick}
-                onChange={(val: number) =>
+                onChange={(val: number) => {
                   setBorrowInfo({
                     ...borrowInfo,
                     borrowColleteral: val,
-                    borrowAmount: BigNumber(val)
-                      .dividedBy(100)
-                      .times(minerBalance?.total_balance_human || 0)
-                      .precision(2)
+                    borrowAmount: BigNumber(minerBalance?.total_balance_human || 0)
+                      .dividedBy(val)
+                      .times(100)
+                      .decimalPlaces(0, BigNumber.ROUND_DOWN)
                       .toNumber()
                   })
-                }
+                }}
                 prefix='%'
               />
             ) : (
               <p className='h-[49px] leading-[49px]'>{borrowInfo.borrowColleteral}</p>
             )}
-            <p className='pt-[5px] text-sm text-gray-500'>Colleteral % = Borrow amount/Miner Total Current Value</p>
+            <p className='pt-[5px] text-sm text-gray-500'>Colleteral % = Miner Total Current Value / Borrow amount</p>
           </div>
         </div>
       </>
@@ -335,7 +335,7 @@ export default function LoanAddDialog(props: IProps) {
                       ) / Math.log(Math.E)
                     )
                       .times(100)
-                      .decimalPlaces(2)
+                      .decimalPlaces(2, BigNumber.ROUND_DOWN)
                       .toNumber()
                   })
                 }

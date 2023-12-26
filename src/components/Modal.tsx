@@ -98,7 +98,7 @@ export default function Modal(props: IProps) {
                   </div>
                 </div>
 
-                <div className='text-center'>
+                <div className='mt-5 text-center'>
                   <button
                     type='button'
                     className={clsx([

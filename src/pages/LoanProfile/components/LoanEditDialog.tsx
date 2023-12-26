@@ -30,7 +30,9 @@ export default function LoanEditDialog(props: IProps) {
   const [borrowAmount, setBorrowAmount] = useState<number | null>()
   const [APY, setAPY] = useState<number | null>()
   const [depositAddress, setDepositAddress] = useState<string>('')
-  const [loading, setLoading] = useState<boolean>(false)
+  const [borrowAmountEditLoading, setBorrowAmountEditLoading] = useState<boolean>(false)
+  const [APYEditLoading, setAPYEditLoading] = useState<boolean>(false)
+  const [addressEditLoading, setAddressEditLoading] = useState<boolean>(false)
 
   const onClose = () => {
     setOpen(false)
@@ -41,7 +43,7 @@ export default function LoanEditDialog(props: IProps) {
     setDepositAddress(inputValue)
   }
 
-  const handleConfirm = async () => {
+  const handleBorrowAmountEdit = async () => {
     if (!currentAccount) {
       return message({
         title: 'TIP',
@@ -49,26 +51,18 @@ export default function LoanEditDialog(props: IProps) {
         content: 'Please connect you wallet first'
       })
     }
+    if (!borrowAmount) {
+      return message({
+        title: 'TIP',
+        type: 'warning',
+        content: 'Please input borrow amount'
+      })
+    }
     try {
-      setLoading(true)
-      const params = [
-        data?.miner_id,
-        data?.delegator_address,
-        getValueMultiplied(borrowAmount || 0),
-        getValueMultiplied(
-          BigNumber(APY || 0)
-            .dividedBy(100)
-            .precision(6)
-            .toNumber(),
-          6
-        ),
-        depositAddress,
-        data?.disabled,
-        data?.max_lender_count,
-        data?.min_lend_amount_raw
-      ]
+      setBorrowAmountEditLoading(true)
+      const params = [data?.miner_id, getValueMultiplied(borrowAmount || 0)]
 
-      const tx = await loanContract.changeMinerBorrowParameters(...params)
+      const tx = await loanContract.changeMinerMaxDebtAmount(...params)
       const result = await tx.wait()
 
       if (result) {
@@ -80,17 +74,89 @@ export default function LoanEditDialog(props: IProps) {
         })
         await patchLoanMiners({
           miner_id: data?.miner_id,
-          receive_address: depositAddress,
-          max_debt_amount_human: borrowAmount,
-          annual_interest_rate_human: APY
+          max_debt_amount_human: borrowAmount
         })
-        setOpen(false)
         updateList()
       }
     } catch (error) {
       handleError(error)
     } finally {
-      setLoading(false)
+      setBorrowAmountEditLoading(false)
+    }
+  }
+
+  const handleAPYEdit = async () => {
+    if (!currentAccount) {
+      return message({
+        title: 'TIP',
+        type: 'warning',
+        content: 'Please connect you wallet first'
+      })
+    }
+    try {
+      setAPYEditLoading(true)
+      const params = [
+        data?.miner_id,
+        getValueMultiplied(
+          BigNumber(APY || 0)
+            .dividedBy(100)
+            .precision(6)
+            .toNumber(),
+          6
+        )
+      ]
+      const tx = await loanContract.changeMinerLoanInterestRate(...params)
+      const result = await tx.wait()
+      if (result) {
+        message({
+          title: 'TIP',
+          type: 'success',
+          content: tx.hash,
+          closeTime: 4000
+        })
+        await patchLoanMiners({
+          miner_id: data?.miner_id,
+          annual_interest_rate_human: APY
+        })
+        updateList()
+      }
+    } catch (error) {
+      handleError(error)
+    } finally {
+      setAPYEditLoading(false)
+    }
+  }
+
+  const handleDepositAddressEdit = async () => {
+    if (!currentAccount) {
+      return message({
+        title: 'TIP',
+        type: 'warning',
+        content: 'Please connect you wallet first'
+      })
+    }
+    try {
+      setAddressEditLoading(true)
+      const params = [data?.miner_id, depositAddress]
+      const tx = await loanContract.changeMinerDelegator(...params)
+      const result = await tx.wait()
+      if (result) {
+        message({
+          title: 'TIP',
+          type: 'success',
+          content: tx.hash,
+          closeTime: 4000
+        })
+        await patchLoanMiners({
+          miner_id: data?.miner_id,
+          receive_address: depositAddress
+        })
+        updateList()
+      }
+    } catch (error) {
+      handleError(error)
+    } finally {
+      setAddressEditLoading(false)
     }
   }
 
@@ -102,15 +168,9 @@ export default function LoanEditDialog(props: IProps) {
 
   useEffect(() => {
     if (open) {
-      setBorrowAmount(data?.max_debt_amount_human || null)
-      setAPY(
-        BigNumber(data?.annual_interest_rate_human || 0)
-          .decimalPlaces(6, 1)
-          .toNumber() || null
-      )
-      setDepositAddress(data?.receive_address || '')
+      clear()
     }
-  }, [data?.max_debt_amount_human, data?.receive_address, data, open])
+  }, [open])
 
   return (
     <>
@@ -157,8 +217,8 @@ export default function LoanEditDialog(props: IProps) {
                         </svg>
                       </Dialog.Title>
                     </div>
-                    <div className='mt-[30px] px-[20px]'>
-                      <div className='relative mb-[30px] grid grid-cols-3 gap-[20px]'>
+                    <div className='mt-[60px] px-[20px]'>
+                      <div className='relative mb-[30px] grid grid-cols-4 gap-[20px]'>
                         <div className='flex flex-col'>
                           <p className='text-xl font-semibold'>Borrow Amount</p>
                           <p className='text-sm text-gray-500'>
@@ -173,7 +233,7 @@ export default function LoanEditDialog(props: IProps) {
                           </p>
                         </div>
                         <div>
-                          <p className='absolute -top-[50px] right-[80px] text-center text-lg font-semibold'>
+                          <p className='absolute -top-[50px] right-[250px] text-center text-lg font-semibold'>
                             Change to
                           </p>
                           <NumberInput
@@ -183,12 +243,24 @@ export default function LoanEditDialog(props: IProps) {
                           />
                           <div className='flex items-center justify-between'>
                             <p className='text-sm'>Already completed</p>
-                            <p className='font-medium'>{`${numberWithCommas(data?.last_debt_amount_human)} FIL`}</p>
+                            <p className='font-medium'>{`${numberWithCommas(
+                              data?.current_total_principal_human
+                            )} FIL`}</p>
                           </div>
+                        </div>
+                        <div className='text-center'>
+                          <Button
+                            width={128}
+                            loading={borrowAmountEditLoading}
+                            disabled={Number(borrowAmount) === Number(data?.max_debt_amount_human)}
+                            onClick={() => handleBorrowAmountEdit()}
+                          >
+                            Confirm
+                          </Button>
                         </div>
                       </div>
 
-                      <div className='relative mb-[30px] grid grid-cols-3 gap-[20px]'>
+                      <div className='relative mb-[30px] grid grid-cols-4 gap-[20px]'>
                         <div className='flex flex-col'>
                           <p className='text-xl font-semibold'>Interest</p>
                           <p className='text-sm text-gray-500'>
@@ -205,13 +277,26 @@ export default function LoanEditDialog(props: IProps) {
                           <NumberInput
                             prefix='%'
                             value={APY}
-                            disabled={Number(data?.last_debt_amount_human) > 0}
+                            disabled={Number(data?.current_total_principal_human) > 0}
                             onChange={(val: number) => setAPY(val)}
                           />
                         </div>
+                        <div className='text-center'>
+                          <Button
+                            width={128}
+                            loading={APYEditLoading}
+                            disabled={
+                              Number(data?.current_total_principal_human) > 0 ||
+                              APY === Number(data?.annual_interest_rate_human)
+                            }
+                            onClick={() => handleAPYEdit()}
+                          >
+                            Confirm
+                          </Button>
+                        </div>
                       </div>
 
-                      <div className='grid grid-cols-3 gap-[20px]'>
+                      <div className='grid grid-cols-4 gap-[20px]'>
                         <div className='flex flex-col'>
                           <p className='text-xl font-semibold'>Deposit Address</p>
                           <p className='text-sm text-gray-500'>
@@ -224,18 +309,23 @@ export default function LoanEditDialog(props: IProps) {
                         </div>
                         <div>
                           <TextArea
-                            className='h-[49px]'
+                            className='!h-[80px]'
                             autoSize={false}
                             value={depositAddress}
                             onChange={handleDepositAddressChange}
                           />
                         </div>
+                        <div className='text-center'>
+                          <Button
+                            width={128}
+                            loading={addressEditLoading}
+                            disabled={depositAddress === data?.receive_address}
+                            onClick={() => handleDepositAddressEdit()}
+                          >
+                            Confirm
+                          </Button>
+                        </div>
                       </div>
-                    </div>
-                    <div className='mt-10 text-center'>
-                      <Button width={256} loading={loading} onClick={() => handleConfirm()}>
-                        Confirm
-                      </Button>
                     </div>
                   </Dialog.Panel>
                 </Transition.Child>

@@ -92,7 +92,8 @@ export function message(params: IParams) {
 
   timer = setTimeout(() => {
     if (tip) {
-      tip = tip.unmount()
+      tip.unmount()
+      tip = null
     }
   }, closeTime)
 

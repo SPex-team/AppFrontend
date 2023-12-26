@@ -50,6 +50,8 @@ export const handleError = (error: any) => {
   }
 }
 
+let timestamp = 0
+
 export default function AddDialog(props: IProps) {
   const { open = false, setOpen, updataList } = props
   const { currentAccount, contract } = useMetaMask()
@@ -74,11 +76,7 @@ export default function AddDialog(props: IProps) {
 
   const confirmSignContent = useMemo(() => {
     if (data?.miner_id && data?.miner_info && currentAccount) {
-      const timestamp = Math.floor(Date.now() / 1000)
-      setData({
-        ...data,
-        timestamp
-      })
+      timestamp = Math.floor(Date.now() / 1000)
       return abiCoder.encode(
         ['string', 'uint64', 'uint64', 'address', 'uint256', 'uint256'],
         [
@@ -176,7 +174,7 @@ export default function AddDialog(props: IProps) {
     return (
       <form className='text-[#57596C]' id='form_sign'>
         <span className='mb-4 mt-[10px] inline-block text-sm font-light'>
-          {'Sign '}
+          {'Key '}
           <span className='inline-block w-full break-words font-medium'>{data?.msg_cid_hex}</span>
           {' with owner address to propose transfer owner to SPex contract'}
         </span>
@@ -215,7 +213,7 @@ export default function AddDialog(props: IProps) {
     return (
       <form className='text-[#57596C]' id='form_confirm'>
         <span className='mb-4 mt-[10px] inline-block w-full text-sm font-light'>
-          {'Sign '}
+          {'Key '}
           <span className='inline-block w-full break-words font-medium'>
             {confirmSignContent?.toString()?.slice(2)}
           </span>
@@ -431,17 +429,14 @@ export default function AddDialog(props: IProps) {
               const targetBuyer = formData.get('targetBuyer')
               sign = '0x' + sign.slice(2)
 
-              console.log('ZeroAddress: ', ZeroAddress)
-              console.log('parseEther(price): ', parseEther(price))
-              console.log('sign: ', sign)
-              console.log('data: ', data)
-              const tx = await contract?.confirmTransferMinerIntoSPexAndList(
-                data.miner_id,
-                sign,
-                data.timestamp,
-                parseEther(price),
-                targetBuyer || ZeroAddress
-              )
+              // console.log('ZeroAddress: ', ZeroAddress)
+              // console.log('parseEther(price): ', parseEther(price))
+              // console.log('sign: ', sign)
+              // console.log('data', data)
+              const params = [data.miner_id, sign, timestamp, parseEther(price), targetBuyer || ZeroAddress]
+              console.log('params ==> ', params)
+
+              const tx = await contract?.confirmTransferMinerIntoSPexAndList(...params)
 
               message({
                 title: 'TIP',
@@ -451,7 +446,6 @@ export default function AddDialog(props: IProps) {
               })
 
               const result = await tx.wait()
-              console.log('result', result)
 
               await postMiner({
                 owner: currentAccount,
@@ -554,6 +548,8 @@ export default function AddDialog(props: IProps) {
 
   const handleSkip = () => {
     if (stepNum === 2) {
+      const form = document.getElementById('form_sign') as HTMLFormElement
+      form.reset()
       return setStepNum(3)
     }
   }

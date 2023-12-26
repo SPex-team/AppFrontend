@@ -86,7 +86,7 @@ const BorrowList = () => {
       render: (val, row) => (
         <div className='justify-space flex flex-wrap gap-x-7'>
           <button
-            className='whitespace-nowrap break-words hover:text-[#0077FE]'
+            className='flex items-center whitespace-nowrap break-words hover:text-[#0077FE]'
             onClick={() => {
               setSelectedMiner(row)
               // profileClasss.getLoanByMinerId(miner.miner_id)
@@ -97,18 +97,18 @@ const BorrowList = () => {
             <DetailIcon className='ml-2 inline-block w-[14px]' />
           </button>
           <button
-            className='whitespace-nowrap break-words hover:text-[#0077FE]'
+            className='flex items-center whitespace-nowrap break-words hover:text-[#0077FE]'
             onClick={() => {
               setSelectedMiner(row)
               setIsRepayDialogOpen(true)
             }}
           >
             Repay
-            <PayCircleOutlined className='mb-[4px] ml-1 align-middle' />
+            <PayCircleOutlined className='ml-1 align-middle' />
           </button>
           {row.disabled ? (
             <button
-              className='whitespace-nowrap break-words hover:text-[#0077FE]'
+              className='flex items-center whitespace-nowrap break-words hover:text-[#0077FE]'
               onClick={() => {
                 setSelectedMiner(row)
                 setIsLoanAddDialogOpen(true)
@@ -119,7 +119,7 @@ const BorrowList = () => {
                 xmlns='http://www.w3.org/2000/svg'
                 viewBox='0 0 20 20'
                 fill='currentColor'
-                className='mb-[4px] ml-1 inline-block w-[16px]'
+                className='ml-1 inline-block w-[16px]'
               >
                 <path
                   fillRule='evenodd'
@@ -130,7 +130,7 @@ const BorrowList = () => {
             </button>
           ) : (
             <button
-              className='whitespace-nowrap break-words hover:text-[#0077FE]'
+              className='flex items-center whitespace-nowrap break-words hover:text-[#0077FE]'
               disabled={loading}
               onClick={async () => {
                 try {
@@ -154,29 +154,31 @@ const BorrowList = () => {
               }}
             >
               Unlist
-              <CloseSquareOutlined className='mb-[4px] ml-1 align-middle' />
+              <CloseSquareOutlined className='ml-1 align-middle' />
             </button>
           )}
-          <button
-            className='whitespace-nowrap break-words hover:text-[#0077FE]'
-            onClick={() => {
-              setSelectedMiner(row)
-              setIsLoanEditDialogOpen(true)
-            }}
-          >
-            Edit
-            <EditOutlined className='mb-[4px] ml-1 align-middle' />
-          </button>
+          {!row.disabled && (
+            <button
+              className='flex items-center whitespace-nowrap break-words hover:text-[#0077FE]'
+              onClick={() => {
+                setSelectedMiner(row)
+                setIsLoanEditDialogOpen(true)
+              }}
+            >
+              Edit
+              <EditOutlined className='ml-1 align-middle' />
+            </button>
+          )}
           {row.disabled && (
             <button
-              className='whitespace-nowrap break-words hover:text-[#0077FE]'
+              className='flex items-center whitespace-nowrap break-words hover:text-[#0077FE]'
               onClick={() => {
                 setSelectedMiner(row)
                 setIsBeneficiaryReleaseDialogOpen(true)
               }}
             >
               Redemption
-              <RollbackOutlined className='mb-[4px] ml-1 align-middle' />
+              <RollbackOutlined className='ml-1 align-middle' />
             </button>
           )}
         </div>
@@ -198,6 +200,14 @@ const BorrowList = () => {
     profileClasss.initBorrow()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [profileClasss])
+
+  useEffect(() => {
+    if (selectedMiner) {
+      const target = borrowList.find((item) => item.miner_id === selectedMiner.miner_id)
+      setSelectedMiner(target)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [borrowList])
 
   return (
     <section className='container mx-auto pb-[60px]'>
