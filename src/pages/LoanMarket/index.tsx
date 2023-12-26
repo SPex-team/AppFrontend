@@ -71,9 +71,9 @@ const LoanMarket = (props) => {
       render: (val) => <span className='whitespace-nowrap'>{`${BigNumber(val).decimalPlaces(2) ?? '0'} %`}</span>
     },
     {
-      title: 'Listed Date',
+      title: 'Min. Lend Amount',
       key: 'min_lend_amount_human',
-      render: (val) => `${numberWithCommas(val) ?? '0'} FIL`
+      render: (val) => `${BigNumber(val).decimalPlaces(2, BigNumber.ROUND_CEIL).toNumber() ?? '0'} FIL`
     },
     {
       title: 'Loan Progress',
@@ -142,7 +142,7 @@ const LoanMarket = (props) => {
         </Popover>
       ),
       key: 'operation',
-      width: '35%',
+      width: '25%',
       render: (val, row) => {
         return (
           <div className='justify-space flex flex-wrap gap-x-7'>

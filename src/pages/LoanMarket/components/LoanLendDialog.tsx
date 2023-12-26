@@ -29,6 +29,11 @@ export default function LoanLendDialog(props: IProps) {
   const [amount, setAmount] = useState<number | null>()
   const [loading, setLoading] = useState<boolean>(false)
   const debouncedAmount = debounce(setAmount, 800)
+  const minLenAmount = useMemo(() => {
+    return BigNumber(minerInfo?.min_lend_amount_human || 0)
+      .decimalPlaces(2, BigNumber.ROUND_CEIL)
+      .toNumber()
+  }, [minerInfo?.min_lend_amount_human])
 
   const minerDetail = useMemo(() => {
     return [
@@ -329,8 +334,12 @@ export default function LoanLendDialog(props: IProps) {
                           <label>Amount you wound like to lend</label>
                           <NumberInput
                             max={maxAmount}
+                            min={minLenAmount}
                             maxButton
                             prefix='FIL'
+                            placeholder={
+                              minerInfo?.min_lend_amount_human ? `Min. lend amount is ${minLenAmount} FIL` : ''
+                            }
                             value={amount}
                             onChange={(val: number) => debouncedAmount(val)}
                             onMaxButtonClick={handleMaxBtnClick}
