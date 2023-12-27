@@ -123,7 +123,7 @@ export default function LoanDetailDialog(props: IProps) {
         value: `${
           Number(data?.max_debt_amount_human) <= 0
             ? 0
-            : BigNumber(data?.current_total_principal_human || 0)
+            : BigNumber(data?.current_principal_human || data?.current_total_principal_human || 0)
                 .dividedBy(BigNumber(data?.max_debt_amount_human || 0))
                 .multipliedBy(100)
                 .decimalPlaces(2)

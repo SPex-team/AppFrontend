@@ -234,6 +234,7 @@ export default function RepayDialog(props: IProps) {
           .toNumber()
 
         await patchLoanMiners(minerPatchParams)
+        updateList()
 
         const res = await getLoanListByMiner({
           page: 1,

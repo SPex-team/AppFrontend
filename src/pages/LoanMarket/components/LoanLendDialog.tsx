@@ -211,6 +211,9 @@ export default function LoanLendDialog(props: IProps) {
             id: target.id,
             current_principal_human: BigNumber(target.current_principal_human || 0)
               .plus(amount)
+              .toNumber(),
+            current_total_amount_human: BigNumber(target.current_total_amount_human || 0)
+              .plus(amount)
               .toNumber()
           })
         }

@@ -23,6 +23,8 @@ interface IProps {
 
 export default function ClaimDialog(props: IProps) {
   const { open = false, data, setOpen, updateList } = props
+  console.log('data ==> ', data)
+
   const { currentAccount, loanContract } = useMetaMask()
 
   const [amount, setAmount] = useState<number | null>()
@@ -112,6 +114,12 @@ export default function ClaimDialog(props: IProps) {
             0
           )
         }
+        params.current_total_amount_human = Math.max(
+          BigNumber(data?.current_total_amount_human || 0)
+            .minus(totalAmountOwned || 0)
+            .toNumber(),
+          0
+        )
 
         await patchLoanById({
           ...params,
@@ -154,10 +162,10 @@ export default function ClaimDialog(props: IProps) {
           .toNumber()
 
         await patchLoanMiners(minerPatchParams)
-        onClose()
         if (updateList) {
           updateList()
         }
+        onClose()
       }
     } catch (error) {
       handleError(error)
