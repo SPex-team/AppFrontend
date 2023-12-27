@@ -434,7 +434,7 @@ export default function AddDialog(props: IProps) {
               // console.log('sign: ', sign)
               // console.log('data', data)
               const params = [data.miner_id, sign, timestamp, parseEther(price), targetBuyer || ZeroAddress]
-              console.log('params ==> ', params)
+              // console.log('params ==> ', params)
 
               const tx = await contract?.confirmTransferMinerIntoSPexAndList(...params)
 

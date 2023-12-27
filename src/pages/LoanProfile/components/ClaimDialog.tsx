@@ -23,8 +23,6 @@ interface IProps {
 
 export default function ClaimDialog(props: IProps) {
   const { open = false, data, setOpen, updateList } = props
-  console.log('data ==> ', data)
-
   const { currentAccount, loanContract } = useMetaMask()
 
   const [amount, setAmount] = useState<number | null>()

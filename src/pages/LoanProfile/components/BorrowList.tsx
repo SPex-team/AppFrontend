@@ -89,7 +89,7 @@ const BorrowList = () => {
             className='flex items-center whitespace-nowrap break-words hover:text-[#0077FE]'
             onClick={() => {
               setSelectedMiner(row)
-              // profileClasss.getLoanByMinerId(miner.miner_id)
+              updateBorrowList()
               setIsDetailDialogOpen(true)
             }}
           >
