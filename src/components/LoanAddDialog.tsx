@@ -63,7 +63,8 @@ export default function LoanAddDialog(props: IProps) {
       .times(maxDebtRate)
       .decimalPlaces(0, BigNumber.ROUND_DOWN)
       .toNumber()
-  }, [minerBalance, maxDebtRate])
+  }, [minerBalance?.available_balance_human, maxDebtRate])
+  console.log('maxBorrowAmount ==> ', maxBorrowAmount)
 
   const onClose = () => {
     setStepNum(1)
@@ -101,7 +102,7 @@ export default function LoanAddDialog(props: IProps) {
       getMaxDebtRate()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [open])
 
   type StepType = {
     key: number | string
