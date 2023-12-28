@@ -252,18 +252,20 @@ export default function LoanAddDialog(props: IProps) {
             {borrowInfo?.borrowFunction === 2 ? (
               <NumberInput
                 value={borrowInfo.borrowColleteral}
-                maxButton
+                // maxButton
                 min={166}
-                onMaxButtonClick={handleMaxBtnClick}
+                // onMaxButtonClick={handleMaxBtnClick}
                 onChange={(val: number) => {
                   setBorrowInfo({
                     ...borrowInfo,
                     borrowColleteral: val,
-                    borrowAmount: BigNumber(minerBalance?.total_balance_human || 0)
-                      .dividedBy(val)
-                      .times(100)
-                      .decimalPlaces(0, BigNumber.ROUND_DOWN)
-                      .toNumber()
+                    borrowAmount: val
+                      ? BigNumber(minerBalance?.total_balance_human || 0)
+                          .dividedBy(val)
+                          .times(100)
+                          .decimalPlaces(0, BigNumber.ROUND_DOWN)
+                          .toNumber()
+                      : ''
                   })
                 }}
                 prefix='%'
