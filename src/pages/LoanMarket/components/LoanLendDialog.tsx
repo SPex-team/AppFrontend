@@ -13,6 +13,7 @@ import { handleError } from '@/components/ErrorHandler'
 import BigNumber from 'bignumber.js'
 import debounce from 'lodash/debounce'
 import { patchLoanMiners, postLoanList, patchLoanById, getLoanList } from '@/api/modules/loan'
+import { formatEther, formatUnits } from 'ethers'
 
 interface IProps {
   open: boolean
@@ -28,7 +29,11 @@ export default function LoanLendDialog(props: IProps) {
 
   const [amount, setAmount] = useState<number | null>()
   const [loading, setLoading] = useState<boolean>(false)
+  const [maxDebtRate, setMaxDebtRate] = useState(0)
+  const [maxAmount, setMaxAmount] = useState(0)
+
   const debouncedAmount = debounce(setAmount, 800)
+
   const minLenAmount = useMemo(() => {
     return BigNumber(minerInfo?.min_lend_amount_human || 0)
       .decimalPlaces(2, BigNumber.ROUND_CEIL)
@@ -108,12 +113,61 @@ export default function LoanLendDialog(props: IProps) {
     ]
   }, [minerInfo])
 
-  const maxAmount = useMemo(() => {
-    return BigNumber(minerInfo?.max_debt_amount_human || 0)
-      .minus(BigNumber(minerInfo?.current_total_principal_human || 0))
-      .decimalPlaces(6, 1)
-      .toNumber()
-  }, [minerInfo])
+  const getMaxAmount = async (writeAmount?: boolean) => {
+    if (minerInfo?.miner_id && maxDebtRate) {
+      const maxAllowedAmount = BigNumber(minerInfo?.total_balance_human || 0)
+        .times(maxDebtRate)
+        .decimalPlaces(18, BigNumber.ROUND_DOWN)
+        .toNumber()
+
+      const res = await loanContract?.getCurrentMinerOwedAmount(Number(minerInfo?.miner_id))
+      const minerOwnedTotalAmount = formatEther(res?.[0] || 0)
+
+      const APY = minerInfo?.annual_interest_rate_human
+      const expectedInterestInHalfHour = BigNumber(minerOwnedTotalAmount)
+        .times(APY)
+        .dividedBy(17520)
+        .decimalPlaces(18, BigNumber.ROUND_CEIL)
+        .toNumber()
+
+      const expectedMinerOwnedTotalAmount = BigNumber(minerOwnedTotalAmount).plus(expectedInterestInHalfHour)
+
+      let maxLendAmount: number = 0
+
+      if (BigNumber(minerOwnedTotalAmount).lt(maxAllowedAmount)) {
+        maxLendAmount = Math.max(
+          BigNumber(minerInfo?.max_debt_amount_human)
+            .minus(expectedMinerOwnedTotalAmount)
+            .decimalPlaces(2, BigNumber.ROUND_DOWN)
+            .toNumber(),
+          0
+        )
+      }
+
+      setMaxAmount(maxLendAmount)
+      if (writeAmount) {
+        setAmount(maxLendAmount)
+      }
+    }
+  }
+
+  const getMaxDebtRate = async () => {
+    const res = await loanContract?._maxDebtRate()
+    const rate = formatUnits(res, 6) // 0.6
+    setMaxDebtRate(Number(rate))
+  }
+
+  useEffect(() => {
+    if (open) {
+      getMaxDebtRate()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open])
+
+  useEffect(() => {
+    getMaxAmount()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [minerInfo?.miner_id, open])
 
   const lendInfoByAmount = useMemo(() => {
     return {
@@ -130,7 +184,7 @@ export default function LoanLendDialog(props: IProps) {
   }
 
   const handleMaxBtnClick = () => {
-    setAmount(maxAmount)
+    getMaxAmount(true)
   }
 
   const handleConfirm = async () => {

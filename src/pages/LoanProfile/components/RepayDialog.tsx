@@ -130,6 +130,7 @@ export default function RepayDialog(props: IProps) {
       const isMax = BigNumber(repayAmount || 0).gte(maxRepayAmount)
 
       const checkRes = await loanContract.getCurrentLenderOwedAmount(selectedLender?.user_address, miner?.miner_id)
+
       const totalAmountOwned = isMax ? getValueDivide(checkRes[0]) : repayAmount
       const totalRepayAmount = isMax
         ? BigNumber(totalAmountOwned || 0)

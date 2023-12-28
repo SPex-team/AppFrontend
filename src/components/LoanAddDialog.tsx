@@ -16,6 +16,7 @@ import { useSelector } from 'react-redux'
 import BigNumber from 'bignumber.js'
 import { RootState } from '@/store'
 import { LeftOutlined } from '@ant-design/icons'
+import { formatEther, formatUnits } from 'ethers'
 
 interface IProps {
   open?: boolean
@@ -55,13 +56,14 @@ export default function LoanAddDialog(props: IProps) {
   const [stepNum, setStepNum] = useState(1)
   const [loading, setLoading] = useState(false)
   const [borrowInfo, setBorrowInfo] = useState<BorrowInfoType>(defaultBorrowInfo)
+  const [maxDebtRate, setMaxDebtRate] = useState(0)
 
   const maxBorrowAmount = useMemo(() => {
     return BigNumber(minerBalance?.available_balance_human || 0)
-      .times(0.6)
+      .times(maxDebtRate)
       .decimalPlaces(0, BigNumber.ROUND_DOWN)
       .toNumber()
-  }, [minerBalance])
+  }, [minerBalance, maxDebtRate])
 
   const onClose = () => {
     setStepNum(1)
@@ -87,6 +89,19 @@ export default function LoanAddDialog(props: IProps) {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [miner?.miner_id])
+
+  const getMaxDebtRate = async () => {
+    const res = await loanContract?._maxDebtRate()
+    const rate = formatUnits(res, 6) // 0.6
+    setMaxDebtRate(Number(rate))
+  }
+
+  useEffect(() => {
+    if (open) {
+      getMaxDebtRate()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   type StepType = {
     key: number | string
@@ -212,11 +227,13 @@ export default function LoanAddDialog(props: IProps) {
                   setBorrowInfo({
                     ...borrowInfo,
                     borrowAmount: val,
-                    borrowColleteral: BigNumber(minerBalance?.total_balance_human || 0)
-                      .dividedBy(val)
-                      .times(100)
-                      .decimalPlaces(0, BigNumber.ROUND_DOWN)
-                      .toNumber()
+                    borrowColleteral: val
+                      ? BigNumber(minerBalance?.total_balance_human || 0)
+                          .dividedBy(val)
+                          .times(100)
+                          .decimalPlaces(0, BigNumber.ROUND_DOWN)
+                          .toNumber()
+                      : ''
                   })
                 }
                 prefix='FIL'
@@ -224,7 +241,12 @@ export default function LoanAddDialog(props: IProps) {
             ) : (
               <p className='h-[49px] leading-[49px]'>{borrowInfo.borrowAmount}</p>
             )}
-            <p className='pt-[5px] text-sm text-gray-500'>The colleteral rate cannot be less than 166%</p>
+            <div className='pt-[5px] text-sm text-gray-500'>{`The minimum lend amount for each lender: ${BigNumber(
+              borrowInfo.borrowAmount || 0
+            )
+              .dividedBy(20)
+              .toNumber()} FIL`}</div>
+            <p className='text-xs text-gray-500'>* The maximum number of lenders is 20</p>
           </div>
           <div className='w-1/2'>
             {borrowInfo?.borrowFunction === 2 ? (
@@ -249,7 +271,10 @@ export default function LoanAddDialog(props: IProps) {
             ) : (
               <p className='h-[49px] leading-[49px]'>{borrowInfo.borrowColleteral}</p>
             )}
-            <p className='pt-[5px] text-sm text-gray-500'>Colleteral % = Miner Total Current Value / Borrow amount</p>
+            <div className='pt-[5px]'>
+              <p className='text-xs text-gray-500'>* Colleteral % = Miner Total Current Value / Borrow amount</p>
+              <p className='text-xs text-gray-500'>* The colleteral rate cannot be less than 166%</p>
+            </div>
           </div>
         </div>
       </>
@@ -397,6 +422,20 @@ export default function LoanAddDialog(props: IProps) {
             <span className='font-semibold text-[#0077FE]'>{item.value}</span>
           </div>
         ))}
+        <div className='mt-[40px] text-sm font-semibold opacity-40'>
+          <div className='flex w-[400px] justify-between'>
+            <span>* The maximum number of lenders</span>
+            <span>20</span>
+          </div>
+          <div className='flex w-[400px] justify-between'>
+            <span>* The minimum lend amount for each lender</span>
+            <span>
+              {`${BigNumber(borrowInfo.borrowAmount || 0)
+                .dividedBy(20)
+                .toNumber()} FIL`}
+            </span>
+          </div>
+        </div>
       </div>
     )
   }
@@ -488,11 +527,10 @@ export default function LoanAddDialog(props: IProps) {
                 false,
                 20, // maxLenderCount
                 getValueMultiplied(
-                  BigNumber(minerBalance?.total_balance_human || 0)
-                    .dividedBy(2)
+                  BigNumber(borrowInfo.borrowAmount || 0)
                     .dividedBy(20)
                     .toNumber()
-                ) // minLendAmount (miner total balance / 2 /20)
+                ) // minLendAmount
               ]
 
               const tx = await loanContract?.changeMinerBorrowParameters(...params)
