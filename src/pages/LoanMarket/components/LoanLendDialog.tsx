@@ -142,6 +142,14 @@ export default function LoanLendDialog(props: IProps) {
             .toNumber(),
           0
         )
+
+        maxLendAmount = Math.min(
+          maxLendAmount,
+          BigNumber(minerInfo?.max_debt_amount_human)
+            .minus(minerInfo?.current_total_principal_human)
+            .decimalPlaces(2, BigNumber.ROUND_DOWN)
+            .toNumber()
+        )
       }
 
       setMaxAmount(maxLendAmount)
