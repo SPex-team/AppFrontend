@@ -75,6 +75,7 @@ export default function LoanEditDialog(props: IProps) {
         await patchLoanMiners({
           miner_id: data?.miner_id,
           max_debt_amount_human: borrowAmount
+          // min_lend_amount_human: BigNumber(borrowAmount).dividedBy(20).decimalPlaces(2, BigNumber.ROUND_DOWN).toNumber()
         })
         updateList()
       }

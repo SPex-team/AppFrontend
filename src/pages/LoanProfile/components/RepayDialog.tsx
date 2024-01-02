@@ -346,17 +346,27 @@ export default function RepayDialog(props: IProps) {
                     {payoff ? (
                       <div className='pt-[50px]'>
                         <p className='mb-[20px] text-center'>🎉 Congrats! You've succeed repaid your loan!</p>
-                        <p className='text-center font-semibold'>
-                          Do you want to continue borrowing, or you want to unlist the loan from the market?
-                        </p>
-                        <div className='mt-[40px] flex justify-center gap-[40px]'>
-                          <Button width={200} loading={loading} onClick={handleUnlist}>
-                            Unlist the Loan
-                          </Button>
-                          <Button width={200} onClick={onClose}>
-                            Continue Borrowing
-                          </Button>
-                        </div>
+                        {!miner?.disabled ? (
+                          <>
+                            <p className='text-center font-semibold'>
+                              Do you want to continue borrowing, or you want to unlist the loan from the market?
+                            </p>
+                            <div className='mt-[40px] flex justify-center gap-[40px]'>
+                              <Button width={200} loading={loading} onClick={handleUnlist}>
+                                Unlist the Loan
+                              </Button>
+                              <Button width={200} onClick={onClose}>
+                                Continue Borrowing
+                              </Button>
+                            </div>
+                          </>
+                        ) : (
+                          <div className='mt-[80px] flex justify-center gap-[40px]'>
+                            <Button width={200} onClick={onClose}>
+                              OK
+                            </Button>
+                          </div>
+                        )}
                       </div>
                     ) : (
                       <div>

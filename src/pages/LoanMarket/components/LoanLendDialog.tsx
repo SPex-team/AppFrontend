@@ -1,5 +1,5 @@
 import { Dialog, Transition } from '@headlessui/react'
-import { Fragment, useEffect, useMemo, useState } from 'react'
+import { Fragment, useEffect, useMemo, useState, useCallback } from 'react'
 import Tip, { message } from '../../../components/Tip'
 import { useMetaMask } from '@/hooks/useMetaMask'
 import DetailColDesc from '@/components/DetailColDesc'
@@ -39,6 +39,13 @@ export default function LoanLendDialog(props: IProps) {
       .decimalPlaces(2, BigNumber.ROUND_CEIL)
       .toNumber()
   }, [minerInfo?.min_lend_amount_human])
+
+  const maxAllowedAmount = useMemo(() => {
+    return BigNumber(minerInfo?.total_balance_human || 0)
+      .times(maxDebtRate)
+      .decimalPlaces(18, BigNumber.ROUND_DOWN)
+      .toNumber()
+  }, [maxDebtRate, minerInfo])
 
   const minerDetail = useMemo(() => {
     return [
@@ -105,23 +112,24 @@ export default function LoanLendDialog(props: IProps) {
       {
         title: 'Lending Quota left',
         value: `${numberWithCommas(
-          BigNumber(minerInfo?.max_debt_amount_human || 0).minus(
-            BigNumber(minerInfo?.current_total_principal_human || 0)
-          )
+          // BigNumber(minerInfo?.max_debt_amount_human || 0).minus(
+          //   BigNumber(minerInfo?.current_total_principal_human || 0)
+          // )
+          maxAmount
         )} FIL`
       }
     ]
-  }, [minerInfo])
+  }, [minerInfo, maxAmount])
 
   const getMaxAmount = async (writeAmount?: boolean) => {
     if (minerInfo?.miner_id && maxDebtRate) {
-      const maxAllowedAmount = BigNumber(minerInfo?.total_balance_human || 0)
-        .times(maxDebtRate)
-        .decimalPlaces(18, BigNumber.ROUND_DOWN)
-        .toNumber()
+      console.log('minerInfo ===>', minerInfo, 'maxDebtRate ==> ', maxDebtRate)
+
+      console.log('maxAllowedAmount ==> ', maxAllowedAmount)
 
       const res = await loanContract?.getCurrentMinerOwedAmount(Number(minerInfo?.miner_id))
       const minerOwnedTotalAmount = formatEther(res?.[0] || 0)
+      console.log('minerOwnedTotalAmount ==>', minerOwnedTotalAmount)
 
       const APY = minerInfo?.annual_interest_rate_human
       const expectedInterestInHalfHour = BigNumber(minerOwnedTotalAmount)
@@ -129,27 +137,27 @@ export default function LoanLendDialog(props: IProps) {
         .dividedBy(17520)
         .decimalPlaces(18, BigNumber.ROUND_CEIL)
         .toNumber()
-
       const expectedMinerOwnedTotalAmount = BigNumber(minerOwnedTotalAmount).plus(expectedInterestInHalfHour)
 
       let maxLendAmount: number = 0
 
-      if (BigNumber(minerOwnedTotalAmount).lt(maxAllowedAmount)) {
-        maxLendAmount = Math.max(
-          BigNumber(minerInfo?.max_debt_amount_human)
-            .minus(expectedMinerOwnedTotalAmount)
-            .decimalPlaces(2, BigNumber.ROUND_DOWN)
-            .toNumber(),
-          0
-        )
+      console.log('expectedMinerOwnedTotalAmount ==> ', expectedMinerOwnedTotalAmount.toNumber())
 
-        maxLendAmount = Math.min(
-          maxLendAmount,
-          BigNumber(minerInfo?.max_debt_amount_human)
-            .minus(minerInfo?.current_total_principal_human)
-            .decimalPlaces(2, BigNumber.ROUND_DOWN)
-            .toNumber()
-        )
+      if (BigNumber(expectedMinerOwnedTotalAmount).lt(maxAllowedAmount)) {
+        if (BigNumber(minerInfo?.max_debt_amount_human).lte(maxAllowedAmount)) {
+          maxLendAmount = Math.max(
+            BigNumber(minerInfo?.max_debt_amount_human)
+              .minus(minerInfo?.current_total_principal_human)
+              .decimalPlaces(2, BigNumber.ROUND_DOWN)
+              .toNumber(),
+            0
+          )
+        } else {
+          maxLendAmount = Math.max(
+            BigNumber(maxAllowedAmount).minus(minerOwnedTotalAmount).decimalPlaces(2, BigNumber.ROUND_DOWN).toNumber(),
+            0
+          )
+        }
       }
 
       setMaxAmount(maxLendAmount)
@@ -175,7 +183,7 @@ export default function LoanLendDialog(props: IProps) {
   useEffect(() => {
     getMaxAmount()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [minerInfo?.miner_id, open])
+  }, [minerInfo, open])
 
   const lendInfoByAmount = useMemo(() => {
     return {
@@ -398,7 +406,7 @@ export default function LoanLendDialog(props: IProps) {
                         <div className='mt-[30px] rounded-[10px] border border-[#ACCEF1] p-[20px]'>
                           <label>Amount you wound like to lend</label>
                           <NumberInput
-                            max={maxAmount}
+                            // max={maxAmount}
                             min={minLenAmount}
                             maxButton
                             prefix='FIL'

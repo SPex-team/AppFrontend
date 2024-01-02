@@ -64,7 +64,6 @@ export default function LoanAddDialog(props: IProps) {
       .decimalPlaces(0, BigNumber.ROUND_DOWN)
       .toNumber()
   }, [minerBalance?.available_balance_human, maxDebtRate])
-  console.log('maxBorrowAmount ==> ', maxBorrowAmount)
 
   const onClose = () => {
     setStepNum(1)
