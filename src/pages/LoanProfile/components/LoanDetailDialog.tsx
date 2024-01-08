@@ -47,13 +47,13 @@ export default function LoanDetailDialog(props: IProps) {
       title: 'Total Amount',
       dataIndex: 'current_total_amount_human',
       align: 'center',
-      render: (text) => `${BigNumber(text).decimalPlaces(6, BigNumber.ROUND_DOWN).toNumber()} FIL`
+      render: (text) => `${numberWithCommas(BigNumber(text).decimalPlaces(2, BigNumber.ROUND_DOWN))} FIL`
     },
     {
       title: 'Principle',
       dataIndex: 'current_principal_human',
       align: 'center',
-      render: (text) => `${BigNumber(text).decimalPlaces(6, BigNumber.ROUND_DOWN).toNumber()} FIL`
+      render: (text) => `${numberWithCommas(BigNumber(text).decimalPlaces(2, BigNumber.ROUND_DOWN))} FIL`
     }
   ]
 
@@ -73,16 +73,18 @@ export default function LoanDetailDialog(props: IProps) {
   const borrowDetail = useMemo(() => {
     return [
       {
-        title: 'Amount request to borrow',
+        title: 'Requested Loan Amount',
         value: `${numberWithCommas(data?.max_debt_amount_human)} FIL`
       },
       {
-        title: 'Collateral Rate',
+        title: 'Collateral Ratio',
         value: `${BigNumber(data?.collateral_rate || 0).decimalPlaces(2)}%`
       },
       {
-        title: 'Commit APY',
-        value: `${BigNumber(data?.annual_interest_rate_human || 0).decimalPlaces(2)}%`
+        title: 'Est. APY',
+        value: `${numberWithCommas(
+          BigNumber(data?.annual_interest_rate_human || 0).decimalPlaces(2, BigNumber.ROUND_DOWN)
+        )}%`
       },
       {
         title: 'Approximate Interest',
@@ -94,19 +96,19 @@ export default function LoanDetailDialog(props: IProps) {
   const minerDetail = useMemo(() => {
     return [
       {
-        title: 'Miner ID',
+        title: 'SP ID',
         value: `${config.address_zero_prefix}0${data?.miner_id}`
       },
       {
-        title: 'Miner Available Balance',
+        title: 'Available Balance',
         value: `${numberWithCommas((data?.available_balance_human || 0).toFixed(6))} FIL`
       },
       {
-        title: 'Miner Locked Reward',
+        title: 'Locked Reward',
         value: `${numberWithCommas(data?.locked_rewards_human)} FIL`
       },
       {
-        title: 'Miner Pledge Amount',
+        title: 'Pledge Amount',
         value: `${numberWithCommas(data?.initial_pledge_human)} FIL`
       }
     ]
@@ -120,14 +122,14 @@ export default function LoanDetailDialog(props: IProps) {
       },
       {
         title: 'Order completed',
-        value: `${
+        value: `${numberWithCommas(
           Number(data?.max_debt_amount_human) <= 0
             ? 0
             : BigNumber(data?.current_principal_human || data?.current_total_principal_human || 0)
                 .dividedBy(BigNumber(data?.max_debt_amount_human || 0))
                 .multipliedBy(100)
-                .decimalPlaces(2)
-        } %`
+                .decimalPlaces(2, BigNumber.ROUND_DOWN)
+        )} %`
       },
       {
         title: 'Lending Quota left',
@@ -147,13 +149,15 @@ export default function LoanDetailDialog(props: IProps) {
           },
           {
             title: '% of Total Loan',
-            value: `${BigNumber(data?.current_principal_human || 0)
-              .dividedBy(BigNumber(data?.max_debt_amount_human || 0))
-              .multipliedBy(100)
-              .decimalPlaces(2)}%`
+            value: `${numberWithCommas(
+              BigNumber(data?.current_principal_human || 0)
+                .dividedBy(BigNumber(data?.max_debt_amount_human || 0))
+                .multipliedBy(100)
+                .decimalPlaces(2, BigNumber.ROUND_DOWN)
+            )}%`
           },
           {
-            title: 'Approximate interest you would earn / year',
+            title: 'Est. interest earned per year',
             value: `${getContinuousProfile(
               data?.current_principal_human || 0,
               data?.annual_interest_rate_human || 0
@@ -199,7 +203,7 @@ export default function LoanDetailDialog(props: IProps) {
                   <Dialog.Panel className='flex min-h-[400px] w-full max-w-[900px] transform flex-col justify-between overflow-hidden rounded-2xl bg-white p-[30px] text-left shadow-xl transition-all'>
                     <div className='mb-4'>
                       <Dialog.Title as='h3' className='flex items-center justify-between text-2xl font-medium'>
-                        Loan Order Detail
+                        Loan Details
                         <svg
                           xmlns='http://www.w3.org/2000/svg'
                           fill='none'
@@ -216,7 +220,6 @@ export default function LoanDetailDialog(props: IProps) {
                     <div className='flex flex-row space-x-[30px]'>
                       <div className='w-1/2'>
                         <div className='rounded-[10px] border border-gray-300 p-[20px]'>
-                          <p className='font-semibold'>Miner Detail</p>
                           {minerDetail.map((item) => (
                             <div className='my-[10px] flex justify-between' key={item.title}>
                               <span>{item.title}</span>
@@ -225,7 +228,7 @@ export default function LoanDetailDialog(props: IProps) {
                           ))}
                           <Divider className='my-[12px] border-gray-300' />
                           <div className='my-[10px] flex justify-between'>
-                            <span>Miner Total Value</span>
+                            <span>Total Value</span>
                             <span className='font-medium'>{`${numberWithCommas(data?.total_balance_human)} FIL`}</span>
                           </div>
                           <div>

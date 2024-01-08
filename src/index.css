@@ -41,7 +41,7 @@
     @apply rounded-[10px] border border-[#8BB6FF] bg-[#E9F1FF] px-[24px] py-[12px] font-semibold;
   }
   .common-container {
-    @apply container mx-auto px-[12px] pb-[60px] pt-[100px] md:px-[0] md:pt-[190px];
+    @apply container mx-auto px-[24px] pb-[60px] pt-[100px] md:pt-[190px];
   }
 }
 

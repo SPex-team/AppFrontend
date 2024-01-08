@@ -1,9 +1,12 @@
 import { Space } from 'antd'
 import { useState } from 'react'
 
+import InfoTips from '../InfoTips'
+
 interface Props {
   title: string
   desc: string
+  tip?: string | React.ReactNode
   className?: string
   type?: 'green' | 'blue' | 'white'
 }
@@ -21,7 +24,7 @@ const titleColor = {
 }
 
 function DetailColDesc(props: Props) {
-  const { title, desc, className, type = 'white' } = props
+  const { title, desc, tip, className, type = 'white' } = props
 
   return (
     <div
@@ -36,14 +39,15 @@ function DetailColDesc(props: Props) {
             }
       }
     >
-      <p
+      <Space
         className='font-medium'
         style={{
           color: titleColor[type]
         }}
       >
         {title}
-      </p>
+        {tip && <InfoTips content={tip} />}
+      </Space>
       <p className='font-medium text-[#1C1C1C]'>{desc}</p>
     </div>
   )

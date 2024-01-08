@@ -18,7 +18,7 @@ export default function Header() {
           href: 'https://www.spex.website/'
         },
         {
-          name: 'Loan Market',
+          name: 'DePIN Market',
           href: '/loanMarket'
         },
         // {
@@ -55,9 +55,9 @@ export default function Header() {
 
   return (
     <header className='fixed top-0 z-20 w-screen bg-transparent backdrop-blur-lg [font-family:GeneralSansVariable]'>
-      <div className='container mx-auto flex items-center justify-between px-2 py-6'>
+      <div className='container mx-auto flex items-center justify-between px-[24px] py-6'>
         <div className='flex'>
-          <a href='/'>
+          <a href={isLoan ? '/loanMarket' : '/'}>
             <img width={104} height={38} src='/logo.svg' alt='SPex' />
           </a>
           <div className='hidden items-center text-base md:flex'>

@@ -52,7 +52,7 @@ const LoanProfile = (props) => {
                 Check the details of your borrowing / lending
               </p>
             </div>
-            <div className='mx-5 hidden pt-5 xl:block'>{renderInterestTotal()}</div>
+            {/* <div className='mx-5 hidden pt-5 xl:block'>{renderInterestTotal()}</div> */}
           </div>
           <Tabs
             type='card'

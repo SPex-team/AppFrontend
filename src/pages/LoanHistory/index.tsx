@@ -15,7 +15,7 @@ const isDevEnv = process.env.NODE_ENV === 'development' || window.location.origi
 
 const columns = [
   {
-    title: 'Miner ID',
+    title: 'SP ID',
     key: 'miner_id',
     minWidth: 160,
     render: (val) => <MinerIDRow value={val} />

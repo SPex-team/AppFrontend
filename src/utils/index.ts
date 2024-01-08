@@ -57,12 +57,10 @@ export function isIndent(str: string, unit: number = 6) {
 }
 
 export function numberWithCommas(x, decimal?: number) {
-  if (!x || x <= 0) return '0'
-  return new Intl.NumberFormat('en-US', { maximumSignificantDigits: 18 }).format(
-    BigNumber(x || 0)
-      .decimalPlaces(decimal || 6, 1)
-      .toNumber()
-  )
+  if (!x || Number(x) <= 0) {
+    x = 0
+  }
+  return BigNumber(x || 0).toFormat(decimal || 2, BigNumber.ROUND_DOWN)
 }
 
 export function getValueMultiplied(num: number | string, pow: number = 18) {
@@ -79,7 +77,7 @@ export function getContinuousProfile(p: number | string, apy: number | string) {
   return BigNumber(p || 0)
     .times(Math.pow(Math.E, Number(apy) / 100))
     .minus(p || 0)
-    .decimalPlaces(6, 1)
+    .decimalPlaces(2, BigNumber.ROUND_DOWN)
     .toNumber()
 }
 

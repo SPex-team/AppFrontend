@@ -40,24 +40,29 @@ const BorrowList = () => {
 
   const columns: ColumnsType<LoanMarketListItem> = [
     {
-      title: 'Miner ID',
+      title: 'SP ID',
       key: 'miner_id',
       render: (val) => <MinerIDRow value={val} />
     },
     {
-      title: 'Total Miner Value',
+      title: 'Total Value',
       key: 'total_balance_human',
       render: (val) => (!isEmpty(val) ? `${numberWithCommas(val)} FIL` : '-')
     },
     {
-      title: 'Collateral Rate',
+      title: 'Collateral Ratio',
       key: 'collateral_rate',
-      render: (val) => (!isEmpty(val) ? `${BigNumber(val).decimalPlaces(2)} %` : '-')
+      render: (val) =>
+        !isEmpty(val) ? `${numberWithCommas(BigNumber(val).decimalPlaces(2, BigNumber.ROUND_DOWN))} %` : '-'
     },
     {
       title: 'APY',
       key: 'annual_interest_rate_human',
-      render: (val) => (!isEmpty(val) ? `${BigNumber(val).decimalPlaces(2)} %` : '-')
+      render: (val) => (
+        <span className='whitespace-nowrap'>
+          {!isEmpty(val) ? `${numberWithCommas(BigNumber(val).decimalPlaces(2, BigNumber.ROUND_DOWN))} %` : '-'}
+        </span>
+      )
     },
     {
       title: 'Listed Day',
@@ -172,6 +177,7 @@ const BorrowList = () => {
           {row.disabled && (
             <button
               className='flex items-center whitespace-nowrap break-words hover:text-[#0077FE]'
+              disabled={Number(row?.current_total_debt_human) > 0}
               onClick={() => {
                 setSelectedMiner(row)
                 setIsBeneficiaryReleaseDialogOpen(true)

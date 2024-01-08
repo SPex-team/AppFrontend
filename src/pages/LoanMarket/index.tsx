@@ -11,18 +11,17 @@ import BeneficiaryBindDialog from './components/BeneficiaryBindDialog'
 import LoanLendDialog from './components/LoanLendDialog'
 import { config } from '@/config'
 import { message } from '@/components/Tip'
-import { NavLink } from 'react-router-dom'
 import { isEmpty, numberWithCommas } from '@/utils'
 import BasicTable from '@/components/BasicTable'
 import MinerIDRow from '@/pages/components/MinerIDRow'
 import { useMetaMask } from '@/hooks/useMetaMask'
-import { Popover, Transition } from '@headlessui/react'
 import { ShoppingCartOutlined } from '@ant-design/icons'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import { LoanMarketListItem } from '@/types'
 import BigNumber from 'bignumber.js'
-import useLoading from '@/hooks/useLoading'
+import { Space } from 'antd'
+import InfoTips from '../../components/InfoTips'
 
 const LoanMarket = (props) => {
   const { currentAccount } = useMetaMask()
@@ -33,9 +32,6 @@ const LoanMarket = (props) => {
   const [isLendDialogOpen, setIsLendDialogOpen] = useState<boolean>(false)
   const [selectedMiner, setSelectedMiner] = useState<LoanMarketListItem>()
   const [createdMinerId, setCreatedMinerId] = useState<number | null>()
-  const { loading, setLoading } = useLoading()
-
-  const [buttonRef, setButtonRef] = useState<HTMLButtonElement | null>(null)
 
   const data = useSelector((state: RootState) => ({
     marketCount: state.loan.marketCount,
@@ -52,98 +48,47 @@ const LoanMarket = (props) => {
 
   const columns = [
     {
-      title: 'Miner ID',
+      title: 'SP ID',
       key: 'miner_id',
       render: (val, row) => <MinerIDRow showType={false} value={val} />
     },
     {
-      title: 'Total Miner Value',
+      title: (
+        <Space>
+          Total Value <InfoTips content='Total Value = Pledge + Locked Reward + Available Balance' />
+        </Space>
+      ),
       key: 'total_balance_human',
       render: (val) => `${numberWithCommas(val) ?? '0'} FIL`
     },
     {
-      title: 'Borrow Amount',
+      title: 'APY',
+      key: 'annual_interest_rate_human',
+      render: (val) => <span className='whitespace-nowrap'>{`${numberWithCommas(val) ?? '0'} %`}</span>
+    },
+    {
+      title: 'Requested Loan Amount',
       key: 'max_debt_amount_human',
       render: (val) => (!isEmpty(val) ? `${numberWithCommas(val)} FIL` : '-')
     },
     {
-      title: 'APY',
-      key: 'annual_interest_rate_human',
-      render: (val) => <span className='whitespace-nowrap'>{`${BigNumber(val).decimalPlaces(2) ?? '0'} %`}</span>
-    },
-    {
-      title: 'Min. Lend Amount',
-      key: 'min_lend_amount_human',
-      render: (val) => `${BigNumber(val).decimalPlaces(2, BigNumber.ROUND_CEIL).toNumber() ?? '0'} FIL`
-    },
-    {
-      title: 'Loan Progress',
+      title: '% of Loan Filled',
       key: 'progress',
       render: (val, row) => (
         <Progress
-          format={(percent) => `${percent}%`}
+          format={(percent) => `${numberWithCommas(percent)}%`}
           percent={BigNumber(row?.current_total_principal_human || 0)
             .dividedBy(BigNumber(row?.max_debt_amount_human || 0))
             .multipliedBy(100)
+            .decimalPlaces(2, BigNumber.ROUND_DOWN)
             .toNumber()}
         />
       )
     },
     {
-      title: (
-        <Popover className='relative'>
-          {({ open }) => (
-            <>
-              <Popover.Button
-                className='focus:outline-none'
-                ref={setButtonRef}
-                onMouseEnter={() => buttonRef && buttonRef.click()}
-              >
-                <svg
-                  xmlns='http://www.w3.org/2000/svg'
-                  fill='none'
-                  viewBox='0 0 24 24'
-                  strokeWidth='1.5'
-                  stroke='currentColor'
-                  className='h-5 w-5'
-                >
-                  <path
-                    strokeLinecap='round'
-                    strokeLinejoin='round'
-                    d='M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z'
-                  />
-                </svg>
-              </Popover.Button>
-              <Transition
-                as={Fragment}
-                enter='transition ease-out duration-200'
-                enterFrom='opacity-0 translate-y-1'
-                enterTo='opacity-100 translate-y-0'
-                leave='transition ease-in duration-150'
-                leaveFrom='opacity-100 translate-y-0'
-                leaveTo='opacity-0 translate-y-1'
-              >
-                <Popover.Panel static className='absolute z-10 max-w-sm bg-white'>
-                  {({ close }) => (
-                    <div className='overflow-hidden rounded-lg px-4 py-2 shadow-lg' onMouseLeave={() => close()}>
-                      <div className='mb-4'>
-                        <p className='text-sm font-medium text-gray-900'>Detail</p>
-                        <p className='text-sm font-normal text-gray-500'>View full info on a miner account</p>
-                      </div>
-                      <div>
-                        <p className='text-sm font-medium text-gray-900'>Comments</p>
-                        <p className='text-sm font-normal text-gray-500'>Discuss or negotiate with the seller</p>
-                      </div>
-                    </div>
-                  )}
-                </Popover.Panel>
-              </Transition>
-            </>
-          )}
-        </Popover>
-      ),
+      title: '',
+      width: '25%',
       key: 'operation',
-      width: '30%',
       render: (val, row) => {
         return (
           <div className='justify-space flex flex-wrap gap-x-7'>
@@ -154,7 +99,7 @@ const LoanMarket = (props) => {
                 window.open(url)
               }}
             >
-              Miner Detail
+              SP Detail
               <ExportIcon className='ml-1 inline-block w-[18px]' />
             </button>
             <button
@@ -165,12 +110,12 @@ const LoanMarket = (props) => {
               Lend
               <ShoppingCartOutlined className='ml-1 align-middle' />
             </button>
-            <NavLink to={'/loanComment/' + row.miner_id.toString()}>
+            {/* <NavLink to={'/loanComment/' + row.miner_id.toString()}>
               <button className='flex items-center whitespace-nowrap hover:text-[#0077FE]'>
                 Comments
                 <CommentIcon className='ml-1 inline-block' width={14} height={14} />
               </button>
-            </NavLink>
+            </NavLink> */}
           </div>
         )
       }
@@ -209,10 +154,12 @@ const LoanMarket = (props) => {
       <section className='common-container'>
         <div className='flex flex-col justify-between sm:flex-row'>
           <div className='mb-5 xl:mb-20'>
-            <h2 className='jr-market mb-[13px] text-[32px] font-semibold leading-[61px] sm:text-[56px]'>Loan Market</h2>
+            <h2 className='jr-market mb-[13px] text-[32px] font-semibold leading-[61px] sm:text-[56px]'>
+              DePIN Market
+            </h2>
             <div className='w-[360px] text-[#57596C] md:w-[500px] md:text-lg'>
-              You could list your loan request order in the market to acquire the liquidity of your pledge amount and
-              locked rewards OR you can lend for exchange of interest.
+              Invest directly in decentralized physical infrastructure network (DePIN) permissionlessly. Finance your
+              preferred DePIN provider and start earning yield.
             </div>
           </div>
           <button

@@ -32,12 +32,13 @@ const History = () => {
 
   const columns: ColumnsType<LoanOrderInfo> = [
     {
-      title: 'Miner ID',
+      title: 'SP ID',
       key: 'miner_id',
+      width: 160,
       render: (val) => <MinerIDRow value={val} showType={false} />
     },
     {
-      title: 'Total Miner Value',
+      title: 'Total Value',
       key: 'miner_total_balance_human',
       render: (val) => (!isEmpty(val) ? `${numberWithCommas(val)} FIL` : '-')
     },
@@ -49,7 +50,11 @@ const History = () => {
     {
       title: 'APY',
       key: 'annual_interest_rate',
-      render: (val) => (!isEmpty(val) ? `${BigNumber(val).decimalPlaces(2)} %` : '-')
+      render: (val) => (
+        <span className='whitespace-nowrap'>
+          {!isEmpty(val) ? `${numberWithCommas(BigNumber(val).decimalPlaces(2))} %` : '-'}
+        </span>
+      )
     },
     {
       title: 'Interest Earned',
@@ -71,7 +76,7 @@ const History = () => {
     },
     {
       key: 'operation',
-      width: '35%',
+      width: '36%',
       render: (val, row) => (
         <div className='justify-space flex flex-wrap gap-x-7'>
           <button

@@ -49,7 +49,7 @@ export default function ClaimDialog(props: IProps) {
       value: `${(data?.annual_interest_rate_human || 0).toFixed(2)}%`
     },
     {
-      title: 'Miner Available Balance',
+      title: 'SP Available Balance',
       value: `${numberWithCommas(data?.available_balance_human || 0)} FIL`
     }
   ]
@@ -209,7 +209,7 @@ export default function ClaimDialog(props: IProps) {
                   <Dialog.Panel className='flex min-h-[400px] w-full max-w-[900px] transform flex-col justify-between overflow-hidden rounded-2xl bg-white p-[30px] text-left shadow-xl transition-all'>
                     <div className='mb-4'>
                       <Dialog.Title as='h3' className='flex items-center justify-between text-2xl font-medium'>
-                        {`Miner ${config.address_zero_prefix}0${data?.miner_id} Claim Repayment`}
+                        {`SP ${config.address_zero_prefix}0${data?.miner_id} Claim Repayment`}
                         <svg
                           xmlns='http://www.w3.org/2000/svg'
                           fill='none'

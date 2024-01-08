@@ -329,7 +329,7 @@ export default function RepayDialog(props: IProps) {
                   <Dialog.Panel className='flex min-h-[400px] w-full max-w-[900px] transform flex-col overflow-hidden rounded-2xl bg-white p-[30px] text-left shadow-xl transition-all'>
                     <div className='mb-4'>
                       <Dialog.Title as='h3' className='flex items-center justify-between text-2xl font-medium'>
-                        {`Miner ${config.address_zero_prefix}0${miner?.miner_id} Loan Repay`}
+                        {`SP ${config.address_zero_prefix}0${miner?.miner_id} Loan Repay`}
                         <svg
                           xmlns='http://www.w3.org/2000/svg'
                           fill='none'

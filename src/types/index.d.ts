@@ -18,6 +18,7 @@ export interface LoanMarketListItem {
   daily_interest_rate?: number
   annual_interest_rate?: number
   annual_interest_rate_human?: number
+  current_total_debt_human?: number
   current_total_principal_human?: number
   current_total_interest_human?: number
   last_debt_amount_raw?: string

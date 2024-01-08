@@ -188,13 +188,13 @@ export default function LoanAddDialog(props: IProps) {
         value: `${numberWithCommas(minerBalance?.available_balance_human) || 0} FIL`
       },
       {
-        title: 'The Miner Total Current Value',
+        title: 'The SP Total Current Value',
         value: `${numberWithCommas(minerBalance?.total_balance_human) || 0} FIL`
       }
     ]
     return (
       <>
-        <div>{`Miner Id: ${config.address_zero_prefix}0${miner?.miner_id}`}</div>
+        <div>{`SP Id: ${config.address_zero_prefix}0${miner?.miner_id}`}</div>
         <div className='flex w-3/4 flex-wrap'>
           {BorrowAmountMap.map((item) => (
             <div key={item.title} className='w-1/2 text-sm'>
@@ -274,7 +274,7 @@ export default function LoanAddDialog(props: IProps) {
               <p className='h-[49px] leading-[49px]'>{borrowInfo.borrowColleteral}</p>
             )}
             <div className='pt-[5px]'>
-              <p className='text-xs text-gray-500'>* Colleteral % = Miner Total Current Value / Borrow amount</p>
+              <p className='text-xs text-gray-500'>* Colleteral % = SP Total Current Value / Borrow amount</p>
               <p className='text-xs text-gray-500'>* The colleteral rate cannot be less than 166%</p>
             </div>
           </div>
@@ -400,7 +400,7 @@ export default function LoanAddDialog(props: IProps) {
   const step4 = () => {
     const data = [
       {
-        name: 'Miner ID',
+        name: 'SP ID',
         value: `${config.address_zero_prefix}0${miner?.miner_id}`
       },
       {
