@@ -1,5 +1,711 @@
 export const loanABI = [
   {
+    inputs: [],
+    stateMutability: 'nonpayable',
+    type: 'constructor'
+  },
+  {
+    inputs: [
+      {
+        internalType: 'int256',
+        name: 'errorCode',
+        type: 'int256'
+      }
+    ],
+    name: 'ActorError',
+    type: 'error'
+  },
+  {
+    inputs: [],
+    name: 'ActorNotFound',
+    type: 'error'
+  },
+  {
+    inputs: [],
+    name: 'FailToCallActor',
+    type: 'error'
+  },
+  {
+    inputs: [],
+    name: 'FailToCallActor',
+    type: 'error'
+  },
+  {
+    inputs: [
+      {
+        internalType: 'CommonTypes.FilActorId',
+        name: 'actorId',
+        type: 'uint64'
+      }
+    ],
+    name: 'InvalidActorID',
+    type: 'error'
+  },
+  {
+    inputs: [
+      {
+        internalType: 'uint64',
+        name: '',
+        type: 'uint64'
+      }
+    ],
+    name: 'InvalidCodec',
+    type: 'error'
+  },
+  {
+    inputs: [],
+    name: 'InvalidResponseLength',
+    type: 'error'
+  },
+  {
+    inputs: [
+      {
+        internalType: 'uint256',
+        name: 'balance',
+        type: 'uint256'
+      },
+      {
+        internalType: 'uint256',
+        name: 'value',
+        type: 'uint256'
+      }
+    ],
+    name: 'NotEnoughBalance',
+    type: 'error'
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: 'address',
+        name: 'buyer',
+        type: 'address'
+      },
+      {
+        indexed: false,
+        internalType: 'address',
+        name: 'seller',
+        type: 'address'
+      },
+      {
+        indexed: false,
+        internalType: 'CommonTypes.FilActorId',
+        name: 'minerId',
+        type: 'uint64'
+      },
+      {
+        indexed: false,
+        internalType: 'uint256',
+        name: 'buyAmount',
+        type: 'uint256'
+      },
+      {
+        indexed: false,
+        internalType: 'uint256',
+        name: 'pricePerFil',
+        type: 'uint256'
+      },
+      {
+        indexed: false,
+        internalType: 'uint256',
+        name: 'principalChange',
+        type: 'uint256'
+      }
+    ],
+    name: 'EventBuyLoan',
+    type: 'event'
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: 'address',
+        name: 'operator',
+        type: 'address'
+      },
+      {
+        indexed: false,
+        internalType: 'CommonTypes.FilActorId',
+        name: 'minerId',
+        type: 'uint64'
+      }
+    ],
+    name: 'EventCancelSellLoan',
+    type: 'event'
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: 'CommonTypes.FilActorId',
+        name: 'minerId',
+        type: 'uint64'
+      },
+      {
+        indexed: false,
+        internalType: 'address',
+        name: 'newDelegator',
+        type: 'address'
+      }
+    ],
+    name: 'EventChangeMinerDelegator',
+    type: 'event'
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: 'CommonTypes.FilActorId',
+        name: 'minerId',
+        type: 'uint64'
+      },
+      {
+        indexed: false,
+        internalType: 'bool',
+        name: 'disabled',
+        type: 'bool'
+      }
+    ],
+    name: 'EventChangeMinerDisabled',
+    type: 'event'
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: 'CommonTypes.FilActorId',
+        name: 'minerId',
+        type: 'uint64'
+      },
+      {
+        indexed: false,
+        internalType: 'uint256',
+        name: 'newLoanInterestRate',
+        type: 'uint256'
+      }
+    ],
+    name: 'EventChangeMinerLoanInterestRate',
+    type: 'event'
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: 'CommonTypes.FilActorId',
+        name: 'minerId',
+        type: 'uint64'
+      },
+      {
+        indexed: false,
+        internalType: 'uint256',
+        name: 'newMaxDebtAmount',
+        type: 'uint256'
+      }
+    ],
+    name: 'EventChangeMinerMaxDebtAmount',
+    type: 'event'
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: 'CommonTypes.FilActorId',
+        name: 'minerId',
+        type: 'uint64'
+      },
+      {
+        indexed: false,
+        internalType: 'uint256',
+        name: 'maxLenderCount',
+        type: 'uint256'
+      }
+    ],
+    name: 'EventChangeMinerMaxLenderCount',
+    type: 'event'
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: 'CommonTypes.FilActorId',
+        name: 'minerId',
+        type: 'uint64'
+      },
+      {
+        indexed: false,
+        internalType: 'uint256',
+        name: 'minLendAmount',
+        type: 'uint256'
+      }
+    ],
+    name: 'EventChangeMinerMinLendAmount',
+    type: 'event'
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: 'CommonTypes.FilActorId',
+        name: 'minerId',
+        type: 'uint64'
+      },
+      {
+        indexed: false,
+        internalType: 'address',
+        name: 'newReceiveAddress',
+        type: 'address'
+      }
+    ],
+    name: 'EventChangeMinerReceiveAddress',
+    type: 'event'
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: 'address',
+        name: 'lender',
+        type: 'address'
+      },
+      {
+        indexed: false,
+        internalType: 'CommonTypes.FilActorId',
+        name: 'minerId',
+        type: 'uint64'
+      },
+      {
+        indexed: false,
+        internalType: 'uint256',
+        name: 'amount',
+        type: 'uint256'
+      }
+    ],
+    name: 'EventLendToMiner',
+    type: 'event'
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: 'CommonTypes.FilActorId',
+        name: 'minerId',
+        type: 'uint64'
+      },
+      {
+        indexed: true,
+        internalType: 'address',
+        name: 'delegator',
+        type: 'address'
+      },
+      {
+        indexed: false,
+        internalType: 'uint256',
+        name: 'maxDebtAmount',
+        type: 'uint256'
+      },
+      {
+        indexed: false,
+        internalType: 'uint256',
+        name: 'loanInterestRate',
+        type: 'uint256'
+      },
+      {
+        indexed: false,
+        internalType: 'address',
+        name: 'receiveAddress',
+        type: 'address'
+      },
+      {
+        indexed: false,
+        internalType: 'uint8',
+        name: 'maxLenderCount',
+        type: 'uint8'
+      },
+      {
+        indexed: false,
+        internalType: 'uint256',
+        name: 'minLendAmount',
+        type: 'uint256'
+      }
+    ],
+    name: 'EventPledgeBeneficiaryToSpex',
+    type: 'event'
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: 'CommonTypes.FilActorId',
+        name: 'minerId',
+        type: 'uint64'
+      },
+      {
+        components: [
+          {
+            internalType: 'bytes',
+            name: 'data',
+            type: 'bytes'
+          }
+        ],
+        indexed: false,
+        internalType: 'struct CommonTypes.FilAddress',
+        name: 'newBeneficiary',
+        type: 'tuple'
+      }
+    ],
+    name: 'EventReleaseBeneficiary',
+    type: 'event'
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: 'address',
+        name: 'repayer',
+        type: 'address'
+      },
+      {
+        indexed: false,
+        internalType: 'address',
+        name: 'lender',
+        type: 'address'
+      },
+      {
+        indexed: false,
+        internalType: 'CommonTypes.FilActorId',
+        name: 'minerId',
+        type: 'uint64'
+      },
+      {
+        indexed: false,
+        internalType: 'uint256',
+        name: 'actualRepaymentAmount',
+        type: 'uint256'
+      },
+      {
+        indexed: false,
+        internalType: 'uint256',
+        name: 'repaiedInterest',
+        type: 'uint256'
+      }
+    ],
+    name: 'EventRepayment',
+    type: 'event'
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: 'address',
+        name: 'seller',
+        type: 'address'
+      },
+      {
+        indexed: false,
+        internalType: 'CommonTypes.FilActorId',
+        name: 'minerId',
+        type: 'uint64'
+      },
+      {
+        indexed: false,
+        internalType: 'uint256',
+        name: 'ceilingAmount',
+        type: 'uint256'
+      },
+      {
+        indexed: false,
+        internalType: 'uint256',
+        name: 'pricePerFil',
+        type: 'uint256'
+      }
+    ],
+    name: 'EventSellLoan',
+    type: 'event'
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: 'address',
+        name: 'operator',
+        type: 'address'
+      },
+      {
+        indexed: false,
+        internalType: 'address',
+        name: 'lender',
+        type: 'address'
+      },
+      {
+        indexed: false,
+        internalType: 'CommonTypes.FilActorId',
+        name: 'minerId',
+        type: 'uint64'
+      },
+      {
+        indexed: false,
+        internalType: 'uint256',
+        name: 'actualRepaymentAmount',
+        type: 'uint256'
+      },
+      {
+        indexed: false,
+        internalType: 'uint256',
+        name: 'repaiedInterest',
+        type: 'uint256'
+      }
+    ],
+    name: 'EventWithdrawRepayment',
+    type: 'event'
+  },
+  {
+    inputs: [],
+    name: 'MAX_FEE_RATE',
+    outputs: [
+      {
+        internalType: 'uint256',
+        name: '',
+        type: 'uint256'
+      }
+    ],
+    stateMutability: 'view',
+    type: 'function'
+  },
+  {
+    inputs: [],
+    name: 'RATE_BASE',
+    outputs: [
+      {
+        internalType: 'uint256',
+        name: '',
+        type: 'uint256'
+      }
+    ],
+    stateMutability: 'view',
+    type: 'function'
+  },
+  {
+    inputs: [],
+    name: 'REQUIRED_EXPIRATION',
+    outputs: [
+      {
+        internalType: 'int64',
+        name: '',
+        type: 'int64'
+      }
+    ],
+    stateMutability: 'view',
+    type: 'function'
+  },
+  {
+    inputs: [],
+    name: 'REQUIRED_QUOTA',
+    outputs: [
+      {
+        internalType: 'uint256',
+        name: '',
+        type: 'uint256'
+      }
+    ],
+    stateMutability: 'view',
+    type: 'function'
+  },
+  {
+    inputs: [],
+    name: '_feeRate',
+    outputs: [
+      {
+        internalType: 'uint256',
+        name: '',
+        type: 'uint256'
+      }
+    ],
+    stateMutability: 'view',
+    type: 'function'
+  },
+  {
+    inputs: [],
+    name: '_foundation',
+    outputs: [
+      {
+        internalType: 'address',
+        name: '',
+        type: 'address'
+      }
+    ],
+    stateMutability: 'view',
+    type: 'function'
+  },
+  {
+    inputs: [
+      {
+        internalType: 'address',
+        name: '',
+        type: 'address'
+      }
+    ],
+    name: '_lastTimestampMap',
+    outputs: [
+      {
+        internalType: 'uint256',
+        name: '',
+        type: 'uint256'
+      }
+    ],
+    stateMutability: 'view',
+    type: 'function'
+  },
+  {
+    inputs: [
+      {
+        internalType: 'address',
+        name: '',
+        type: 'address'
+      },
+      {
+        internalType: 'CommonTypes.FilActorId',
+        name: '',
+        type: 'uint64'
+      }
+    ],
+    name: '_loans',
+    outputs: [
+      {
+        internalType: 'uint256',
+        name: 'principalAmount',
+        type: 'uint256'
+      },
+      {
+        internalType: 'uint256',
+        name: 'lastAmount',
+        type: 'uint256'
+      },
+      {
+        internalType: 'uint256',
+        name: 'lastUpdateTime',
+        type: 'uint256'
+      }
+    ],
+    stateMutability: 'view',
+    type: 'function'
+  },
+  {
+    inputs: [],
+    name: '_maxDebtRate',
+    outputs: [
+      {
+        internalType: 'uint256',
+        name: '',
+        type: 'uint256'
+      }
+    ],
+    stateMutability: 'view',
+    type: 'function'
+  },
+  {
+    inputs: [
+      {
+        internalType: 'CommonTypes.FilActorId',
+        name: '',
+        type: 'uint64'
+      }
+    ],
+    name: '_miners',
+    outputs: [
+      {
+        internalType: 'CommonTypes.FilActorId',
+        name: 'minerId',
+        type: 'uint64'
+      },
+      {
+        internalType: 'address',
+        name: 'delegator',
+        type: 'address'
+      },
+      {
+        internalType: 'uint256',
+        name: 'maxDebtAmount',
+        type: 'uint256'
+      },
+      {
+        internalType: 'uint256',
+        name: 'loanInterestRate',
+        type: 'uint256'
+      },
+      {
+        internalType: 'address',
+        name: 'receiveAddress',
+        type: 'address'
+      },
+      {
+        internalType: 'bool',
+        name: 'disabled',
+        type: 'bool'
+      },
+      {
+        internalType: 'uint256',
+        name: 'principalAmount',
+        type: 'uint256'
+      },
+      {
+        internalType: 'uint256',
+        name: 'maxLenderCount',
+        type: 'uint256'
+      },
+      {
+        internalType: 'uint256',
+        name: 'minLendAmount',
+        type: 'uint256'
+      }
+    ],
+    stateMutability: 'view',
+    type: 'function'
+  },
+  {
+    inputs: [
+      {
+        internalType: 'address',
+        name: '',
+        type: 'address'
+      },
+      {
+        internalType: 'CommonTypes.FilActorId',
+        name: '',
+        type: 'uint64'
+      }
+    ],
+    name: '_sales',
+    outputs: [
+      {
+        internalType: 'uint256',
+        name: 'amountRemaining',
+        type: 'uint256'
+      },
+      {
+        internalType: 'uint256',
+        name: 'pricePerFil',
+        type: 'uint256'
+      }
+    ],
+    stateMutability: 'view',
+    type: 'function'
+  },
+  {
     inputs: [
       {
         internalType: 'address',
@@ -22,27 +728,6 @@ export const loanABI = [
     ],
     stateMutability: 'nonpayable',
     type: 'function'
-  },
-  {
-    inputs: [],
-    stateMutability: 'nonpayable',
-    type: 'constructor'
-  },
-  {
-    inputs: [
-      {
-        internalType: 'int256',
-        name: 'errorCode',
-        type: 'int256'
-      }
-    ],
-    name: 'ActorError',
-    type: 'error'
-  },
-  {
-    inputs: [],
-    name: 'ActorNotFound',
-    type: 'error'
   },
   {
     inputs: [
@@ -434,452 +1119,128 @@ export const loanABI = [
     type: 'function'
   },
   {
-    inputs: [],
-    name: 'FailToCallActor',
-    type: 'error'
-  },
-  {
     inputs: [
       {
-        internalType: 'CommonTypes.FilActorId',
-        name: 'actorId',
-        type: 'uint64'
-      }
-    ],
-    name: 'InvalidActorID',
-    type: 'error'
-  },
-  {
-    inputs: [
-      {
-        internalType: 'uint64',
-        name: '',
-        type: 'uint64'
-      }
-    ],
-    name: 'InvalidCodec',
-    type: 'error'
-  },
-  {
-    inputs: [],
-    name: 'InvalidResponseLength',
-    type: 'error'
-  },
-  {
-    inputs: [
-      {
-        internalType: 'uint256',
-        name: 'balance',
-        type: 'uint256'
-      },
-      {
-        internalType: 'uint256',
-        name: 'value',
-        type: 'uint256'
-      }
-    ],
-    name: 'NotEnoughBalance',
-    type: 'error'
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: false,
         internalType: 'address',
-        name: '',
+        name: 'lender',
         type: 'address'
       },
       {
-        indexed: false,
-        internalType: 'address',
-        name: '',
-        type: 'address'
-      },
-      {
-        indexed: false,
         internalType: 'CommonTypes.FilActorId',
-        name: '',
-        type: 'uint64'
-      },
-      {
-        indexed: false,
-        internalType: 'uint256',
-        name: '',
-        type: 'uint256'
-      },
-      {
-        indexed: false,
-        internalType: 'uint256',
-        name: '',
-        type: 'uint256'
-      },
-      {
-        indexed: false,
-        internalType: 'uint256',
-        name: '',
-        type: 'uint256'
-      }
-    ],
-    name: 'EventBuyLoan',
-    type: 'event'
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: false,
-        internalType: 'address',
-        name: '',
-        type: 'address'
-      },
-      {
-        indexed: false,
-        internalType: 'CommonTypes.FilActorId',
-        name: '',
+        name: 'minerId',
         type: 'uint64'
       }
     ],
-    name: 'EventCancelSellLoan',
-    type: 'event'
-  },
-  {
-    anonymous: false,
-    inputs: [
+    name: 'getCurrentLenderOwedAmount',
+    outputs: [
       {
-        indexed: false,
-        internalType: 'CommonTypes.FilActorId',
-        name: '',
-        type: 'uint64'
-      },
-      {
-        indexed: false,
-        internalType: 'address',
-        name: '',
-        type: 'address'
-      }
-    ],
-    name: 'EventChangeMinerDelegator',
-    type: 'event'
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: false,
-        internalType: 'CommonTypes.FilActorId',
-        name: '',
-        type: 'uint64'
-      },
-      {
-        indexed: false,
-        internalType: 'bool',
-        name: '',
-        type: 'bool'
-      }
-    ],
-    name: 'EventChangeMinerDisabled',
-    type: 'event'
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: false,
-        internalType: 'CommonTypes.FilActorId',
-        name: '',
-        type: 'uint64'
-      },
-      {
-        indexed: false,
         internalType: 'uint256',
-        name: '',
-        type: 'uint256'
-      }
-    ],
-    name: 'EventChangeMinerLoanInterestRate',
-    type: 'event'
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: false,
-        internalType: 'CommonTypes.FilActorId',
-        name: '',
-        type: 'uint64'
-      },
-      {
-        indexed: false,
-        internalType: 'uint256',
-        name: '',
-        type: 'uint256'
-      }
-    ],
-    name: 'EventChangeMinerMaxDebtAmount',
-    type: 'event'
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: false,
-        internalType: 'CommonTypes.FilActorId',
-        name: '',
-        type: 'uint64'
-      },
-      {
-        indexed: false,
-        internalType: 'uint256',
-        name: '',
-        type: 'uint256'
-      }
-    ],
-    name: 'EventChangeMinerMaxLenderCount',
-    type: 'event'
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: false,
-        internalType: 'CommonTypes.FilActorId',
-        name: '',
-        type: 'uint64'
-      },
-      {
-        indexed: false,
-        internalType: 'uint256',
-        name: '',
-        type: 'uint256'
-      }
-    ],
-    name: 'EventChangeMinerMinLendAmount',
-    type: 'event'
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: false,
-        internalType: 'CommonTypes.FilActorId',
-        name: '',
-        type: 'uint64'
-      },
-      {
-        indexed: false,
-        internalType: 'address',
-        name: '',
-        type: 'address'
-      }
-    ],
-    name: 'EventChangeMinerReceiveAddress',
-    type: 'event'
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: false,
-        internalType: 'address',
-        name: '',
-        type: 'address'
-      },
-      {
-        indexed: false,
-        internalType: 'CommonTypes.FilActorId',
-        name: '',
-        type: 'uint64'
-      },
-      {
-        indexed: false,
-        internalType: 'uint256',
-        name: '',
-        type: 'uint256'
-      }
-    ],
-    name: 'EventLendToMiner',
-    type: 'event'
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: false,
-        internalType: 'CommonTypes.FilActorId',
-        name: '',
-        type: 'uint64'
-      },
-      {
-        indexed: false,
-        internalType: 'address',
-        name: '',
-        type: 'address'
-      },
-      {
-        indexed: false,
-        internalType: 'uint256',
-        name: '',
+        name: 'totalAmountOwed',
         type: 'uint256'
       },
       {
-        indexed: false,
         internalType: 'uint256',
-        name: '',
-        type: 'uint256'
-      },
-      {
-        indexed: false,
-        internalType: 'address',
-        name: '',
-        type: 'address'
-      },
-      {
-        indexed: false,
-        internalType: 'uint8',
-        name: '',
-        type: 'uint8'
-      },
-      {
-        indexed: false,
-        internalType: 'uint256',
-        name: '',
+        name: 'principal',
         type: 'uint256'
       }
     ],
-    name: 'EventPledgeBeneficiaryToSpex',
-    type: 'event'
+    stateMutability: 'view',
+    type: 'function'
   },
   {
-    anonymous: false,
     inputs: [
       {
-        indexed: false,
         internalType: 'CommonTypes.FilActorId',
-        name: '',
+        name: 'minerId',
         type: 'uint64'
+      }
+    ],
+    name: 'getCurrentMinerOwedAmount',
+    outputs: [
+      {
+        internalType: 'uint256',
+        name: 'totalDebt',
+        type: 'uint256'
       },
+      {
+        internalType: 'uint256',
+        name: 'principal',
+        type: 'uint256'
+      }
+    ],
+    stateMutability: 'view',
+    type: 'function'
+  },
+  {
+    inputs: [
+      {
+        internalType: 'CommonTypes.FilActorId',
+        name: 'minerId',
+        type: 'uint64'
+      }
+    ],
+    name: 'getMiner',
+    outputs: [
       {
         components: [
           {
-            internalType: 'bytes',
-            name: 'data',
-            type: 'bytes'
+            internalType: 'CommonTypes.FilActorId',
+            name: 'minerId',
+            type: 'uint64'
+          },
+          {
+            internalType: 'address',
+            name: 'delegator',
+            type: 'address'
+          },
+          {
+            internalType: 'uint256',
+            name: 'maxDebtAmount',
+            type: 'uint256'
+          },
+          {
+            internalType: 'uint256',
+            name: 'loanInterestRate',
+            type: 'uint256'
+          },
+          {
+            internalType: 'address',
+            name: 'receiveAddress',
+            type: 'address'
+          },
+          {
+            internalType: 'bool',
+            name: 'disabled',
+            type: 'bool'
+          },
+          {
+            internalType: 'uint256',
+            name: 'principalAmount',
+            type: 'uint256'
+          },
+          {
+            internalType: 'uint256',
+            name: 'maxLenderCount',
+            type: 'uint256'
+          },
+          {
+            internalType: 'uint256',
+            name: 'minLendAmount',
+            type: 'uint256'
+          },
+          {
+            internalType: 'address[]',
+            name: 'lenders',
+            type: 'address[]'
           }
         ],
-        indexed: false,
-        internalType: 'struct CommonTypes.FilAddress',
+        internalType: 'struct SPexBeneficiary.Miner',
         name: '',
         type: 'tuple'
       }
     ],
-    name: 'EventReleaseBeneficiary',
-    type: 'event'
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: false,
-        internalType: 'address',
-        name: '',
-        type: 'address'
-      },
-      {
-        indexed: false,
-        internalType: 'address',
-        name: '',
-        type: 'address'
-      },
-      {
-        indexed: false,
-        internalType: 'CommonTypes.FilActorId',
-        name: '',
-        type: 'uint64'
-      },
-      {
-        indexed: false,
-        internalType: 'uint256',
-        name: '',
-        type: 'uint256'
-      },
-      {
-        indexed: false,
-        internalType: 'uint256',
-        name: '',
-        type: 'uint256'
-      }
-    ],
-    name: 'EventRepayment',
-    type: 'event'
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: false,
-        internalType: 'address',
-        name: '',
-        type: 'address'
-      },
-      {
-        indexed: false,
-        internalType: 'CommonTypes.FilActorId',
-        name: '',
-        type: 'uint64'
-      },
-      {
-        indexed: false,
-        internalType: 'uint256',
-        name: '',
-        type: 'uint256'
-      },
-      {
-        indexed: false,
-        internalType: 'uint256',
-        name: '',
-        type: 'uint256'
-      }
-    ],
-    name: 'EventSellLoan',
-    type: 'event'
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: false,
-        internalType: 'address',
-        name: '',
-        type: 'address'
-      },
-      {
-        indexed: false,
-        internalType: 'address',
-        name: '',
-        type: 'address'
-      },
-      {
-        indexed: false,
-        internalType: 'CommonTypes.FilActorId',
-        name: '',
-        type: 'uint64'
-      },
-      {
-        indexed: false,
-        internalType: 'uint256',
-        name: '',
-        type: 'uint256'
-      },
-      {
-        indexed: false,
-        internalType: 'uint256',
-        name: '',
-        type: 'uint256'
-      }
-    ],
-    name: 'EventWithdrawRepayment',
-    type: 'event'
+    stateMutability: 'view',
+    type: 'function'
   },
   {
     inputs: [
@@ -1056,362 +1417,6 @@ export const loanABI = [
       }
     ],
     stateMutability: 'nonpayable',
-    type: 'function'
-  },
-  {
-    inputs: [],
-    name: '_feeRate',
-    outputs: [
-      {
-        internalType: 'uint256',
-        name: '',
-        type: 'uint256'
-      }
-    ],
-    stateMutability: 'view',
-    type: 'function'
-  },
-  {
-    inputs: [],
-    name: '_foundation',
-    outputs: [
-      {
-        internalType: 'address',
-        name: '',
-        type: 'address'
-      }
-    ],
-    stateMutability: 'view',
-    type: 'function'
-  },
-  {
-    inputs: [
-      {
-        internalType: 'address',
-        name: '',
-        type: 'address'
-      }
-    ],
-    name: '_lastTimestampMap',
-    outputs: [
-      {
-        internalType: 'uint256',
-        name: '',
-        type: 'uint256'
-      }
-    ],
-    stateMutability: 'view',
-    type: 'function'
-  },
-  {
-    inputs: [
-      {
-        internalType: 'address',
-        name: '',
-        type: 'address'
-      },
-      {
-        internalType: 'CommonTypes.FilActorId',
-        name: '',
-        type: 'uint64'
-      }
-    ],
-    name: '_loans',
-    outputs: [
-      {
-        internalType: 'uint256',
-        name: 'principalAmount',
-        type: 'uint256'
-      },
-      {
-        internalType: 'uint256',
-        name: 'lastAmount',
-        type: 'uint256'
-      },
-      {
-        internalType: 'uint256',
-        name: 'lastUpdateTime',
-        type: 'uint256'
-      }
-    ],
-    stateMutability: 'view',
-    type: 'function'
-  },
-  {
-    inputs: [],
-    name: '_maxDebtRate',
-    outputs: [
-      {
-        internalType: 'uint256',
-        name: '',
-        type: 'uint256'
-      }
-    ],
-    stateMutability: 'view',
-    type: 'function'
-  },
-  {
-    inputs: [
-      {
-        internalType: 'CommonTypes.FilActorId',
-        name: '',
-        type: 'uint64'
-      }
-    ],
-    name: '_miners',
-    outputs: [
-      {
-        internalType: 'CommonTypes.FilActorId',
-        name: 'minerId',
-        type: 'uint64'
-      },
-      {
-        internalType: 'address',
-        name: 'delegator',
-        type: 'address'
-      },
-      {
-        internalType: 'uint256',
-        name: 'maxDebtAmount',
-        type: 'uint256'
-      },
-      {
-        internalType: 'uint256',
-        name: 'loanInterestRate',
-        type: 'uint256'
-      },
-      {
-        internalType: 'address',
-        name: 'receiveAddress',
-        type: 'address'
-      },
-      {
-        internalType: 'bool',
-        name: 'disabled',
-        type: 'bool'
-      },
-      {
-        internalType: 'uint256',
-        name: 'principalAmount',
-        type: 'uint256'
-      },
-      {
-        internalType: 'uint256',
-        name: 'maxLenderCount',
-        type: 'uint256'
-      },
-      {
-        internalType: 'uint256',
-        name: 'minLendAmount',
-        type: 'uint256'
-      }
-    ],
-    stateMutability: 'view',
-    type: 'function'
-  },
-  {
-    inputs: [
-      {
-        internalType: 'address',
-        name: '',
-        type: 'address'
-      },
-      {
-        internalType: 'CommonTypes.FilActorId',
-        name: '',
-        type: 'uint64'
-      }
-    ],
-    name: '_sales',
-    outputs: [
-      {
-        internalType: 'uint256',
-        name: 'amountRemaining',
-        type: 'uint256'
-      },
-      {
-        internalType: 'uint256',
-        name: 'pricePerFil',
-        type: 'uint256'
-      }
-    ],
-    stateMutability: 'view',
-    type: 'function'
-  },
-  {
-    inputs: [
-      {
-        internalType: 'address',
-        name: 'lender',
-        type: 'address'
-      },
-      {
-        internalType: 'CommonTypes.FilActorId',
-        name: 'minerId',
-        type: 'uint64'
-      }
-    ],
-    name: 'getCurrentLenderOwedAmount',
-    outputs: [
-      {
-        internalType: 'uint256',
-        name: 'totalAmountOwed',
-        type: 'uint256'
-      },
-      {
-        internalType: 'uint256',
-        name: 'principal',
-        type: 'uint256'
-      }
-    ],
-    stateMutability: 'view',
-    type: 'function'
-  },
-  {
-    inputs: [
-      {
-        internalType: 'CommonTypes.FilActorId',
-        name: 'minerId',
-        type: 'uint64'
-      }
-    ],
-    name: 'getCurrentMinerOwedAmount',
-    outputs: [
-      {
-        internalType: 'uint256',
-        name: 'totalDebt',
-        type: 'uint256'
-      },
-      {
-        internalType: 'uint256',
-        name: 'principal',
-        type: 'uint256'
-      }
-    ],
-    stateMutability: 'view',
-    type: 'function'
-  },
-  {
-    inputs: [
-      {
-        internalType: 'CommonTypes.FilActorId',
-        name: 'minerId',
-        type: 'uint64'
-      }
-    ],
-    name: 'getMiner',
-    outputs: [
-      {
-        components: [
-          {
-            internalType: 'CommonTypes.FilActorId',
-            name: 'minerId',
-            type: 'uint64'
-          },
-          {
-            internalType: 'address',
-            name: 'delegator',
-            type: 'address'
-          },
-          {
-            internalType: 'uint256',
-            name: 'maxDebtAmount',
-            type: 'uint256'
-          },
-          {
-            internalType: 'uint256',
-            name: 'loanInterestRate',
-            type: 'uint256'
-          },
-          {
-            internalType: 'address',
-            name: 'receiveAddress',
-            type: 'address'
-          },
-          {
-            internalType: 'bool',
-            name: 'disabled',
-            type: 'bool'
-          },
-          {
-            internalType: 'uint256',
-            name: 'principalAmount',
-            type: 'uint256'
-          },
-          {
-            internalType: 'uint256',
-            name: 'maxLenderCount',
-            type: 'uint256'
-          },
-          {
-            internalType: 'uint256',
-            name: 'minLendAmount',
-            type: 'uint256'
-          },
-          {
-            internalType: 'address[]',
-            name: 'lenders',
-            type: 'address[]'
-          }
-        ],
-        internalType: 'struct SPexBeneficiary.Miner',
-        name: '',
-        type: 'tuple'
-      }
-    ],
-    stateMutability: 'view',
-    type: 'function'
-  },
-  {
-    inputs: [],
-    name: 'MAX_FEE_RATE',
-    outputs: [
-      {
-        internalType: 'uint256',
-        name: '',
-        type: 'uint256'
-      }
-    ],
-    stateMutability: 'view',
-    type: 'function'
-  },
-  {
-    inputs: [],
-    name: 'RATE_BASE',
-    outputs: [
-      {
-        internalType: 'uint256',
-        name: '',
-        type: 'uint256'
-      }
-    ],
-    stateMutability: 'view',
-    type: 'function'
-  },
-  {
-    inputs: [],
-    name: 'REQUIRED_EXPIRATION',
-    outputs: [
-      {
-        internalType: 'int64',
-        name: '',
-        type: 'int64'
-      }
-    ],
-    stateMutability: 'view',
-    type: 'function'
-  },
-  {
-    inputs: [],
-    name: 'REQUIRED_QUOTA',
-    outputs: [
-      {
-        internalType: 'uint256',
-        name: '',
-        type: 'uint256'
-      }
-    ],
-    stateMutability: 'view',
     type: 'function'
   }
 ]
