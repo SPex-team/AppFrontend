@@ -8,7 +8,7 @@ export const dev_config = {
   contractLoanAddress: '0x4989116AeB43A0Ddc5C7925B11Dd9f4D9BE324b7',
   address_zero_prefix: 't',
   net: 'Calibration',
-  filescanOrigin: 'https://calibration.filscan.io',
+  filescanOrigin: 'https://calibration.filscan.io/en',
   chainId: 314159,
   chainIdBinary: '0x4cb2f'
 }
@@ -20,7 +20,7 @@ export const calibration_config = {
   contractLoanAddress: '0x4989116AeB43A0Ddc5C7925B11Dd9f4D9BE324b7',
   address_zero_prefix: 't',
   net: 'Calibration',
-  filescanOrigin: 'https://calibration.filscan.io',
+  filescanOrigin: 'https://calibration.filscan.io/en',
   chainId: 314159,
   chainIdBinary: '0x4cb2f'
 }
@@ -32,7 +32,7 @@ export const mainnet_config = {
   contractLoanAddress: '0x0be642351dd08b2F6Eb5C651Df21c59Fe69DaC1D',
   address_zero_prefix: 'f',
   net: 'MainNet',
-  filescanOrigin: 'https://filscan.io',
+  filescanOrigin: 'https://filscan.io/en',
   chainId: 314,
   chainIdBinary: '0x13a'
 }
