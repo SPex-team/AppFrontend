@@ -18,7 +18,7 @@ export default function Header() {
           href: 'https://www.spex.website/'
         },
         {
-          name: 'DePIN Market',
+          name: 'Loan Market',
           href: '/loanMarket'
         },
         // {

@@ -126,7 +126,7 @@ export default function BeneficiaryBindDialog(props: IProps) {
   const step0 = () => {
     return (
       <div className='space-y-[20px] pt-[20px]'>
-        <p>👋 Hey, welcome to SPex DePIN Market!</p>
+        <p>👋 Hey, welcome to SPex Loan Market!</p>
         <p>
           👂 Heard you're looking to free up your locked miner value through a loan. You've come to the right place! 🚀
         </p>

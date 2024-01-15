@@ -154,12 +154,10 @@ const LoanMarket = (props) => {
       <section className='common-container'>
         <div className='flex flex-col justify-between sm:flex-row'>
           <div className='mb-5 xl:mb-20'>
-            <h2 className='jr-market mb-[13px] text-[32px] font-semibold leading-[61px] sm:text-[56px]'>
-              DePIN Market
-            </h2>
-            <div className='w-[360px] text-[#57596C] md:w-[500px] md:text-lg'>
-              Invest directly in decentralized physical infrastructure network (DePIN) permissionlessly. Finance your
-              preferred DePIN provider and start earning yield.
+            <h2 className='jr-market mb-[13px] text-[30px] font-semibold leading-[61px] sm:text-[56px]'>Loan Market</h2>
+            <div className='w-[420px] text-lg text-[#57596C] sm:w-[620px]'>
+              <p>You could list your loan request order in the market to acquire</p>
+              the liquidity of your pledge amount and locked rewards OR you can lend for exchange of interest.
             </div>
           </div>
           <button
