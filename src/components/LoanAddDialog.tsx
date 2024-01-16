@@ -165,11 +165,13 @@ export default function LoanAddDialog(props: IProps) {
     setBorrowInfo({
       ...borrowInfo,
       borrowAmount: maxBorrowAmount,
-      borrowColleteral: BigNumber(minerBalance?.total_balance_human || 0)
-        .dividedBy(maxBorrowAmount)
-        .times(100)
-        .decimalPlaces(0, BigNumber.ROUND_DOWN)
-        .toNumber()
+      borrowColleteral: maxBorrowAmount
+        ? BigNumber(minerBalance?.total_balance_human || 0)
+            .dividedBy(maxBorrowAmount)
+            .times(100)
+            .decimalPlaces(0, BigNumber.ROUND_DOWN)
+            .toNumber()
+        : 0
     })
   }
 
