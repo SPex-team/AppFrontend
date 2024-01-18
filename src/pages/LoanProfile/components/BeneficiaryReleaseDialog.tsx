@@ -55,7 +55,7 @@ export default function BeneficiaryReleaseDialog(props: IProps) {
           <p>Sign to transfer back the beneficary address to your own address.</p>
           <p>You have two options to confirm the transfer proposal :</p>
           <ul className='list-inside list-disc'>
-            <li>Copy the provided command, sign it in your terminal, and paste the signature here;</li>
+            <li>Copy the provided key, sign it in your terminal, and paste the signature here;</li>
             <li>
               Use a third-party tool like Venus or Lotus to make the transfer. Skip this step if you use this method.
             </li>
@@ -102,11 +102,7 @@ export default function BeneficiaryReleaseDialog(props: IProps) {
             </span>
           </div>
         </div>
-        <span className='mb-4 mt-[20px] inline-block text-sm font-light'>
-          {
-            'You can also propose by other tools, e.g. Lotus,Venus, please do not input anything if you are already use other tools'
-          }
-        </span>
+        <span className='mb-4 mt-[20px] inline-block text-sm font-light'></span>
         <input type='text' value='' className='hidden' readOnly />
       </form>
     )
