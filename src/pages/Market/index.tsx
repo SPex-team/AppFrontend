@@ -190,8 +190,8 @@ const Market = (props) => {
       dispatch(setRootData({ loading: true }))
 
       const tx = await contract.buyMiner(miner_id, {
-        value: price_raw,
-        gasLimit: 100000
+        value: price_raw
+        // gasLimit: 3000000
       })
 
       message({
